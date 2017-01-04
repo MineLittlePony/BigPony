@@ -1,0 +1,55 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven {
+            name 'forge'
+            url 'http://files.minecraftforge.net/maven'
+        }
+        maven {
+            name = 'sponge'
+            url = 'http://repo.spongepowered.org/maven'
+        }
+    }
+
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.4-SNAPSHOT'
+    }
+}
+apply plugin: 'net.minecraftforge.gradle.liteloader'
+apply plugin: 'org.spongepowered.mixin'
+
+group 'com.minelittlepony'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+minecraft {
+    version = '1.11.2'
+    // first snapshot for 1.11. Change to stable when possible.
+    mappings = 'snapshot_20161224'
+    runDir = 'run'
+    replace '@VERSION@', project.version
+}
+
+sourceSets {
+    main {
+        refMap = 'bigpony.mixin.refmap.json'
+    }
+}
+
+litemod.json {
+    author = 'killjoy1221'
+    description = 'Ah am a big pony!'
+    mixinConfigs += 'bigpony.mixin.json'
+}
+mixin {
+    defaultObfuscationEnv notch
+}
+
+jar {
+    from litemod.outputs
+}
+

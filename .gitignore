@@ -1,0 +1,17 @@
+### Gradle
+.gradle/
+build/
+
+### JetBrains
+.idea/
+*.iws
+/out/
+
+### Eclipse
+bin/
+.settings/
+.project
+*.launch
+.classpath
+.factorypath
+
