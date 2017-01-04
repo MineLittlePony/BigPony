@@ -51,5 +51,6 @@ mixin {
 
 jar {
     from litemod.outputs
+    from sourceSets.api.output
 }
 
