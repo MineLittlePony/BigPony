@@ -36,14 +36,13 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     private static final String CHANNEL = "bigpony";
     private static final String DATA = CHANNEL + "|scale";
 
-
     static Logger logger = LogManager.getLogger(NAME);
 
     @Nullable
     private SyncManager manager;
     private PlayerSizeManager sizes;
 
-    private KeyBinding settingsBind = new KeyBinding("bigpony.settings", Keyboard.KEY_F10, "bigpony");
+    private KeyBinding settingsBind = new KeyBinding("bigpony.settings", Keyboard.KEY_F10, "key.category.bigpony");
 
     @Expose
     private float height = 1F;
@@ -73,6 +72,7 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
         this.sizes = new PlayerSizeManager(mc.getSession().getProfile());
 
         LiteLoader.getInstance().registerExposable(this, null);
+        LiteLoader.getInput().registerKeyBinding(this.settingsBind);
 
         this.scale = new PlayerScaleM(xScale, yScale, zScale);
 
@@ -166,6 +166,7 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     @Override
     public void setHeight(float height) {
         this.height = height;
+        LiteLoader.getInstance().writeConfig(this);
     }
 
     @Override
@@ -176,6 +177,7 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     @Override
     public void setDistance(float distance) {
         this.distance = distance;
+        LiteLoader.getInstance().writeConfig(this);
     }
 
     @Override
