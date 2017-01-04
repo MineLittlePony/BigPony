@@ -43,7 +43,7 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     private SyncManager manager;
     private PlayerSizeManager sizes;
 
-    private KeyBinding settingsBind = new KeyBinding("bigpony.settings", Keyboard.KEY_F10, null);
+    private KeyBinding settingsBind = new KeyBinding("bigpony.settings", Keyboard.KEY_F10, "bigpony");
 
     @Expose
     private float height = 1F;
@@ -87,6 +87,8 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
                 manager.register(DATA, new PlayerScale.Serializer(), new ScaleHandler(this.sizes), scale);
 
                 logger.info("PlayerSync detected!");
+            } else {
+                logger.warn("PlayerSync not detected!");
             }
         } catch (InvalidActivityException e) {
             // this should be a runtime exception anyway
