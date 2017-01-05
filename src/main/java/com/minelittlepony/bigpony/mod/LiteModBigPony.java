@@ -2,6 +2,8 @@ package com.minelittlepony.bigpony.mod;
 
 import com.google.common.base.Throwables;
 import com.google.gson.annotations.Expose;
+import com.minelittlepony.bigpony.mod.ducks.IEntityPlayer;
+import com.minelittlepony.bigpony.mod.ducks.IEntityRenderer;
 import com.minelittlepony.bigpony.mod.gui.GuiBigSettings;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mumfrey.liteloader.InitCompleteListener;
@@ -109,19 +111,12 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
         this.sizes.clearPlayers();
         this.sizes.setScale(xScale, yScale, zScale);
 
+        updateHeightDistance();
     }
 
     public void onRenderEntity(EntityLivingBase entity) {
         if (entity instanceof EntityPlayer)
             this.sizes.onRenderPlayer((EntityPlayer) entity);
-    }
-
-    public float getEyeHeight(float initialHeight) {
-        return initialHeight * height;
-    }
-
-    public float getCameraDistance(float initialDistance) {
-        return initialDistance * distance;
     }
 
     @Override
@@ -167,7 +162,9 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     public void setHeight(float height) {
         this.height = height;
         LiteLoader.getInstance().writeConfig(this);
-    }
+
+        updateHeightDistance();
+}
 
     @Override
     public float getHeight() {
@@ -178,10 +175,20 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     public void setDistance(float distance) {
         this.distance = distance;
         LiteLoader.getInstance().writeConfig(this);
+
+        updateHeightDistance();
     }
 
     @Override
     public float getDistance() {
         return distance;
+    }
+
+    private void updateHeightDistance() {
+
+        IEntityRenderer er = (IEntityRenderer) Minecraft.getMinecraft().entityRenderer;
+        er.setThirdPersonDistance(distance);
+        IEntityPlayer ep = (IEntityPlayer) Minecraft.getMinecraft().player;
+        ep.setEyeHeight(height);
     }
 }
