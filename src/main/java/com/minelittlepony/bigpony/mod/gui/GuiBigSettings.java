@@ -2,11 +2,13 @@ package com.minelittlepony.bigpony.mod.gui;
 
 import com.minelittlepony.bigpony.mod.BigPony;
 import com.minelittlepony.bigpony.mod.CameraPresets;
+import com.minelittlepony.bigpony.mod.FloatUtils;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiPageButtonList.GuiResponder;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiSlider;
 import net.minecraft.client.gui.GuiSlider.FormatHelper;
+import net.minecraft.util.math.MathHelper;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -52,18 +54,18 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
-        this.drawCenteredString(this.fontRendererObj, "BigPony settings", width/2, 10, -1);
+        this.drawCenteredString(this.fontRendererObj, "BigPony settings", width / 2, 10, -1);
         this.drawCenteredString(this.fontRendererObj, "Camera Presets", 280, 25, -1);
     }
 
     @Override
     public void updateScreen() {
 
-        resetXSize.enabled = xSize.getSliderValue() != 1;
-        resetYSize.enabled = ySize.getSliderValue() != 1;
-        resetZSize.enabled = zSize.getSliderValue() != 1;
-        resetHeight.enabled = height.getSliderValue() != 1;
-        resetDistance.enabled = distance.getSliderValue() != 1;
+        resetXSize.enabled = !FloatUtils.equals(xSize.getSliderValue(), 1);
+        resetYSize.enabled = !FloatUtils.equals(ySize.getSliderValue(), 1);
+        resetZSize.enabled = !FloatUtils.equals(zSize.getSliderValue(), 1);
+        resetHeight.enabled = !FloatUtils.equals(height.getSliderValue(), 1);
+        resetDistance.enabled = !FloatUtils.equals(distance.getSliderValue(), 1);
 
         humanPreset.enabled = !CameraPresets.HUMAN.isEqual(height.getSliderValue(), distance.getSliderValue());
         marePreset.enabled = !CameraPresets.MARE.isEqual(height.getSliderValue(), distance.getSliderValue());
@@ -151,6 +153,6 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
     @Override
     @Nonnull
     public String getText(int id, @Nonnull String name, float value) {
-        return String.format("%s: %d%%", name, (int) (value * 100));
+        return String.format("%s: %d%%", name, MathHelper.ceil(value * 100));
     }
 }

@@ -24,6 +24,6 @@ public enum CameraPresets {
     }
 
     public boolean isEqual(float height, float distance) {
-        return this.height == height && this.distance == distance;
+        return FloatUtils.equals(this.height, height) && FloatUtils.equals(this.distance, distance);
     }
 }
