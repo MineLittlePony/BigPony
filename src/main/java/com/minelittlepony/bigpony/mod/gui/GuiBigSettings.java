@@ -32,7 +32,7 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
         this.buttonList.add(xSize = new GuiSlider(this, 1, 5, 40, "X Scale", .1F, 2F, bigPony.getxScale(), this));
         this.buttonList.add(ySize = new GuiSlider(this, 2, 5, 60, "Y Scale", .1F, 2F, bigPony.getyScale(), this));
         this.buttonList.add(zSize = new GuiSlider(this, 3, 5, 80, "Z Scale", .1F, 2F, bigPony.getzScale(), this));
-        this.buttonList.add(height = new GuiSlider(this, 4, 5, 100, "Eye Height", .15F, 1.95F, bigPony.getHeight(), this));
+        this.buttonList.add(height = new GuiSlider(this, 4, 5, 100, "Eye Height", .1F, 2F, bigPony.getHeight(), this));
         this.buttonList.add(distance = new GuiSlider(this, 5, 5, 120, "Camera Distance", .1F, 2F, bigPony.getDistance(), this));
 
         // resets
