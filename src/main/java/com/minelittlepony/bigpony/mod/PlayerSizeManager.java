@@ -1,13 +1,16 @@
 package com.minelittlepony.bigpony.mod;
 
+import java.util.Map;
+import java.util.UUID;
+import javax.annotation.Nullable;
+
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
-
-import java.util.Map;
-import java.util.UUID;
 
 public class PlayerSizeManager {
 
@@ -29,7 +32,7 @@ public class PlayerSizeManager {
     }
 
     void handlePacket(UUID uuid, IPlayerScale size) {
-        EntityPlayer player = Minecraft.getMinecraft().world.getPlayerEntityByUUID(uuid);
+        NetworkPlayerInfo player = getPlayer(uuid);
         if (player == null) {
             LiteModBigPony.logger.warn("Received scale data for unknown player id " + uuid);
             return;
@@ -38,8 +41,15 @@ public class PlayerSizeManager {
 
         playerSizes.put(profile, size);
 
-        LiteModBigPony.logger.debug("Received scale data for player " + profile.getName());
+        LiteModBigPony.logger.trace("Received scale data for player " + profile.getName());
+    }
 
+    @Nullable
+    private NetworkPlayerInfo getPlayer(UUID uuid) {
+        NetHandlerPlayClient client = Minecraft.getMinecraft().getConnection();
+        if (client == null)
+            return null;
+        return client.getPlayerInfo(uuid);
     }
 
     void clearPlayers() {
