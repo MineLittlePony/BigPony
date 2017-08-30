@@ -10,8 +10,8 @@ import net.minecraft.client.gui.GuiSlider;
 import net.minecraft.client.gui.GuiSlider.FormatHelper;
 import net.minecraft.util.math.MathHelper;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
+import javax.annotation.Nonnull;
 
 public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHelper {
 
@@ -54,8 +54,8 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
-        this.drawCenteredString(this.fontRendererObj, "BigPony settings", width / 2, 10, -1);
-        this.drawCenteredString(this.fontRendererObj, "Camera Presets", 280, 25, -1);
+        this.drawCenteredString(this.fontRenderer, "BigPony settings", width / 2, 10, -1);
+        this.drawCenteredString(this.fontRenderer, "Camera Presets", 280, 25, -1);
     }
 
     @Override

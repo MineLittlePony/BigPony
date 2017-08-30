@@ -13,33 +13,32 @@ buildscript {
     }
 
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
-        classpath 'org.spongepowered:mixingradle:0.4-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.5-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle.liteloader'
 apply plugin: 'org.spongepowered.mixin'
 
 group 'com.minelittlepony'
-version '1.0.3'
+version '1.0.4'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = '1.11.2'
+    version = '1.12.1'
     // first snapshot for 1.11. Change to stable when possible.
-    mappings = 'snapshot_20161224'
+    mappings = 'snapshot_20170829'
     runDir = 'run'
     replace '@VERSION@', project.version
 }
 
 sourceSets {
     main {
-        refMap = 'bigpony.mixin.refmap.json'
+        ext.refMap = 'bigpony.mixin.refmap.json'
     }
 }
-
 litemod.json {
     author = 'killjoy1221'
     description = 'Ah am a big pony!'

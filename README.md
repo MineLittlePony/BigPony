@@ -5,3 +5,22 @@ In order to communicate your settings to other players, [PlayerSync](https://git
 
 ## Installation
 LiteLoader is required. After installing that, move the downloaded .litemod file into `.minecraft/mods`. PlayerSync goes into the same folder.
+
+## Building
+Requires jdk8, git, and optionally gradle.
+
+Checkout the PlayerSync repository and build it. You will also need to install it to your local maven repo.
+
+```cmd
+git clone https://github.com/killjoy1221/PlayerSync
+cd PlayerSync
+./gradlew build install
+```
+
+Now you can build BigPony normally.
+```cmd
+cd ..
+git clone https://github.com/MineLittlePony/BigPony
+cd BigPony
+./gradlew build
+```

@@ -1,9 +1,5 @@
 package com.minelittlepony.bigpony.mod;
 
-import java.util.Map;
-import java.util.UUID;
-import javax.annotation.Nullable;
-
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
@@ -11,6 +7,10 @@ import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
+
+import java.util.Map;
+import java.util.UUID;
+import javax.annotation.Nullable;
 
 public class PlayerSizeManager {
 
@@ -27,7 +27,7 @@ public class PlayerSizeManager {
         GlStateManager.scale(size.getXScale(), size.getYScale(), size.getZScale());
     }
 
-    private PlayerScale defaultScale(GameProfile profile) {
+    private PlayerScale defaultScale() {
         return new PlayerScale(1, 1, 1);
     }
 
@@ -52,12 +52,9 @@ public class PlayerSizeManager {
         return client.getPlayerInfo(uuid);
     }
 
-    void clearPlayers() {
-        this.playerSizes.clear();
-    }
 
-    public IPlayerScale getScale(GameProfile profile) {
-        return playerSizes.computeIfAbsent(profile, this::defaultScale);
+    private IPlayerScale getScale(GameProfile profile) {
+        return playerSizes.computeIfAbsent(profile, p -> defaultScale());
     }
 
     public void setScale(float xScale, float yScale, float zScale) {

@@ -1,6 +1,5 @@
 package com.minelittlepony.bigpony.mod;
 
-import com.google.common.base.Throwables;
 import com.google.gson.annotations.Expose;
 import com.minelittlepony.bigpony.mod.ducks.IEntityPlayer;
 import com.minelittlepony.bigpony.mod.ducks.IEntityRenderer;
@@ -12,6 +11,7 @@ import com.mumfrey.liteloader.Tickable;
 import com.mumfrey.liteloader.core.LiteLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -20,12 +20,11 @@ import net.minecraft.network.play.server.SPacketJoinGame;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
-import playersync.client.api.IPlayerSync;
+import playersync.client.api.PlayerSync;
 import playersync.client.api.SyncManager;
 
-import javax.activity.InvalidActivityException;
-import javax.annotation.Nullable;
 import java.io.File;
+import javax.annotation.Nullable;
 
 /**
  * Ah' am a big pony!
@@ -70,9 +69,6 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
 
     @Override
     public void init(File configPath) {
-        Minecraft mc = Minecraft.getMinecraft();
-        this.sizes = new PlayerSizeManager(mc.getSession().getProfile());
-
         LiteLoader.getInstance().registerExposable(this, null);
         LiteLoader.getInput().registerKeyBinding(this.settingsBind);
 
@@ -82,19 +78,14 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
 
     @Override
     public void onInitCompleted(Minecraft minecraft, LiteLoader loader) {
-        try {
-            if (loader.isModActive(PSYNC)) {
-                IPlayerSync sync = LiteLoader.getInstance().getMod(PSYNC);
-                manager = sync.getPlayerSyncManager();
-                manager.register(DATA, new PlayerScale.Serializer(), new ScaleHandler(this.sizes), scale);
 
-                logger.info("PlayerSync detected!");
-            } else {
-                logger.warn("PlayerSync not detected!");
-            }
-        } catch (InvalidActivityException e) {
-            // this should be a runtime exception anyway
-            Throwables.propagate(e);
+        if (loader.isModActive(PSYNC)) {
+            manager = PlayerSync.getManager();
+            manager.register(DATA, new PlayerScale.Serializer(), (chan, uuid, obj) -> sizes.handlePacket(uuid, obj), scale);
+
+            logger.info("PlayerSync detected!");
+        } else {
+            logger.warn("PlayerSync not detected! Client synchronization will be disabled.");
         }
     }
 
@@ -108,7 +99,9 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
 
     @Override
     public void onJoinGame(INetHandler netHandler, SPacketJoinGame joinGamePacket, ServerData serverData, RealmsServer realmsServer) {
-        this.sizes.clearPlayers();
+        // initialize this when the player is available.
+        // doing this earlier causes offline-mode to not work properly.
+        this.sizes = new PlayerSizeManager(((NetHandlerPlayClient) netHandler).getGameProfile());
         this.sizes.setScale(xScale, yScale, zScale);
 
         updateHeightDistance();
@@ -164,7 +157,7 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
         LiteLoader.getInstance().writeConfig(this);
 
         updateHeightDistance();
-}
+    }
 
     @Override
     public float getHeight() {
