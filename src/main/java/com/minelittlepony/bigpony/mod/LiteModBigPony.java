@@ -108,7 +108,7 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     }
 
     public void onRenderEntity(EntityLivingBase entity) {
-        if (entity instanceof EntityPlayer)
+        if (sizes != null && entity instanceof EntityPlayer)
             this.sizes.onRenderPlayer((EntityPlayer) entity);
     }
 
