@@ -25,7 +25,7 @@ public abstract class MixinRenderLivingBase<T extends EntityLivingBase> extends 
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/client/renderer/GlStateManager;scale(FFF)V",
                     shift = Shift.AFTER))
-    private void onPrepareScale(EntityLivingBase entity, float ticks, CallbackInfoReturnable ci) {
+    private void onPrepareScale(EntityLivingBase entity, float ticks, CallbackInfoReturnable<Float> ci) {
         LiteLoader.getInstance().getMod(LiteModBigPony.class).onRenderEntity(entity);
     }
 }
