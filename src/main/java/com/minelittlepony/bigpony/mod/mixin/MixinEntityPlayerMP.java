@@ -18,7 +18,7 @@ public abstract class MixinEntityPlayerMP extends EntityPlayer implements IConta
 		super(worldIn, gm);
 	}
 
-	@Inject(method = "copyFrom(Lnet/minecraft/entity/EntityPlayerMP;Z)V", at = @At("RETURN"))
+	@Inject(method = "copyFrom(Lnet/minecraft/entity/player/EntityPlayerMP;Z)V", at = @At("RETURN"))
     public void injectCopyFrom(EntityPlayerMP other, boolean keepEverything, CallbackInfo cbi) {
     	((IEntityPlayer)this).setEyeHeight(((IEntityPlayer)other).getHeightFactor());
     }
