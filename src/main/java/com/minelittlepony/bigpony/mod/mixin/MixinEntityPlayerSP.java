@@ -17,16 +17,16 @@ import net.minecraft.world.World;
 
 @Mixin(EntityPlayerSP.class)
 public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
-	public MixinEntityPlayerSP(World worldIn, GameProfile playerProfile) {
-		super(worldIn, playerProfile);
-	}
+    public MixinEntityPlayerSP(World worldIn, GameProfile playerProfile) {
+        super(worldIn, playerProfile);
+    }
 
-	@Inject(method = "<init>(Lnet/minecraft/client/Minecraft;Lnet/minecraft/world/World;Lnet/minecraft/client/network/NetHandlerPlayClient;Lnet/minecraft/stats/StatisticsManager;Lnet/minecraft/stats/RecipeBook;)V",
-			at = @At(value = "RETURN"))
-	public void init(Minecraft mc, World w, NetHandlerPlayClient con, StatisticsManager stats, RecipeBook recipes, CallbackInfo cbi) {
+    @Inject(method = "<init>(Lnet/minecraft/client/Minecraft;Lnet/minecraft/world/World;Lnet/minecraft/client/network/NetHandlerPlayClient;Lnet/minecraft/stats/StatisticsManager;Lnet/minecraft/stats/RecipeBook;)V",
+            at = @At(value = "RETURN"))
+    public void init(Minecraft mc, World w, NetHandlerPlayClient con, StatisticsManager stats, RecipeBook recipes, CallbackInfo cbi) {
         if (mc.player != null && mc.player.connection == con) {
-        	IEntityPlayer pl = (IEntityPlayer)mc.player;
-        	((IEntityPlayer)this).setEyeHeight(pl.getHeightFactor());
+            IEntityPlayer pl = (IEntityPlayer)mc.player;
+            ((IEntityPlayer)this).setEyeHeight(pl.getHeightFactor());
         }
     }
 }
