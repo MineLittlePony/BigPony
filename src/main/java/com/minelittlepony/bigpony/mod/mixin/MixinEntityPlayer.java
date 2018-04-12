@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(EntityPlayer.class)
 @Implements(@Interface(iface = IEntityPlayer.class, prefix = "bigpony$"))
 public abstract class MixinEntityPlayer extends EntityLivingBase {
-	
-	public float heightFactor = 1F;
+
+    public float heightFactor = 1F;
     public float eyeHeight = 1.62F;
 
     public MixinEntityPlayer(World worldIn) {
@@ -40,13 +40,13 @@ public abstract class MixinEntityPlayer extends EntityLivingBase {
             cir.setReturnValue(0.15F);
         }
     }
-    
+
     public void bigpony$setEyeHeight(float height) {
-    	this.heightFactor = height;
+        this.heightFactor = height;
         this.eyeHeight = 1.62F * height;
     }
-    
+
     public float bigpony$getHeightFactor() {
-    	return this.heightFactor;
+        return this.heightFactor;
     }
 }

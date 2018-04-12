@@ -13,13 +13,13 @@ import com.mojang.authlib.GameProfile;
 
 @Mixin(EntityPlayerMP.class)
 public abstract class MixinEntityPlayerMP extends EntityPlayer implements IContainerListener {
-	
-    public MixinEntityPlayerMP(World worldIn, GameProfile gm) {
-		super(worldIn, gm);
-	}
 
-	@Inject(method = "copyFrom(Lnet/minecraft/entity/player/EntityPlayerMP;Z)V", at = @At("RETURN"))
+    public MixinEntityPlayerMP(World worldIn, GameProfile gm) {
+        super(worldIn, gm);
+    }
+
+    @Inject(method = "copyFrom(Lnet/minecraft/entity/player/EntityPlayerMP;Z)V", at = @At("RETURN"))
     public void injectCopyFrom(EntityPlayerMP other, boolean keepEverything, CallbackInfo cbi) {
-    	((IEntityPlayer)this).setEyeHeight(((IEntityPlayer)other).getHeightFactor());
+        ((IEntityPlayer)this).setEyeHeight(((IEntityPlayer)other).getHeightFactor());
     }
 }

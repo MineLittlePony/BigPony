@@ -177,16 +177,16 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     }
 
     private void updateHeightDistance() {
-		Minecraft mc = Minecraft.getMinecraft();
-		
+        Minecraft mc = Minecraft.getMinecraft();
+
         IEntityRenderer er = (IEntityRenderer) mc.entityRenderer;
         er.setThirdPersonDistance(distance);
         IEntityPlayer ep = (IEntityPlayer) mc.player;
         ep.setEyeHeight(height);
-        
+
         if (mc.isIntegratedServerRunning()) {
-        	IEntityPlayer mplayer = (IEntityPlayer) mc.getIntegratedServer().getPlayerList().getPlayerByUUID(mc.player.getUniqueID());
-        	if (mplayer != null) mplayer.setEyeHeight(height);
+            IEntityPlayer mplayer = (IEntityPlayer) mc.getIntegratedServer().getPlayerList().getPlayerByUUID(mc.player.getUniqueID());
+            if (mplayer != null) mplayer.setEyeHeight(height);
         }
     }
 }
