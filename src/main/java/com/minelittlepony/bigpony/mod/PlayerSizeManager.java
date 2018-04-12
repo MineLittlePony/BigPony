@@ -16,14 +16,14 @@ public class PlayerSizeManager {
 
     private final GameProfile clientProfile;
 
-    private Map<GameProfile, IPlayerScale> playerSizes = Maps.newHashMap();
+    private final Map<GameProfile, IPlayerScale> playerSizes = Maps.newHashMap();
 
-    public PlayerSizeManager(GameProfile clientProfile) {
-        this.clientProfile = clientProfile;
+    public PlayerSizeManager(GameProfile profile) {
+        clientProfile = profile;
     }
 
     void onRenderPlayer(EntityPlayer player) {
-        IPlayerScale size = getScale(player.getGameProfile());
+        IPlayerScale size = getScale(player);
         GlStateManager.scale(size.getXScale(), size.getYScale(), size.getZScale());
     }
 
@@ -52,13 +52,17 @@ public class PlayerSizeManager {
         return client.getPlayerInfo(uuid);
     }
 
-
-    private IPlayerScale getScale(GameProfile profile) {
-        return playerSizes.computeIfAbsent(profile, p -> defaultScale());
+    public float getShadowScale(EntityPlayer player) {
+        IPlayerScale scale = getScale(player);
+        return Math.max(scale.getXScale(), scale.getZScale());
     }
 
-    public void setScale(float xScale, float yScale, float zScale) {
-        this.playerSizes.put(clientProfile, new PlayerScale(xScale, yScale, zScale));
+    public IPlayerScale getScale(EntityPlayer player) {
+        return playerSizes.computeIfAbsent(player.getGameProfile(), p -> defaultScale());
+    }
+
+    public void setOwnScale(float xScale, float yScale, float zScale) {
+        playerSizes.put(this.clientProfile, new PlayerScale(xScale, yScale, zScale));
     }
 
 }

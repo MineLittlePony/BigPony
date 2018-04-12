@@ -102,14 +102,20 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
         // initialize this when the player is available.
         // doing this earlier causes offline-mode to not work properly.
         this.sizes = new PlayerSizeManager(((NetHandlerPlayClient) netHandler).getGameProfile());
-        this.sizes.setScale(xScale, yScale, zScale);
+        this.sizes.setOwnScale(xScale, yScale, zScale);
 
         updateHeightDistance();
     }
 
     public void onRenderEntity(EntityLivingBase entity) {
-        if (sizes != null && entity instanceof EntityPlayer)
+        if (sizes != null && entity instanceof EntityPlayer) {
             this.sizes.onRenderPlayer((EntityPlayer) entity);
+        }
+    }
+
+    public float getUpdatedShadowSize(float initial, EntityLivingBase entity) {
+        if (sizes == null || !(entity instanceof IEntityPlayer)) return initial;
+        return .5f * sizes.getShadowScale(((EntityPlayer)entity));
     }
 
     @Override
@@ -120,7 +126,7 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     @Override
     public void setScale(float xScale, float yScale, float zScale) {
         if (xScale != this.xScale || yScale != this.yScale || zScale != this.zScale) {
-            this.sizes.setScale(xScale, yScale, zScale);
+            this.sizes.setOwnScale(xScale, yScale, zScale);
 
             this.xScale = xScale;
             this.yScale = yScale;
