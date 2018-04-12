@@ -4,8 +4,9 @@ public enum CameraPresets {
     HUMAN(1F, 1F),
     MARE(.75F, 1F),
     STALLION(.9F, 1.1F),
-    ALICORN(1F, 1.2F),
-    FILLY(.5F, .7F);
+    ALICORN(1.15F, 1.2F),
+    FILLY(.5F, .7F),
+    GIANT(2F, 1.1F);
 
     private float height;
     private float distance;
@@ -24,6 +25,13 @@ public enum CameraPresets {
     }
 
     public boolean isEqual(float height, float distance) {
-        return FloatUtils.equals(this.height, height) && FloatUtils.equals(this.distance, distance);
+        return FloatUtils.equals(this.height, height)
+                && FloatUtils.equals(this.distance, distance);
+    }
+
+    public boolean isEqual(float scaleX, float scaleY, float scaleZ) {
+        return this.height == scaleX
+                && this.height == scaleY
+                && this.height == scaleZ;
     }
 }
