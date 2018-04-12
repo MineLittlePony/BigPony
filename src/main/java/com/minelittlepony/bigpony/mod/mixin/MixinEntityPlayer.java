@@ -7,6 +7,7 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -14,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Implements(@Interface(iface = IEntityPlayer.class, prefix = "bigpony$"))
 public abstract class MixinEntityPlayer extends EntityLivingBase {
 
+    public float heightFactor = 1F;
     public float eyeHeight = 1.62F;
 
     public MixinEntityPlayer(World worldIn) {
@@ -40,7 +42,11 @@ public abstract class MixinEntityPlayer extends EntityLivingBase {
     }
 
     public void bigpony$setEyeHeight(float height) {
+        this.heightFactor = height;
         this.eyeHeight = 1.62F * height;
     }
 
+    public float bigpony$getHeightFactor() {
+        return this.heightFactor;
+    }
 }

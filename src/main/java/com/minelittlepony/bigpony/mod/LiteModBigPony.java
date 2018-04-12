@@ -92,7 +92,6 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     @Override
     public void onTick(Minecraft minecraft, float partialTicks, boolean inGame, boolean clock) {
         if (settingsBind.isPressed()) {
-
             minecraft.displayGuiScreen(new GuiBigSettings(this));
         }
     }
@@ -178,10 +177,16 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     }
 
     private void updateHeightDistance() {
+        Minecraft mc = Minecraft.getMinecraft();
 
-        IEntityRenderer er = (IEntityRenderer) Minecraft.getMinecraft().entityRenderer;
+        IEntityRenderer er = (IEntityRenderer) mc.entityRenderer;
         er.setThirdPersonDistance(distance);
-        IEntityPlayer ep = (IEntityPlayer) Minecraft.getMinecraft().player;
+        IEntityPlayer ep = (IEntityPlayer) mc.player;
         ep.setEyeHeight(height);
+
+        if (mc.isIntegratedServerRunning()) {
+            IEntityPlayer mplayer = (IEntityPlayer) mc.getIntegratedServer().getPlayerList().getPlayerByUUID(mc.player.getUniqueID());
+            if (mplayer != null) mplayer.setEyeHeight(height);
+        }
     }
 }

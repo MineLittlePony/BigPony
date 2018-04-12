@@ -6,6 +6,8 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "MixinEntityPlayer",
+    "MixinEntityPlayerMP",
+    "MixinEntityPlayerSP",
     "MixinEntityRenderer",
     "MixinRenderLivingBase"
   ]
