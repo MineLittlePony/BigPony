@@ -25,8 +25,7 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
             at = @At(value = "RETURN"))
     public void init(Minecraft mc, World w, NetHandlerPlayClient con, StatisticsManager stats, RecipeBook recipes, CallbackInfo cbi) {
         if (mc.player != null && mc.player.connection == con) {
-            IEntityPlayer pl = (IEntityPlayer)mc.player;
-            ((IEntityPlayer)this).setEyeHeight(pl.getHeightFactor());
+            ((IEntityPlayer)this).updatePlayerScale((IEntityPlayer)mc.player);
         }
     }
 }

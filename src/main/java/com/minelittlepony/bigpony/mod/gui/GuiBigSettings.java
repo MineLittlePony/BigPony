@@ -29,9 +29,9 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
     public void initGui() {
 
         // sliders
-        this.buttonList.add(xSize = new GuiSlider(this, 1, 5, 40, "X Scale", .1F, 2F, bigPony.getxScale(), this));
-        this.buttonList.add(ySize = new GuiSlider(this, 2, 5, 60, "Y Scale", .1F, 2F, bigPony.getyScale(), this));
-        this.buttonList.add(zSize = new GuiSlider(this, 3, 5, 80, "Z Scale", .1F, 2F, bigPony.getzScale(), this));
+        this.buttonList.add(xSize = new GuiSlider(this, 1, 5, 40, "X Scale", .1F, 2F, bigPony.getXScale(), this));
+        this.buttonList.add(ySize = new GuiSlider(this, 2, 5, 60, "Y Scale", .1F, 2F, bigPony.getYScale(), this));
+        this.buttonList.add(zSize = new GuiSlider(this, 3, 5, 80, "Z Scale", .1F, 2F, bigPony.getZScale(), this));
         this.buttonList.add(height = new GuiSlider(this, 4, 5, 100, "Eye Height", .1F, 2F, bigPony.getHeight(), this));
         this.buttonList.add(distance = new GuiSlider(this, 5, 5, 120, "Camera Distance", .1F, 2F, bigPony.getDistance(), this));
 
@@ -122,10 +122,10 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
 
     @Override
     public void setEntryValue(int id, float value) {
+        float x = bigPony.getXScale();
+        float y = bigPony.getYScale();
+        float z = bigPony.getZScale();
 
-        float x = bigPony.getxScale();
-        float y = bigPony.getyScale();
-        float z = bigPony.getzScale();
         switch (id) {
             case 1:
                 bigPony.setScale(value, y, z);

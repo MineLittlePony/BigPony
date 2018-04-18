@@ -11,41 +11,32 @@ import com.mumfrey.liteloader.Tickable;
 import com.mumfrey.liteloader.core.LiteLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.play.server.SPacketJoinGame;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
-import playersync.client.api.PlayerSync;
-import playersync.client.api.SyncManager;
 
 import java.io.File;
-import javax.annotation.Nullable;
 
 /**
  * Ah' am a big pony!
  */
 public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, JoinGameListener {
 
-    private static final String PSYNC = "playersync";
-
     private static final String NAME = "BigPony";
-    private static final String CHANNEL = "bigpony";
-    private static final String DATA = CHANNEL + "|scale";
 
     static Logger logger = LogManager.getLogger(NAME);
     
     public static LiteModBigPony instance() {
-      return LiteLoader.getInstance().getMod(LiteModBigPony.class);
+        return LiteLoader.getInstance().getMod(LiteModBigPony.class);
     }
     
-    @Nullable
-    private SyncManager manager;
     private PlayerSizeManager sizes;
 
     private KeyBinding settingsBind = new KeyBinding("bigpony.settings", Keyboard.KEY_F10, "key.category.bigpony");
@@ -60,7 +51,6 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     private float yScale = 1F;
     @Expose
     private float zScale = 1F;
-    private PlayerScaleM scale;
 
     @Override
     public String getName() {
@@ -76,22 +66,11 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     public void init(File configPath) {
         LiteLoader.getInstance().registerExposable(this, null);
         LiteLoader.getInput().registerKeyBinding(this.settingsBind);
-
-        this.scale = new PlayerScaleM(xScale, yScale, zScale);
-
     }
 
     @Override
     public void onInitCompleted(Minecraft minecraft, LiteLoader loader) {
-
-        if (loader.isModActive(PSYNC)) {
-            manager = PlayerSync.getManager();
-            manager.register(DATA, new PlayerScale.Serializer(), (chan, uuid, obj) -> sizes.handlePacket(uuid, obj), scale);
-
-            logger.info("PlayerSync detected!");
-        } else {
-            logger.warn("PlayerSync not detected! Client synchronization will be disabled.");
-        }
+      sizes = new PlayerSizeManager(loader, this);
     }
 
     @Override
@@ -103,70 +82,55 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
 
     @Override
     public void onJoinGame(INetHandler netHandler, SPacketJoinGame joinGamePacket, ServerData serverData, RealmsServer realmsServer) {
-        // initialize this when the player is available.
-        // doing this earlier causes offline-mode to not work properly.
-        this.sizes = new PlayerSizeManager(((NetHandlerPlayClient) netHandler).getGameProfile());
-        this.sizes.setOwnScale(xScale, yScale, zScale);
-
-        updateHeightDistance();
+        updateHeightAndDistance();
     }
 
     public void onRenderEntity(EntityLivingBase entity) {
-        if (sizes != null && entity instanceof EntityPlayer) {
-            this.sizes.onRenderPlayer((EntityPlayer) entity);
+        if (entity instanceof IEntityPlayer) {
+            IPlayerScale scale = ((IEntityPlayer)entity).getPlayerScale();
+            GlStateManager.scale(scale.getXScale(), scale.getYScale(), scale.getZScale());
         }
     }
 
     public float getUpdatedShadowSize(float initial, Entity entity) {
         if (sizes == null || !(entity instanceof IEntityPlayer)) return initial;
-        return initial * sizes.getShadowScale(((EntityPlayer)entity));
+        return initial * sizes.getShadowScale(((IEntityPlayer)entity));
     }
-
+    
     @Override
     public void upgradeSettings(String version, File configPath, File oldConfigPath) {
-
     }
 
     @Override
     public void setScale(float xScale, float yScale, float zScale) {
         if (xScale != this.xScale || yScale != this.yScale || zScale != this.zScale) {
-            this.sizes.setOwnScale(xScale, yScale, zScale);
-
             this.xScale = xScale;
             this.yScale = yScale;
             this.zScale = zScale;
 
-            this.scale.set(xScale, yScale, zScale);
-
-            LiteLoader.getInstance().writeConfig(this);
-
-            if (manager != null) {
-                manager.sendPacket(DATA, this.scale);
-            }
+            updateHeightAndDistance();
         }
     }
 
     @Override
-    public float getxScale() {
+    public float getXScale() {
         return xScale;
     }
 
     @Override
-    public float getyScale() {
+    public float getYScale() {
         return yScale;
     }
 
     @Override
-    public float getzScale() {
+    public float getZScale() {
         return zScale;
     }
 
     @Override
     public void setHeight(float height) {
         this.height = height;
-        LiteLoader.getInstance().writeConfig(this);
-
-        updateHeightDistance();
+        updateHeightAndDistance();
     }
 
     @Override
@@ -177,9 +141,7 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     @Override
     public void setDistance(float distance) {
         this.distance = distance;
-        LiteLoader.getInstance().writeConfig(this);
-
-        updateHeightDistance();
+        updateHeightAndDistance();
     }
 
     @Override
@@ -187,17 +149,18 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
         return distance;
     }
 
-    private void updateHeightDistance() {
+    private void updateHeightAndDistance() {
+        LiteLoader.getInstance().writeConfig(this);
+
         Minecraft mc = Minecraft.getMinecraft();
 
-        IEntityRenderer er = (IEntityRenderer) mc.entityRenderer;
-        er.setThirdPersonDistance(distance);
-        IEntityPlayer ep = (IEntityPlayer) mc.player;
-        ep.setEyeHeight(height);
+        ((IEntityRenderer) mc.entityRenderer).setThirdPersonDistance(distance);
 
-        if (mc.isIntegratedServerRunning()) {
-            IEntityPlayer mplayer = (IEntityPlayer) mc.getIntegratedServer().getPlayerList().getPlayerByUUID(mc.player.getUniqueID());
-            if (mplayer != null) mplayer.setEyeHeight(height);
-        }
+        sizes.setScale((IEntityPlayer) mc.player, this);
+    }
+
+    @Override
+    public void copyFrom(IPlayerScale scale) {
+
     }
 }
