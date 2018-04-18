@@ -125,7 +125,6 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
         float x = bigPony.getXScale();
         float y = bigPony.getYScale();
         float z = bigPony.getZScale();
-
         switch (id) {
             case 1:
                 bigPony.setScale(value, y, z);

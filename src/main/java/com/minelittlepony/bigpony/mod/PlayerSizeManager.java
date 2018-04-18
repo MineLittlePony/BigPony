@@ -15,14 +15,13 @@ public class PlayerSizeManager {
     @Nullable
     private final SyncManager manager;
 
-    private static final String PSYNC = "playersync";
-    private static final String CHANNEL = "bigpony";
-    private static final String DATA = CHANNEL + "|scale";
+    private static final String PSYNC = "playersync",
+                                CHANNEL = "bigpony|scale";
 
     public PlayerSizeManager(LiteLoader loader, IPlayerScale initial) {
       if (loader.isModActive(PSYNC)) {
           manager = PlayerSync.getManager();
-          manager.register(DATA, new PlayerScale.Serializer(), (chan, uuid, obj) -> handlePacket(uuid, obj), initial);
+          manager.register(CHANNEL, new PlayerScale.Serializer(), (chan, uuid, obj) -> handlePacket(uuid, obj), initial);
           LiteModBigPony.logger.info("PlayerSync detected!");
       } else {
           manager = null;

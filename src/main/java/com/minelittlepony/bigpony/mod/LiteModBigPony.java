@@ -31,15 +31,15 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
 
     private static final String NAME = "BigPony";
 
-    static Logger logger = LogManager.getLogger(NAME);
+    static final Logger logger = LogManager.getLogger(NAME);
     
     public static LiteModBigPony instance() {
         return LiteLoader.getInstance().getMod(LiteModBigPony.class);
     }
-    
+
     private PlayerSizeManager sizes;
 
-    private KeyBinding settingsBind = new KeyBinding("bigpony.settings", Keyboard.KEY_F10, "key.category.bigpony");
+    private final KeyBinding settingsBind = new KeyBinding("bigpony.settings", Keyboard.KEY_F10, "key.category.bigpony");
 
     @Expose
     private float height = 1F;
@@ -65,7 +65,7 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     @Override
     public void init(File configPath) {
         LiteLoader.getInstance().registerExposable(this, null);
-        LiteLoader.getInput().registerKeyBinding(this.settingsBind);
+        LiteLoader.getInput().registerKeyBinding(settingsBind);
     }
 
     @Override
