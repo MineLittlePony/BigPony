@@ -47,9 +47,7 @@ public class PlayerSizeManager {
     @Nullable
     private NetworkPlayerInfo getPlayer(UUID uuid) {
         NetHandlerPlayClient client = Minecraft.getMinecraft().getConnection();
-        if (client == null)
-            return null;
-        return client.getPlayerInfo(uuid);
+        return client == null ? null : client.getPlayerInfo(uuid);
     }
 
     public float getShadowScale(EntityPlayer player) {
@@ -62,7 +60,7 @@ public class PlayerSizeManager {
     }
 
     public void setOwnScale(float xScale, float yScale, float zScale) {
-        playerSizes.put(this.clientProfile, new PlayerScale(xScale, yScale, zScale));
+        playerSizes.put(clientProfile, new PlayerScale(xScale, yScale, zScale));
     }
 
 }
