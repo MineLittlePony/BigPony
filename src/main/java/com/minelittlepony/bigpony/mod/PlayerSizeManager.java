@@ -25,6 +25,9 @@ public class PlayerSizeManager {
     void onRenderPlayer(EntityPlayer player) {
         IPlayerScale size = getScale(player);
         GlStateManager.scale(size.getXScale(), size.getYScale(), size.getZScale());
+        if (player.isSneaking()) {
+            GlStateManager.translate(0, -1F + size.getYScale(), 0);
+        }
     }
 
     private PlayerScale defaultScale() {
