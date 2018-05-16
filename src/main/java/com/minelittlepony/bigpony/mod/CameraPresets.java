@@ -6,7 +6,8 @@ public enum CameraPresets {
     STALLION(.9F, 1.1F),
     ALICORN(1.15F, 1.2F),
     FILLY(.5F, .7F),
-    GIANT(2F, 1.1F);
+    GIANT(2F, 1.1F),
+    ANT(0.1F, 0.1F);
 
     private float height;
     private float distance;
