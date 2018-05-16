@@ -15,7 +15,7 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
 
     private BigPony bigPony;
 
-    private ResettableSlider xSize, ySize, zSize, height, distance;
+    private ResettableSlider allSize, xSize, ySize, zSize, height, distance;
 
     private CameraPresetButton[] cameraPresets, scalePresets, combinedPresets;
 
@@ -26,12 +26,15 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
     @Override
     public void initGui() {
         // sliders
-        xSize = new ResettableSlider(this.buttonList, this, 1, 5, 40, "X Scale", .1F, 2F, bigPony.getxScale(), this);
-        ySize = new ResettableSlider(this.buttonList, this, 2, 5, 60, "Y Scale", .1F, 2F, bigPony.getyScale(), this);
-        zSize = new ResettableSlider(this.buttonList, this, 3, 5, 80, "Z Scale", .1F, 2F, bigPony.getzScale(), this);
+        int top = 40;
+        
+        allSize = new ResettableSlider(buttonList, this, 1, 5, top += 20, "Global Scale", .1F, 2F, bigPony.getxScale(), this);
+        xSize = new ResettableSlider(buttonList, this, 2, 5, top += 20, "X Scale", .1F, 2F, bigPony.getxScale(), this);
+        ySize = new ResettableSlider(buttonList, this, 3, 5, top += 20, "Y Scale", .1F, 2F, bigPony.getyScale(), this);
+        zSize = new ResettableSlider(buttonList, this, 4, 5, top += 20, "Z Scale", .1F, 2F, bigPony.getzScale(), this);
 
-        height = new ResettableSlider(this.buttonList, this, 4, 5, 100, "Eye Height", .1F, 2F, bigPony.getHeight(), this);
-        distance = new ResettableSlider(this.buttonList, this, 5, 5, 120, "Camera Distance", .1F, 2F, bigPony.getDistance(), this);
+        height = new ResettableSlider(buttonList, this, 5, 5, top += 20, "Eye Height", .1F, 2F, bigPony.getHeight(), this);
+        distance = new ResettableSlider(buttonList, this, 6, 5, top += 20, "Camera Distance", .1F, 2F, bigPony.getDistance(), this);
 
         CameraPresets[] values = CameraPresets.values();
         // presets
@@ -97,18 +100,26 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
         float z = bigPony.getzScale();
         switch (id) {
             case 1:
-                bigPony.setScale(value, y, z);
+                bigPony.setScale(value, value, value);
+                bigPony.setHeight(value);
+                xSize.setSliderValue(value, false);
+                ySize.setSliderValue(value, false);
+                zSize.setSliderValue(value, false);
+                height.setSliderValue(value, false);
                 break;
             case 2:
-                bigPony.setScale(x, value, z);
+                bigPony.setScale(value, y, z);
                 break;
             case 3:
-                bigPony.setScale(x, y, value);
+                bigPony.setScale(x, value, z);
                 break;
             case 4:
-                bigPony.setHeight(value);
+                bigPony.setScale(x, y, value);
                 break;
             case 5:
+                bigPony.setHeight(value);
+                break;
+            case 6:
                 bigPony.setDistance(value);
                 break;
         }
