@@ -17,12 +17,13 @@ public abstract class MixinEntityRenderer implements IResourceManagerReloadListe
 
     private float thirdPersonDistanceCustom;
 
-    @Redirect(method = "orientCamera(F)V", at = @At(value = "FIELD", ordinal = 0, target = DISTANCE))
+    @Redirect(method = "orientCamera(F)V",
+              at = @At(value = "FIELD", ordinal = 0, target = DISTANCE))
     private float fixCameraDistance(EntityRenderer thus) {
         return thirdPersonDistanceCustom;
     }
 
     public void bigpony$setThirdPersonDistance(float distance) {
-        this.thirdPersonDistanceCustom = 4.0F * distance;
+        thirdPersonDistanceCustom = 4.0F * distance;
     }
 }

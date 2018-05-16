@@ -26,12 +26,17 @@ public abstract class MixinEntityPlayer extends EntityLivingBase {
     }
 
     // this is for forge
-    @Redirect(method = "getEyeHeight()F", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayer;eyeHeight:F", remap = false))
+    @Redirect(method = "getEyeHeight()F",
+              at = @At(value = "FIELD",
+                       target = "Lnet/minecraft/entity/player/EntityPlayer;eyeHeight:F",
+                       remap = false))
     private float redirectEyeHeight(EntityPlayer initial) {
         return eyeHeight;
     }
 
-    @Inject(method = "getEyeHeight()F", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getEyeHeight()F",
+            at = @At("RETURN"),
+            cancellable = true)
     private void fixNegativeHeights(CallbackInfoReturnable<Float> cir) {
         // prevent you from seeing under the ground when looking down.
         if (cir.getReturnValueF() < 0.15F) {
@@ -40,7 +45,7 @@ public abstract class MixinEntityPlayer extends EntityLivingBase {
     }
 
     public void bigpony$setEyeHeight(float height) {
-        this.eyeHeight = 1.62F * height;
+        eyeHeight = 1.62F * height;
     }
 
 }

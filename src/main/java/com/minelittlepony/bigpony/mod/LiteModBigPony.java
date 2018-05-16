@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.INetHandler;
@@ -38,7 +39,11 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     private static final String DATA = CHANNEL + "|scale";
 
     static Logger logger = LogManager.getLogger(NAME);
-
+    
+    public static LiteModBigPony instance() {
+      return LiteLoader.getInstance().getMod(LiteModBigPony.class);
+    }
+    
     @Nullable
     private SyncManager manager;
     private PlayerSizeManager sizes;
@@ -113,9 +118,9 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
         }
     }
 
-    public float getUpdatedShadowSize(float initial, EntityLivingBase entity) {
+    public float getUpdatedShadowSize(float initial, Entity entity) {
         if (sizes == null || !(entity instanceof IEntityPlayer)) return initial;
-        return .5f * sizes.getShadowScale(((EntityPlayer)entity));
+        return initial * sizes.getShadowScale(((EntityPlayer)entity));
     }
 
     @Override
