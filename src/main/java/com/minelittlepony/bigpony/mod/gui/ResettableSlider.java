@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiSlider;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiPageButtonList.GuiResponder;
 
@@ -12,7 +13,7 @@ public class ResettableSlider extends GuiSlider {
     public SliderResetButton reset;
 
     public ResettableSlider(List<GuiButton> buttonList, GuiResponder responder, int id, int left, int top, String title, float min, float max, float def, FormatHelper formatter) {
-        super(responder, id, left, top, title, min, max, def, formatter);
+        super(responder, id, left, top, I18n.format(title), min, max, def, formatter);
         reset = new SliderResetButton(this);
         buttonList.add(this);
         buttonList.add(reset);

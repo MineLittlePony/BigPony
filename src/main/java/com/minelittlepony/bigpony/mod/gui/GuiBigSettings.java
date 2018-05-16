@@ -6,6 +6,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiPageButtonList.GuiResponder;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiSlider.FormatHelper;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
 
 import java.io.IOException;
@@ -28,15 +29,17 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
         // sliders
         int top = 20;
         int left = width / 2 - 200;
-        int right = width / 2 + 16;
+        int right = width / 2 + 50;
         
-        allSize = new ResettableSlider(buttonList, this, 1, left, top += 20, "Global Scale", .1F, 2F, bigPony.getxScale(), this);
-        xSize = new ResettableSlider(buttonList, this, 2, left, top += 20, "X Scale", .1F, 2F, bigPony.getxScale(), this);
-        ySize = new ResettableSlider(buttonList, this, 3, left, top += 20, "Y Scale", .1F, 2F, bigPony.getyScale(), this);
-        zSize = new ResettableSlider(buttonList, this, 4, left, top += 20, "Z Scale", .1F, 2F, bigPony.getzScale(), this);
-
-        height = new ResettableSlider(buttonList, this, 5, left, top += 20, "Eye Height", .1F, 2F, bigPony.getHeight(), this);
-        distance = new ResettableSlider(buttonList, this, 6, left, top += 20, "Camera Distance", .1F, 2F, bigPony.getDistance(), this);
+        allSize = new ResettableSlider(buttonList, this, 1, left, top += 20, "minebp.scale.global", .1F, 2F, bigPony.getxScale(), this);
+        xSize = new ResettableSlider(buttonList, this, 2, left, top += 20, "minebp.scale.x", .1F, 2F, bigPony.getxScale(), this);
+        ySize = new ResettableSlider(buttonList, this, 3, left, top += 20, "minebp.scale.y", .1F, 2F, bigPony.getyScale(), this);
+        zSize = new ResettableSlider(buttonList, this, 4, left, top += 20, "minebp.scale.z", .1F, 2F, bigPony.getzScale(), this);
+        
+        top += 20;
+        
+        height = new ResettableSlider(buttonList, this, 5, left, top += 20, "minebp.camera.height", .1F, 2F, bigPony.getHeight(), this);
+        distance = new ResettableSlider(buttonList, this, 6, left, top += 20, "minebp.camera.distance", .1F, 2F, bigPony.getDistance(), this);
 
         CameraPresets[] values = CameraPresets.values();
         // presets
@@ -46,9 +49,9 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
         combinedPresets = new CameraPresetButton[values.length];
 
         for (int i = 0; i < cameraPresets.length; i++) {
-            buttonList.add(cameraPresets[i] = new CameraPresetButton(this, values[i], right, 40, true, false));
-            buttonList.add(scalePresets[i] = new CameraPresetButton(this, values[i], right + 100, 40, false, true));
-            buttonList.add(combinedPresets[i] = new CameraPresetButton(this, values[i], right + 80, 40, true, true));
+            buttonList.add(cameraPresets[i] = new CameraPresetButton(this, values[i], right + 100, 40, true, false));
+            buttonList.add(scalePresets[i] = new CameraPresetButton(this, values[i], right + 80, 40, false, true));
+            buttonList.add(combinedPresets[i] = new CameraPresetButton(this, values[i], right, 40, true, true));
         }
     }
 
@@ -60,9 +63,10 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
         int left = width / 2 - 200;
         int right = width / 2 + 16;
         
-        drawCenteredString(fontRenderer, "BigPony settings", width / 2, 10, -1);
-        drawCenteredString(fontRenderer, "Camera Presets", left + 80, 25, -1);
-        drawCenteredString(fontRenderer, "Body Presets", right + 90, 25, -1);
+        drawCenteredString(fontRenderer, I18n.format("minebp.options.title"), width / 2, 10, -1);
+        drawCenteredString(fontRenderer, I18n.format("minebp.options.body"), left + 80, 25, -1);
+        drawCenteredString(fontRenderer, I18n.format("minebp.options.camera"), left + 80, 125, -1);
+        drawCenteredString(fontRenderer, I18n.format("minebp.options.presets"), right + 90, 25, -1);
     }
 
     @Override
