@@ -31,8 +31,8 @@ public enum CameraPresets {
     }
 
     public boolean isEqual(float scaleX, float scaleY, float scaleZ) {
-        return this.height == scaleX
-                && this.height == scaleY
-                && this.height == scaleZ;
+        return FloatUtils.equals(this.height, scaleX)
+                && FloatUtils.equals(this.height, scaleY)
+                && FloatUtils.equals(this.height, scaleZ);
     }
 }
