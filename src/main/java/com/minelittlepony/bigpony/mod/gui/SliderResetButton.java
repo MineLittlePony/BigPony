@@ -8,14 +8,17 @@ import net.minecraft.client.gui.GuiSlider;
 public class SliderResetButton extends GuiButton implements IPerformable {
 
     private final GuiSlider slider;
+    
+    private final float def;
 
-    public SliderResetButton(GuiSlider slider) {
+    public SliderResetButton(GuiSlider slider, float def) {
         super(12, slider.x + slider.getButtonWidth() + 5, slider.y, 20, 20, "*");
         this.slider = slider;
+        this.def = def;
     }
 
     public void updateEnabled() {
-        enabled = !FloatUtils.equals(slider.getSliderValue(), 1);
+        enabled = !FloatUtils.equals(slider.getSliderValue(), def);
     }
 
     @Override

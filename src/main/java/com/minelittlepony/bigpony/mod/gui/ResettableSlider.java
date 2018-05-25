@@ -14,7 +14,7 @@ public class ResettableSlider extends GuiSlider {
 
     public ResettableSlider(List<GuiButton> buttonList, GuiResponder responder, int id, int left, int top, String title, float min, float max, float def, FormatHelper formatter) {
         super(responder, id, left, top, I18n.format(title), min, max, def, formatter);
-        reset = new SliderResetButton(this);
+        reset = new SliderResetButton(this, def);
         buttonList.add(this);
         buttonList.add(reset);
     }
@@ -36,5 +36,13 @@ public class ResettableSlider extends GuiSlider {
         boolean res = super.mousePressed(mc, mouseX, mouseY);
         if (res) reset.updateEnabled();
         return res;
+    }
+    
+    @Override
+    protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) {
+        super.mouseDragged(mc, mouseX, mouseY);
+        if (isMouseDown) {
+            reset.updateEnabled();
+        }
     }
 }
