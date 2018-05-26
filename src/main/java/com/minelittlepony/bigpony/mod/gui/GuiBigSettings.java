@@ -18,7 +18,7 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
 
     private ResettableSlider allSize, xSize, ySize, zSize, height, distance;
 
-    private CameraPresetButton[] cameraPresets, scalePresets, combinedPresets;
+    private CameraPresetButton[] presets;
 
     public GuiBigSettings(BigPony bigPony) {
         this.bigPony = bigPony;
@@ -42,17 +42,14 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
         distance = new ResettableSlider(buttonList, this, 6, left, top += 20, "minebp.camera.distance", .1F, 2F, bigPony.getDistance(), this);
 
         CameraPresets[] values = CameraPresets.values();
-        // presets
 
-        cameraPresets = new CameraPresetButton[values.length];
-        scalePresets = new CameraPresetButton[values.length];
-        combinedPresets = new CameraPresetButton[values.length];
+        presets = new CameraPresetButton[values.length];
 
-        for (int i = 0; i < cameraPresets.length; i++) {
-            buttonList.add(cameraPresets[i] = new CameraPresetButton(this, values[i], right + 100, 40, true, false));
-            buttonList.add(scalePresets[i] = new CameraPresetButton(this, values[i], right + 80, 40, false, true));
-            buttonList.add(combinedPresets[i] = new CameraPresetButton(this, values[i], right, 40, true, true));
+        for (int i = 0; i < presets.length; i++) {
+            presets[i] = new CameraPresetButton(buttonList, this, values[i], right);
         }
+        
+        updateScreen();
     }
 
     @Override
@@ -71,10 +68,8 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
 
     @Override
     public void updateScreen() {
-        CameraPresets[] values = CameraPresets.values();
-        for (int i = 0; i < cameraPresets.length; i++) {
-            cameraPresets[i].enabled = !values[i].isEqual(height.getSliderValue(), distance.getSliderValue());
-            scalePresets[i].enabled = !values[i].isEqual(xSize.getSliderValue(), ySize.getSliderValue(), zSize.getSliderValue());
+        for (int i = 0; i < presets.length; i++) {
+            presets[i].updateEnabled(height.getSliderValue(), distance.getSliderValue(), xSize.getSliderValue(), ySize.getSliderValue(), zSize.getSliderValue());
         }
     }
 
