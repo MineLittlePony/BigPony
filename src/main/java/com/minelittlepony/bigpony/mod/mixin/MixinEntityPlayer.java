@@ -25,11 +25,9 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IEnt
     }
 
     // this is for forge
-    public float eyeHeight = 1.62F;
-
     @Redirect(method = "getEyeHeight()F", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayer;eyeHeight:F", remap = false))
     private float redirectEyeHeight(EntityPlayer initial) {
-        return eyeHeight;
+        return 1.62F * playerScale.getHeight();
     }
     //
 
@@ -50,7 +48,6 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IEnt
 
     @Override
     public void setPlayerScale(IPlayerScale scale) {
-        eyeHeight = 1.62F * scale.getHeight();
         playerScale.copyFrom(scale);
     }
 
