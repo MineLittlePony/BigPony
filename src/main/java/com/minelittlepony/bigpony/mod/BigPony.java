@@ -1,5 +1,6 @@
 package com.minelittlepony.bigpony.mod;
 
+//TODO: Why isn't this a subtype of IPlayerScale?
 public interface BigPony {
 
     void setScale(float xScale, float yScale, float zScale);
