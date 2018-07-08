@@ -7,6 +7,7 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -14,8 +15,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Implements(@Interface(iface = IEntityPlayer.class, prefix = "bigpony$"))
 public abstract class MixinEntityPlayer extends EntityLivingBase {
 
+    public float heightFactor = 1F;
     public float eyeHeight = 1.62F;
-
+    
+    @Shadow
+    protected abstract void updateSize();
+    
     public MixinEntityPlayer(World worldIn) {
         super(worldIn);
     }
@@ -45,7 +50,27 @@ public abstract class MixinEntityPlayer extends EntityLivingBase {
     }
 
     public void bigpony$setEyeHeight(float height) {
+        heightFactor = height;
         eyeHeight = 1.62F * height;
+        updateSize();
     }
 
+    public float bigpony$getHeightFactor() {
+        return this.heightFactor;
+    }
+    
+    @ModifyConstant(method = "updateSize()V", constant = @Constant(floatValue = 1.8F))
+    private float modifyStandingHeight(float initial) {
+        return initial * this.heightFactor;
+    }
+    
+    @ModifyConstant(method = "updateSize()V", constant = @Constant(floatValue = 1.65F))
+    private float modifySneakingHeight(float initial) {
+        return initial * this.heightFactor;
+    }
+    
+    @ModifyConstant(method = "updateSize()V", constant = @Constant(floatValue = 0.6F))
+    private float modifyWidth(float initial) {
+        return Math.max(initial * this.heightFactor, 0.3F);
+    }
 }
