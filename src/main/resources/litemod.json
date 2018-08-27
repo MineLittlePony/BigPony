@@ -1,7 +1,9 @@
 {
-  "name": "bigpony",
-  "revision": 0,
-  "mcversion": "1.12.1",
+  "name": "${name}",
+  "mcversion": "${mcversion}",
+  "version": "${version}",
+  "revision": "${revision}",
+  "description": "${description}",
   "mixinConfigs": [
     "bigpony.mixin.json"
   ]

@@ -20,16 +20,15 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.liteloader'
 apply plugin: 'org.spongepowered.mixin'
 
-group 'com.minelittlepony'
-version '1.0.5'
+group project.group
+version project.version
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = project.jveVersion
+targetCompatibility = project.jveVersion
 
 minecraft {
-    version = '1.12.2'
-    // first snapshot for 1.11. Change to stable when possible.
-    mappings = 'snapshot_20170919'
+    version = project.mcVersion
+    mappings = project.mcMappings
     runDir = 'run'
     replace '@VERSION@', project.version
 }
@@ -40,9 +39,11 @@ sourceSets {
     }
 }
 litemod.json {
-    author = 'killjoy1221'
-    mcversion = '1.12.r2'
-    description = 'Ah am a big pony!'
+    name = project.name
+    author = project.authors
+    mcversion = project.mcVersion
+    revision = project.revision
+    description = project.description
     mixinConfigs += 'bigpony.mixin.json'
 }
 mixin {
@@ -54,3 +55,6 @@ jar {
     from sourceSets.api.output
 }
 
+afterEvaluate {
+    file('build.number').delete()
+}
