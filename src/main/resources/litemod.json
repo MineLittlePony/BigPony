@@ -1,5 +1,5 @@
 {
-  "name": "${name}",
+  "name": "bigpony",
   "mcversion": "${mcversion}",
   "version": "${version}",
   "revision": "${revision}",

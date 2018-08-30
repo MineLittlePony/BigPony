@@ -48,7 +48,7 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IEnt
 
     @Override
     public void setPlayerScale(IPlayerScale scale) {
-        playerScale.copyFrom(scale);
+        playerScale = scale;
     }
 
     @Override

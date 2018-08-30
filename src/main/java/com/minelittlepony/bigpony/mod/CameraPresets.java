@@ -2,7 +2,7 @@ package com.minelittlepony.bigpony.mod;
 
 public enum CameraPresets {
     HUMAN(1F, 1F),
-    MARE(.75F, 1F),
+    MARE(.75F, .8F),
     STALLION(.9F, 1.1F),
     ALICORN(1.15F, 1.2F),
     FILLY(.5F, .7F),

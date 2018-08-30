@@ -51,7 +51,9 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
     private float yScale = 1F;
     @Expose
     private float zScale = 1F;
-
+    @Expose
+    private boolean autoDetermine = true;
+    
     @Override
     public String getName() {
         return NAME;
@@ -135,6 +137,10 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
 
     @Override
     public float getHeight() {
+        if (autoDetect() && MineLP.modIsActive()) {
+            return MineLP.adjustForShowAccuracy(MineLP.getEffectivePreset().getHeight());
+        }
+        
         return height;
     }
 
@@ -143,18 +149,33 @@ public class LiteModBigPony implements BigPony, InitCompleteListener, Tickable, 
         this.distance = distance;
         updateHeightAndDistance();
     }
+    
+    @Override
+    public boolean autoDetect() {
+        return autoDetermine;
+    }
+    
+    @Override
+    public void setAutoDetect(boolean v) {
+        autoDetermine = v;
+        updateHeightAndDistance();
+    }
 
     @Override
     public float getDistance() {
+        if (autoDetect() && MineLP.modIsActive()) {
+            return MineLP.adjustForShowAccuracy(MineLP.getEffectivePreset().getDistance());
+        }
+        
         return distance;
     }
 
     private void updateHeightAndDistance() {
+        Minecraft mc = Minecraft.getMinecraft();
+        
         LiteLoader.getInstance().writeConfig(this);
 
-        Minecraft mc = Minecraft.getMinecraft();
-
-        ((IEntityRenderer) mc.entityRenderer).setThirdPersonDistance(distance);
+        ((IEntityRenderer) mc.entityRenderer).setThirdPersonDistance(getDistance());
 
         sizes.setScale((IEntityPlayer) mc.player, this);
     }

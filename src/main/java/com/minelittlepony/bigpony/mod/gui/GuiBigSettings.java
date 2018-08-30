@@ -2,6 +2,8 @@ package com.minelittlepony.bigpony.mod.gui;
 
 import com.minelittlepony.bigpony.mod.BigPony;
 import com.minelittlepony.bigpony.mod.CameraPresets;
+import com.minelittlepony.bigpony.mod.MineLP;
+
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiPageButtonList.GuiResponder;
 import net.minecraft.client.gui.GuiScreen;
@@ -18,6 +20,8 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
 
     private ResettableSlider allSize, xSize, ySize, zSize, height, distance;
 
+    private Checkbox auto;
+    
     private CameraPresetButton[] presets;
 
     public GuiBigSettings(BigPony bigPony) {
@@ -39,7 +43,11 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
         
         height = new ResettableSlider(buttonList, this, 5, left, top += 20, "minebp.camera.height", .1F, 2F, bigPony.getHeight(), this);
         distance = new ResettableSlider(buttonList, this, 6, left, top += 20, "minebp.camera.distance", .1F, 2F, bigPony.getDistance(), this);
-
+        
+        top += 20;
+        
+        this.buttonList.add(auto = new Checkbox(left, top += 20, "minebp.camera.auto", bigPony.autoDetect(), bigPony::setAutoDetect));
+        
         CameraPresets[] values = CameraPresets.values();
 
         presets = new CameraPresetButton[values.length];
@@ -76,6 +84,8 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
     protected void actionPerformed(GuiButton button) throws IOException {
         if (button instanceof IPerformable) {
             ((IPerformable)button).performAction();
+        } else if (button.id == auto.id) {
+            auto.checked = !auto.checked;
         }
     }
 

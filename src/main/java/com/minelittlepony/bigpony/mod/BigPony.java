@@ -9,4 +9,8 @@ public interface BigPony extends IPlayerScale {
     void setDistance(float distance);
 
     float getDistance();
+    
+    boolean autoDetect();
+    
+    void setAutoDetect(boolean v);
 }
