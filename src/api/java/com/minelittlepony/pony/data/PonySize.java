@@ -5,7 +5,8 @@ package com.minelittlepony.pony.data;
  */
 public enum PonySize {
     TALL,
-    LARGE,
+    BULKY,
+    LANKY,
     NORMAL,
     YEARLING,
     FOAL

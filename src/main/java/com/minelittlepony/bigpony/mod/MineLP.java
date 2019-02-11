@@ -44,7 +44,7 @@ public final class MineLP {
         if (size == PonySize.TALL) {
             return CameraPresets.ALICORN;
         }
-        if (size == PonySize.BULKY) {
+        if (size == PonySize.BULKY || size == PonySize.LANKY) {
             return CameraPresets.STALLION;
         }
         
