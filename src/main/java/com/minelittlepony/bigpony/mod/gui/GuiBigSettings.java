@@ -2,7 +2,6 @@ package com.minelittlepony.bigpony.mod.gui;
 
 import com.minelittlepony.bigpony.mod.BigPony;
 import com.minelittlepony.bigpony.mod.CameraPresets;
-import com.minelittlepony.bigpony.mod.MineLP;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiPageButtonList.GuiResponder;
