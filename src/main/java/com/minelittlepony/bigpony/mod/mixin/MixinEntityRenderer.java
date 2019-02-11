@@ -3,6 +3,8 @@ package com.minelittlepony.bigpony.mod.mixin;
 import com.minelittlepony.bigpony.mod.ducks.IEntityRenderer;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.resources.IResourceManagerReloadListener;
+
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,12 +20,12 @@ public abstract class MixinEntityRenderer implements IResourceManagerReloadListe
     private float thirdPersonDistanceCustom;
 
     @Redirect(method = "orientCamera(F)V",
-              at = @At(value = "FIELD", ordinal = 0, target = DISTANCE))
+              at = @At(value = "FIELD", ordinal = 0, target = DISTANCE, opcode = Opcodes.GETFIELD))
     private float fixCameraDistance(EntityRenderer thus) {
         return thirdPersonDistanceCustom;
     }
 
     public void bigpony$setThirdPersonDistance(float distance) {
-        thirdPersonDistanceCustom = 4.0F * distance;
+        thirdPersonDistanceCustom = 4 * distance;
     }
 }
