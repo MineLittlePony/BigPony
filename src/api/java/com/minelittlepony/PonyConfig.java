@@ -3,6 +3,6 @@ package com.minelittlepony;
 /**
  * Stub
  */
-public interface PonyConfig {
-    float getGlobalScaleFactor();
+public abstract class PonyConfig {
+    public abstract float getGlobalScaleFactor();
 }

@@ -4,8 +4,8 @@ package com.minelittlepony;
 /**
  * Stub
  */
-public interface MineLittlePony {
-    static PonyConfig getConfig() {
+public abstract class MineLittlePony {
+    public static PonyConfig getConfig() {
         return null;
     }
 }
