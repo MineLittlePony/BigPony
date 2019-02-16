@@ -2,14 +2,16 @@ package com.minelittlepony.bigpony.mod;
 
 public class PlayerScale implements IPlayerScale {
 
-    private final float xScale;
-    private final float yScale;
-    private final float zScale;
+    private float xScale;
+    private float yScale;
+    private float zScale;
+    private float height;
 
-    public PlayerScale(float xScale, float yScale, float zScale) {
+    public PlayerScale(float xScale, float yScale, float zScale, float height) {
         this.xScale = xScale;
         this.yScale = yScale;
         this.zScale = zScale;
+        this.height = height;
     }
 
     @Override
@@ -27,4 +29,19 @@ public class PlayerScale implements IPlayerScale {
         return zScale;
     }
 
+    @Override
+    public float getHeight() {
+        return height;
+    }
+
+    public void copyFrom(IPlayerScale scale) {
+        this.xScale = scale.getXScale();
+        this.yScale = scale.getYScale();
+        this.zScale = scale.getZScale();
+        this.height = scale.getHeight();
+    }
+
+    public void setHeight(float height) {
+        this.height = height;
+    }
 }

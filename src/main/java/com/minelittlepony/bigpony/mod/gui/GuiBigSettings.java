@@ -2,12 +2,12 @@ package com.minelittlepony.bigpony.mod.gui;
 
 import com.minelittlepony.bigpony.mod.BigPony;
 import com.minelittlepony.bigpony.mod.CameraPresets;
-import com.minelittlepony.bigpony.mod.FloatUtils;
+
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiPageButtonList.GuiResponder;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiSlider;
 import net.minecraft.client.gui.GuiSlider.FormatHelper;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
 
 import java.io.IOException;
@@ -17,9 +17,11 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
 
     private BigPony bigPony;
 
-    private GuiSlider xSize, ySize, zSize, height, distance;
-    private GuiButton resetXSize, resetYSize, resetZSize, resetHeight, resetDistance;
-    private GuiButton humanPreset, marePreset, stallionPreset, princessPreset, fillyPreset;
+    private ResettableSlider allSize, xSize, ySize, zSize, height, distance;
+
+    private Checkbox auto;
+    
+    private CameraPresetButton[] presets;
 
     public GuiBigSettings(BigPony bigPony) {
         this.bigPony = bigPony;
@@ -27,92 +29,76 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
 
     @Override
     public void initGui() {
+        int top = 20;
+        int left = width / 2 - 200;
+        int right = width / 2 + 50;
+        
+        allSize = new ResettableSlider(buttonList, this, 1, left, top += 20, "minebp.scale.global", .1F, 2F, bigPony.getXScale(), this);
+        xSize = new ResettableSlider(buttonList, this, 2, left, top += 20, "minebp.scale.x", .1F, 2F, bigPony.getXScale(), this);
+        ySize = new ResettableSlider(buttonList, this, 3, left, top += 20, "minebp.scale.y", .1F, 2F, bigPony.getYScale(), this);
+        zSize = new ResettableSlider(buttonList, this, 4, left, top += 20, "minebp.scale.z", .1F, 2F, bigPony.getZScale(), this);
+        
+        top += 20;
+        
+        height = new ResettableSlider(buttonList, this, 5, left, top += 20, "minebp.camera.height", .1F, 2F, bigPony.getHeight(), this);
+        distance = new ResettableSlider(buttonList, this, 6, left, top += 20, "minebp.camera.distance", .1F, 2F, bigPony.getDistance(), this);
+        
+        top += 20;
+        
+        this.buttonList.add(auto = new Checkbox(left, top += 20, "minebp.camera.auto", bigPony.autoDetect(), bigPony::setAutoDetect));
+        
+        CameraPresets[] values = CameraPresets.values();
 
-        // sliders
-        this.buttonList.add(xSize = new GuiSlider(this, 1, 5, 40, "X Scale", .1F, 2F, bigPony.getxScale(), this));
-        this.buttonList.add(ySize = new GuiSlider(this, 2, 5, 60, "Y Scale", .1F, 2F, bigPony.getyScale(), this));
-        this.buttonList.add(zSize = new GuiSlider(this, 3, 5, 80, "Z Scale", .1F, 2F, bigPony.getzScale(), this));
-        this.buttonList.add(height = new GuiSlider(this, 4, 5, 100, "Eye Height", .1F, 2F, bigPony.getHeight(), this));
-        this.buttonList.add(distance = new GuiSlider(this, 5, 5, 120, "Camera Distance", .1F, 2F, bigPony.getDistance(), this));
+        presets = new CameraPresetButton[values.length];
 
-        // resets
-        this.buttonList.add(resetXSize = new GuiButton(6, 160, 40, 20, 20, "*"));
-        this.buttonList.add(resetYSize = new GuiButton(7, 160, 60, 20, 20, "*"));
-        this.buttonList.add(resetZSize = new GuiButton(8, 160, 80, 20, 20, "*"));
-        this.buttonList.add(resetHeight = new GuiButton(9, 160, 100, 20, 20, "*"));
-        this.buttonList.add(resetDistance = new GuiButton(10, 160, 120, 20, 20, "*"));
-
-        // presets
-        this.buttonList.add(humanPreset = new GuiButton(11, 220, 40, 120, 20, "Human"));
-        this.buttonList.add(marePreset = new GuiButton(12, 220, 60, 120, 20, "Mare"));
-        this.buttonList.add(stallionPreset = new GuiButton(13, 220, 80, 120, 20, "Stallion"));
-        this.buttonList.add(princessPreset = new GuiButton(14, 220, 100, 120, 20, "Princess"));
-        this.buttonList.add(fillyPreset = new GuiButton(15, 220, 120, 120, 20, "Filly"));
+        for (int i = 0; i < presets.length; i++) {
+            presets[i] = new CameraPresetButton(buttonList, this, values[i], right);
+        }
+        
+        updateScreen();
     }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
-        this.drawCenteredString(this.fontRenderer, "BigPony settings", width / 2, 10, -1);
-        this.drawCenteredString(this.fontRenderer, "Camera Presets", 280, 25, -1);
+        
+        int left = width / 2 - 200;
+        int right = width / 2 + 16;
+        
+        drawCenteredString(fontRenderer, I18n.format("minebp.options.title"), width / 2, 10, -1);
+        drawCenteredString(fontRenderer, I18n.format("minebp.options.body"), left + 80, 25, -1);
+        drawCenteredString(fontRenderer, I18n.format("minebp.options.camera"), left + 80, 125, -1);
+        drawCenteredString(fontRenderer, I18n.format("minebp.options.presets"), right + 90, 25, -1);
     }
 
     @Override
     public void updateScreen() {
-
-        resetXSize.enabled = !FloatUtils.equals(xSize.getSliderValue(), 1);
-        resetYSize.enabled = !FloatUtils.equals(ySize.getSliderValue(), 1);
-        resetZSize.enabled = !FloatUtils.equals(zSize.getSliderValue(), 1);
-        resetHeight.enabled = !FloatUtils.equals(height.getSliderValue(), 1);
-        resetDistance.enabled = !FloatUtils.equals(distance.getSliderValue(), 1);
-
-        humanPreset.enabled = !CameraPresets.HUMAN.isEqual(height.getSliderValue(), distance.getSliderValue());
-        marePreset.enabled = !CameraPresets.MARE.isEqual(height.getSliderValue(), distance.getSliderValue());
-        stallionPreset.enabled = !CameraPresets.STALLION.isEqual(height.getSliderValue(), distance.getSliderValue());
-        princessPreset.enabled = !CameraPresets.ALICORN.isEqual(height.getSliderValue(), distance.getSliderValue());
-        fillyPreset.enabled = !CameraPresets.FILLY.isEqual(height.getSliderValue(), distance.getSliderValue());
+        for (int i = 0; i < presets.length; i++) {
+            presets[i].updateEnabled(height.getSliderValue(), distance.getSliderValue(), xSize.getSliderValue(), ySize.getSliderValue(), zSize.getSliderValue());
+        }
     }
 
     @Override
     protected void actionPerformed(GuiButton button) throws IOException {
-        switch (button.id) {
-            case 6:
-                xSize.setSliderValue(1, true);
-                break;
-            case 7:
-                ySize.setSliderValue(1, true);
-                break;
-            case 8:
-                zSize.setSliderValue(1, true);
-                break;
-            case 9:
-                height.setSliderValue(1, true);
-                break;
-            case 10:
-                distance.setSliderValue(1, true);
-                break;
-            case 11:
-                applyPreset(CameraPresets.HUMAN);
-                break;
-            case 12:
-                applyPreset(CameraPresets.MARE);
-                break;
-            case 13:
-                applyPreset(CameraPresets.STALLION);
-                break;
-            case 14:
-                applyPreset(CameraPresets.ALICORN);
-                break;
-            case 15:
-                applyPreset(CameraPresets.FILLY);
-                break;
+        if (button instanceof IPerformable) {
+            ((IPerformable)button).performAction();
+        } else if (button.id == auto.id) {
+            auto.checked = !auto.checked;
         }
     }
 
-    private void applyPreset(CameraPresets preset) {
-        height.setSliderValue(preset.getHeight(), true);
-        distance.setSliderValue(preset.getDistance(), true);
+    public void applyPreset(CameraPresets preset, boolean camera, boolean body) {
+        float h = preset.getHeight();
+        if (body) {
+            xSize.setSliderValue(h, true);
+            ySize.setSliderValue(h, true);
+            zSize.setSliderValue(h, true);
+        }
+        if (camera) {
+            height.setSliderValue(h, true);
+            distance.setSliderValue(preset.getDistance(), true);
+        }
     }
 
     @Override
@@ -122,24 +108,31 @@ public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHel
 
     @Override
     public void setEntryValue(int id, float value) {
-
-        float x = bigPony.getxScale();
-        float y = bigPony.getyScale();
-        float z = bigPony.getzScale();
+        float x = bigPony.getXScale();
+        float y = bigPony.getYScale();
+        float z = bigPony.getZScale();
         switch (id) {
             case 1:
-                bigPony.setScale(value, y, z);
+                bigPony.setScale(value, value, value);
+                bigPony.setHeight(value);
+                xSize.setSliderValue(value, false);
+                ySize.setSliderValue(value, false);
+                zSize.setSliderValue(value, false);
+                height.setSliderValue(value, false);
                 break;
             case 2:
-                bigPony.setScale(x, value, z);
+                bigPony.setScale(value, y, z);
                 break;
             case 3:
-                bigPony.setScale(x, y, value);
+                bigPony.setScale(x, value, z);
                 break;
             case 4:
-                bigPony.setHeight(value);
+                bigPony.setScale(x, y, value);
                 break;
             case 5:
+                bigPony.setHeight(value);
+                break;
+            case 6:
                 bigPony.setDistance(value);
                 break;
         }
