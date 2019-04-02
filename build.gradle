@@ -34,8 +34,13 @@ minecraft {
 }
 
 sourceSets {
+    external {
+        compileClasspath += main.compileClasspath
+    }
     main {
         ext.refMap = 'bigpony.mixin.refmap.json'
+
+        compileClasspath += external.output
     }
 }
 litemod.json {
@@ -52,7 +57,7 @@ mixin {
 
 jar {
     from litemod.outputs
-    from sourceSets.api.output
+    from sourceSets.external.output
 }
 
 afterEvaluate {
