@@ -1,4 +1,4 @@
-package com.minelittlepony.bigpony.mod.gui;
+package com.minelittlepony.bigpony.gui;
 
 public interface IPerformable {
     public void performAction();

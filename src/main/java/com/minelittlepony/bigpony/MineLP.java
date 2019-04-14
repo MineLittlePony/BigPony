@@ -1,4 +1,4 @@
-package com.minelittlepony.bigpony.mod;
+package com.minelittlepony.bigpony;
 
 import com.minelittlepony.MineLittlePony;
 import com.minelittlepony.pony.data.IPony;

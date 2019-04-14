@@ -1,4 +1,4 @@
-package com.minelittlepony.bigpony.mod;
+package com.minelittlepony.bigpony;
 
 public enum CameraPresets {
     HUMAN(1F, 1F),

@@ -1,9 +1,9 @@
-package com.minelittlepony.bigpony.mod;
+package com.minelittlepony.bigpony;
 
 import com.google.gson.annotations.Expose;
-import com.minelittlepony.bigpony.mod.ducks.IEntityPlayer;
-import com.minelittlepony.bigpony.mod.ducks.IEntityRenderer;
-import com.minelittlepony.bigpony.mod.gui.GuiBigSettings;
+import com.minelittlepony.bigpony.ducks.IEntityPlayer;
+import com.minelittlepony.bigpony.ducks.IEntityRenderer;
+import com.minelittlepony.bigpony.gui.GuiBigSettings;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mumfrey.liteloader.InitCompleteListener;
 import com.mumfrey.liteloader.JoinGameListener;

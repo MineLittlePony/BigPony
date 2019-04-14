@@ -1,10 +1,10 @@
-package com.minelittlepony.bigpony.mod.mixin;
+package com.minelittlepony.bigpony.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.minelittlepony.bigpony.mod.ducks.IEntityPlayer;
+import com.minelittlepony.bigpony.ducks.IEntityPlayer;
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.client.Minecraft;

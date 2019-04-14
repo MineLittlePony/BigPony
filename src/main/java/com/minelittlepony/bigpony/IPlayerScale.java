@@ -1,4 +1,4 @@
-package com.minelittlepony.bigpony.mod;
+package com.minelittlepony.bigpony;
 
 import net.minecraft.network.PacketBuffer;
 import playersync.client.api.PacketSerializer;

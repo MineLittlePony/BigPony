@@ -1,8 +1,9 @@
-package com.minelittlepony.bigpony.mod.mixin;
+package com.minelittlepony.bigpony.mixin;
 
-import com.minelittlepony.bigpony.mod.IPlayerScale;
-import com.minelittlepony.bigpony.mod.PlayerScale;
-import com.minelittlepony.bigpony.mod.ducks.IEntityPlayer;
+import com.minelittlepony.bigpony.IPlayerScale;
+import com.minelittlepony.bigpony.PlayerScale;
+import com.minelittlepony.bigpony.ducks.IEntityPlayer;
+
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;

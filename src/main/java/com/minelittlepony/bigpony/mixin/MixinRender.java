@@ -1,11 +1,11 @@
-package com.minelittlepony.bigpony.mod.mixin;
+package com.minelittlepony.bigpony.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import com.minelittlepony.bigpony.mod.LiteModBigPony;
+import com.minelittlepony.bigpony.LiteModBigPony;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
