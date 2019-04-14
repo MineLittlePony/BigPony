@@ -1,8 +1,8 @@
-package com.minelittlepony.bigpony.mod.gui;
+package com.minelittlepony.bigpony.gui;
 
 import java.util.List;
 
-import com.minelittlepony.bigpony.mod.CameraPresets;
+import com.minelittlepony.bigpony.CameraPresets;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;

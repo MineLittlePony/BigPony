@@ -1,6 +1,6 @@
-package com.minelittlepony.bigpony.mod.gui;
+package com.minelittlepony.bigpony.gui;
 
-import com.minelittlepony.bigpony.mod.FloatUtils;
+import com.minelittlepony.bigpony.FloatUtils;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiSlider;

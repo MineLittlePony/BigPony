@@ -1,6 +1,5 @@
-package com.minelittlepony.bigpony.mod.mixin;
+package com.minelittlepony.bigpony.mixin;
 
-import com.minelittlepony.bigpony.mod.ducks.IEntityRenderer;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.resources.IResourceManagerReloadListener;
 
@@ -10,6 +9,8 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+
+import com.minelittlepony.bigpony.ducks.IEntityRenderer;
 
 @Mixin(EntityRenderer.class)
 @Implements(@Interface(iface = IEntityRenderer.class, prefix = "bigpony$"))

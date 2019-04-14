@@ -1,4 +1,4 @@
-package com.minelittlepony.bigpony.mod.ducks;
+package com.minelittlepony.bigpony.ducks;
 
 public interface IEntityRenderer {
 

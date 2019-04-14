@@ -1,6 +1,6 @@
-package com.minelittlepony.bigpony.mod.ducks;
+package com.minelittlepony.bigpony.ducks;
 
-import com.minelittlepony.bigpony.mod.IPlayerScale;
+import com.minelittlepony.bigpony.IPlayerScale;
 
 public interface IEntityPlayer {
 

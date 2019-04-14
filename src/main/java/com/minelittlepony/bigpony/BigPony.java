@@ -1,4 +1,4 @@
-package com.minelittlepony.bigpony.mod;
+package com.minelittlepony.bigpony;
 
 public interface BigPony extends IPlayerScale {
 

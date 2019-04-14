@@ -1,6 +1,6 @@
-package com.minelittlepony.bigpony.mod;
+package com.minelittlepony.bigpony;
 
-import com.minelittlepony.bigpony.mod.ducks.IEntityPlayer;
+import com.minelittlepony.bigpony.ducks.IEntityPlayer;
 import com.mumfrey.liteloader.core.LiteLoader;
 
 import net.minecraft.client.Minecraft;

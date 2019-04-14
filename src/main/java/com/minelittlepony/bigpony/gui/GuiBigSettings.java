@@ -1,7 +1,4 @@
-package com.minelittlepony.bigpony.mod.gui;
-
-import com.minelittlepony.bigpony.mod.BigPony;
-import com.minelittlepony.bigpony.mod.CameraPresets;
+package com.minelittlepony.bigpony.gui;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiPageButtonList.GuiResponder;
@@ -12,6 +9,9 @@ import net.minecraft.util.math.MathHelper;
 
 import java.io.IOException;
 import javax.annotation.Nonnull;
+
+import com.minelittlepony.bigpony.BigPony;
+import com.minelittlepony.bigpony.CameraPresets;
 
 public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHelper {
 
