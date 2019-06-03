@@ -1,49 +1,25 @@
 package com.minelittlepony.bigpony.gui;
 
-import java.util.List;
+import com.minelittlepony.common.client.gui.GameGui;
+import com.minelittlepony.common.client.gui.element.Button;
+import com.minelittlepony.common.client.gui.element.Slider;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiSlider;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiPageButtonList.GuiResponder;
+public class ResettableSlider extends Slider {
 
-public class ResettableSlider extends GuiSlider {
+    public final Button reset;
 
-    public SliderResetButton reset;
+    public ResettableSlider(GameGui gui, int left, int top, float min, float max, float value) {
+        super(left, top, min, max, value);
 
-    public ResettableSlider(List<GuiButton> buttonList, GuiResponder responder, int id, int left, int top, String title, float min, float max, float def, FormatHelper formatter) {
-        super(responder, id, left, top, I18n.format(title), min, max, def, formatter);
-        reset = new SliderResetButton(this);
-        buttonList.add(this);
-        buttonList.add(reset);
-        reset.updateEnabled();
+        gui.addButton(reset = new Button(left + width + 5, top, 20, 20)
+                .onClick(o -> setValue(1F))
+                .setEnabled(!FloatUtils.equals(getValue(), 1)))
+                .getStyle().setText("x");
     }
 
     @Override
-    public void setSliderValue(float value, boolean notifyResponder) {
-        super.setSliderValue(value, notifyResponder);
-        reset.updateEnabled();
-    }
-
-    @Override
-    public void setSliderPosition(float position) {
-        super.setSliderPosition(position);
-        reset.updateEnabled();
-    }
-
-    @Override
-    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
-        boolean res = super.mousePressed(mc, mouseX, mouseY);
-        if (res) reset.updateEnabled();
-        return res;
-    }
-    
-    @Override
-    protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) {
-        super.mouseDragged(mc, mouseX, mouseY);
-        if (isMouseDown) {
-            reset.updateEnabled();
-        }
+    protected void setClampedValue(float value) {
+        super.setClampedValue(value);
+        reset.setEnabled(!FloatUtils.equals(getValue(), 1));
     }
 }

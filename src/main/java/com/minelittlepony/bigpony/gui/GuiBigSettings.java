@@ -1,151 +1,104 @@
 package com.minelittlepony.bigpony.gui;
 
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiPageButtonList.GuiResponder;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiSlider.FormatHelper;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.math.MathHelper;
+import com.minelittlepony.bigpony.scale.IPlayerScale;
+import com.minelittlepony.common.client.gui.GameGui;
+import com.minelittlepony.common.client.gui.element.Label;
 
-import java.io.IOException;
-import javax.annotation.Nonnull;
+import net.minecraft.network.chat.TranslatableComponent;
 
-import com.minelittlepony.bigpony.BigPony;
-import com.minelittlepony.bigpony.CameraPresets;
+public class GuiBigSettings extends GameGui {
 
-public class GuiBigSettings extends GuiScreen implements GuiResponder, FormatHelper {
+    private final IPlayerScale bigPony;
 
-    private BigPony bigPony;
+    private ResettableSlider xSize, ySize, zSize, height, distance;
 
-    private ResettableSlider allSize, xSize, ySize, zSize, height, distance;
-
-    private Checkbox auto;
-    
     private CameraPresetButton[] presets;
 
-    public GuiBigSettings(BigPony bigPony) {
+    public GuiBigSettings(IPlayerScale bigPony) {
+        super(new TranslatableComponent("minebp.options.title"));
         this.bigPony = bigPony;
     }
 
     @Override
-    public void initGui() {
+    protected void init() {
         int top = 20;
         int left = width / 2 - 200;
         int right = width / 2 + 50;
-        
-        allSize = new ResettableSlider(buttonList, this, 1, left, top += 20, "minebp.scale.global", .1F, 2F, bigPony.getXScale(), this);
-        xSize = new ResettableSlider(buttonList, this, 2, left, top += 20, "minebp.scale.x", .1F, 2F, bigPony.getXScale(), this);
-        ySize = new ResettableSlider(buttonList, this, 3, left, top += 20, "minebp.scale.y", .1F, 2F, bigPony.getYScale(), this);
-        zSize = new ResettableSlider(buttonList, this, 4, left, top += 20, "minebp.scale.z", .1F, 2F, bigPony.getZScale(), this);
-        
+
+        addButton(new Label(width / 2, 6)).setCentered().getStyle().setText(getTitle().getString());
+        addButton(new Label(left + 80, 20)).getStyle().setText("minebp.options.body");
+        addButton(new Label(left + 80, 120)).getStyle().setText("minebp.options.camera");
+        addButton(new Label((width / 2 + 16) + 90, 20)).getStyle().setText("minebp.options.presets");
+
+        addButton(new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getXScale()))
+            .onChange(value -> {
+                xSize.setValue(value);
+                ySize.setValue(value);
+                zSize.setValue(value);
+                height.setValue(value);
+                return value;
+            })
+            .getStyle().setText("minebp.scale.global");
+        addButton(xSize = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getXScale()))
+            .onChange(bigPony::setXScale)
+            .getStyle().setText("minebp.scale.x");
+        addButton(ySize = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getYScale()))
+            .onChange(bigPony::setYScale)
+            .getStyle().setText("minebp.scale.y");
+        addButton(zSize = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getZScale()))
+            .onChange(bigPony::setZScale)
+            .getStyle().setText("minebp.scale.z");
+
         top += 20;
-        
-        height = new ResettableSlider(buttonList, this, 5, left, top += 20, "minebp.camera.height", .1F, 2F, bigPony.getHeight(), this);
-        distance = new ResettableSlider(buttonList, this, 6, left, top += 20, "minebp.camera.distance", .1F, 2F, bigPony.getDistance(), this);
-        
+
+        addButton(height = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getHeight()))
+            .onChange(bigPony::setHeight)
+            .getStyle().setText("minebp.camera.height");
+        addButton(distance = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getDistance()))
+            .onChange(bigPony::setDistance)
+            .getStyle().setText("minebp.camera.distance");
+
         top += 20;
-        
-        this.buttonList.add(auto = new Checkbox(left, top += 20, "minebp.camera.auto", bigPony.autoDetect(), bigPony::setAutoDetect));
-        
+
         CameraPresets[] values = CameraPresets.values();
 
         presets = new CameraPresetButton[values.length];
 
         for (int i = 0; i < presets.length; i++) {
-            presets[i] = new CameraPresetButton(buttonList, this, values[i], right);
+            presets[i] = new CameraPresetButton(this, values[i], right);
         }
-        
-        updateScreen();
+
+        tick();
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        this.drawDefaultBackground();
-        super.drawScreen(mouseX, mouseY, partialTicks);
-        
-        int left = width / 2 - 200;
-        int right = width / 2 + 16;
-        
-        drawCenteredString(fontRenderer, I18n.format("minebp.options.title"), width / 2, 10, -1);
-        drawCenteredString(fontRenderer, I18n.format("minebp.options.body"), left + 80, 25, -1);
-        drawCenteredString(fontRenderer, I18n.format("minebp.options.camera"), left + 80, 125, -1);
-        drawCenteredString(fontRenderer, I18n.format("minebp.options.presets"), right + 90, 25, -1);
+    public void render(int mouseX, int mouseY, float partialTicks) {
+        super.renderBackground();
+        super.render(mouseX, mouseY, partialTicks);
     }
 
     @Override
-    public void updateScreen() {
+    public void tick() {
         for (int i = 0; i < presets.length; i++) {
-            presets[i].updateEnabled(height.getSliderValue(), distance.getSliderValue(), xSize.getSliderValue(), ySize.getSliderValue(), zSize.getSliderValue());
+            presets[i].updateEnabled(height.getValue(), distance.getValue(), xSize.getValue(), ySize.getValue(), zSize.getValue());
         }
     }
 
     @Override
-    protected void actionPerformed(GuiButton button) throws IOException {
-        if (button instanceof IPerformable) {
-            ((IPerformable)button).performAction();
-        } else if (button.id == auto.id) {
-            auto.checked = !auto.checked;
-        }
+    public boolean isPauseScreen() {
+        return false;
     }
 
     public void applyPreset(CameraPresets preset, boolean camera, boolean body) {
         float h = preset.getHeight();
         if (body) {
-            xSize.setSliderValue(h, true);
-            ySize.setSliderValue(h, true);
-            zSize.setSliderValue(h, true);
+            xSize.setValue(h);
+            ySize.setValue(h);
+            zSize.setValue(h);
         }
         if (camera) {
-            height.setSliderValue(h, true);
-            distance.setSliderValue(preset.getDistance(), true);
+            height.setValue(h);
+            distance.setValue(preset.getDistance());
         }
-    }
-
-    @Override
-    public void setEntryValue(int id, boolean value) {
-
-    }
-
-    @Override
-    public void setEntryValue(int id, float value) {
-        float x = bigPony.getXScale();
-        float y = bigPony.getYScale();
-        float z = bigPony.getZScale();
-        switch (id) {
-            case 1:
-                bigPony.setScale(value, value, value);
-                bigPony.setHeight(value);
-                xSize.setSliderValue(value, false);
-                ySize.setSliderValue(value, false);
-                zSize.setSliderValue(value, false);
-                height.setSliderValue(value, false);
-                break;
-            case 2:
-                bigPony.setScale(value, y, z);
-                break;
-            case 3:
-                bigPony.setScale(x, value, z);
-                break;
-            case 4:
-                bigPony.setScale(x, y, value);
-                break;
-            case 5:
-                bigPony.setHeight(value);
-                break;
-            case 6:
-                bigPony.setDistance(value);
-                break;
-        }
-    }
-
-    @Override
-    public void setEntryValue(int id, @Nonnull String value) {
-
-    }
-
-    @Override
-    @Nonnull
-    public String getText(int id, @Nonnull String name, float value) {
-        return String.format("%s: %d%%", name, MathHelper.ceil(value * 100));
     }
 }

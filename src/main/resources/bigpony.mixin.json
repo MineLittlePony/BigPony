@@ -1,15 +1,15 @@
 {
   "required": true,
   "minVersion": "0.6",
-  "package": "com.minelittlepony.bigpony.mod.mixin",
+  "package": "com.minelittlepony.bigpony.mixin",
   "refmap": "bigpony.mixin.refmap.json",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MixinEntityPlayer",
-    "MixinEntityPlayerMP",
-    "MixinEntityPlayerSP",
-    "MixinEntityRenderer",
-    "MixinRender",
-    "MixinRenderLivingBase"
+    "MixinPlayerEntity",
+    "MixinServerPlayerEntity",
+    "MixinClientPlayerEntity",
+    "MixinCamera",
+    "MixinPlayerEntityRenderer",
+    "MixinLivingEntityRenderer"
   ]
 }

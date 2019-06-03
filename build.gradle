@@ -19,7 +19,14 @@ description = project.displayname
 archivesBaseName = project.name
 
 minecraft {
-    refmapName = 'kirin.mixin.refmap.json'
+    refmapName = 'bigpony.mixin.refmap.json'
+}
+
+repositories {
+    maven {
+        name = 'minelp'
+        url = 'http://repo.minelittlepony-mod.com/maven/snapshot'
+    }
 }
 
 dependencies {
@@ -27,6 +34,11 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}"
     modCompile "net.fabricmc:fabric-loader:${project.loader_version}"
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
+
+	modCompile "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    modCompile "com.minelittlepony:Kirin:${project.kirin_version}"
+    include "com.minelittlepony:Kirin:${project.kirin_version}"
 }
 
 processResources {

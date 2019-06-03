@@ -1,4 +1,4 @@
-package com.minelittlepony.bigpony;
+package com.minelittlepony.bigpony.gui;
 
 public enum CameraPresets {
     HUMAN(1F, 1F),
@@ -31,8 +31,8 @@ public enum CameraPresets {
     }
 
     public boolean isEqual(float scaleX, float scaleY, float scaleZ) {
-        return FloatUtils.equals(this.height, scaleX)
-                && FloatUtils.equals(this.height, scaleY)
-                && FloatUtils.equals(this.height, scaleZ);
+        return FloatUtils.equals(height, scaleX)
+                && FloatUtils.equals(height, scaleY)
+                && FloatUtils.equals(height, scaleZ);
     }
 }
