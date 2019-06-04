@@ -39,7 +39,7 @@ public class BigPony {
         instance = this;
         config = JsonConfig.of(utils.getConfigDirectory().resolve("bigpony.json"));
 
-        settingsBind = utils.registerKeybind("key.category.bigpony", GLFW.GLFW_KEY_F10, "bigpony.settings");
+        settingsBind = utils.registerKeybind("key.category.misc", "bigpony:settings", GLFW.GLFW_KEY_F10);
     }
 
     public void onClientTick(MinecraftClient minecraft) {
