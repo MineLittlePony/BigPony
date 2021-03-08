@@ -78,7 +78,7 @@ public class Scaling {
             if (calculatedSize == null || existing.height != knownVanillaSize.height || existing.width != knownVanillaSize.width) {
                 knownVanillaSize = EntityDimensions.fixed(existing.width, existing.height);
                 calculatedSize = EntityDimensions.changing(
-                        knownVanillaSize.width * body.x,
+                        Math.max(0.25F, knownVanillaSize.width * body.x),
                         Math.max(0.14F, knownVanillaSize.height * body.y)
                 );
             }
@@ -93,7 +93,7 @@ public class Scaling {
     }
 
     public double getCameraDistance(double existing) {
-        return serverConsentCamera ? Math.max(0.09F, existing * camera.distance) : existing;
+        return serverConsentCamera ? existing * camera.distance : existing;
     }
 
     public float getReplacementActiveEyeHeight(EntityPose pose, EntityDimensions size, float existing) {
