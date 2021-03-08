@@ -11,6 +11,7 @@
   "client": [
     "client.MixinCamera",
     "client.MixinEntityRenderDispatcher",
-    "client.MixinLivingEntityRenderer"
+    "client.MixinLivingEntityRenderer",
+    "client.MixinPlayerEntityRenderer"
   ]
 }
