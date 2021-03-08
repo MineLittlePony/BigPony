@@ -25,6 +25,7 @@ public class MsgOtherPlayerSize extends MsgPlayerSize {
         if (player != null) {
             System.out.println("[CLIENT] Got size for " + playerId + " from " + ((PlayerEntity)player).getName().asString());
             player.getScaling().initFrom(scaling);
+            player.getScaling().updateConsent(consentcamera, consentHitboxes);
         }
     }
 }

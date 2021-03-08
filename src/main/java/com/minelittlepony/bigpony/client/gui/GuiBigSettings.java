@@ -1,8 +1,8 @@
 package com.minelittlepony.bigpony.client.gui;
 
+import com.minelittlepony.bigpony.BigPony;
 import com.minelittlepony.bigpony.Scaled;
 import com.minelittlepony.bigpony.Scaling;
-import com.minelittlepony.bigpony.client.BigPonyClient;
 import com.minelittlepony.common.client.gui.GameGui;
 import com.minelittlepony.common.client.gui.element.Button;
 import com.minelittlepony.common.client.gui.element.Label;
@@ -24,7 +24,7 @@ public class GuiBigSettings extends GameGui {
         super(new TranslatableText("minebp.options.title"));
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) {
-            bigPony = BigPonyClient.getInstance().getScaling();
+            bigPony = BigPony.getInstance().getScaling();
         } else {
             bigPony = ((Scaled)client.player).getScaling();
         }
@@ -74,10 +74,10 @@ public class GuiBigSettings extends GameGui {
 
         top += 20;
 
-        addButton(height = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getHeight()))
+        addButton(height = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getCamera().height))
             .onChange(bigPony::setHeight)
             .getStyle().setText("minebp.camera.height");
-        addButton(distance = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getDistance()))
+        addButton(distance = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getCamera().distance))
             .onChange(bigPony::setDistance)
             .getStyle().setText("minebp.camera.distance");
 
@@ -120,8 +120,8 @@ public class GuiBigSettings extends GameGui {
     @Override
     public void onClose() {
         super.onClose();
-        BigPonyClient.getInstance().getScaling().copyFrom(bigPony);
-        BigPonyClient.getInstance().getConfig().save();
+        BigPony.getInstance().getScaling().copyFrom(bigPony);
+        BigPony.getInstance().getConfig().save();
     }
 
     public void applyPreset(CameraPresets preset, boolean camera, boolean body) {

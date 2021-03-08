@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.minelittlepony.bigpony.Cam;
 import com.minelittlepony.bigpony.Scaled;
 import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.bigpony.Triple;
@@ -22,14 +23,14 @@ abstract class MixinPlayerEntity extends LivingEntity implements Scaled {
 
     private Scaling playerScale;
 
-    @Inject(method = "getSize(Lnet/minecraft/entity/EntityPose;)Lnet/minecraft/entity/EntitySize;",
+    @Inject(method = "getDimensions(Lnet/minecraft/entity/EntityPose;)Lnet/minecraft/entity/EntityDimensions;",
             at = @At("RETURN"),
             cancellable = true)
     protected void redirectGetSize(EntityPose pose, CallbackInfoReturnable<EntityDimensions> info) {
-        info.setReturnValue(getScaling().getReplacementSize(pose, info.getReturnValue()));
+        info.setReturnValue(getScaling().getReplacementSize((PlayerEntity)(Object)this, pose, info.getReturnValue()));
     }
 
-    @Inject(method = "getActiveEyeHeight(Lnet/minecraft/entity/EntityPose;Lnet/minecraft/entity/EntitySize;)F",
+    @Inject(method = "getActiveEyeHeight(Lnet/minecraft/entity/EntityPose;Lnet/minecraft/entity/EntityDimensions;)F",
             at = @At("RETURN"),
             cancellable = true)
     protected void redirectGetActiveEyeHeight(EntityPose pose, EntityDimensions size, CallbackInfoReturnable<Float> info) {
@@ -56,7 +57,7 @@ abstract class MixinPlayerEntity extends LivingEntity implements Scaled {
     @Override
     public Scaling getScaling() {
         if (playerScale == null) {
-            playerScale = new Scaling(new Triple(1), 1, 1);
+            playerScale = new Scaling(new Triple(1), new Cam(1));
         }
         return playerScale;
     }

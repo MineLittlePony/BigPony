@@ -2,14 +2,10 @@ package com.minelittlepony.bigpony.client;
 
 import java.util.function.Consumer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
 import com.minelittlepony.bigpony.Scaled;
-import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.bigpony.client.gui.GuiBigSettings;
-import com.minelittlepony.common.util.GamePaths;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -19,18 +15,13 @@ import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class BigPonyClient implements ClientModInitializer {
 
-    public static final Logger logger = LogManager.getLogger("BigPony");
-
     private static BigPonyClient instance;
 
     private KeyBinding keybind = new KeyBinding("key.category.misc", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F10, "bigpony:settings");
-
-    private final Config config = new Config(GamePaths.getConfigDirectory().resolve("bigpony.json"));
 
     public static BigPonyClient getInstance() {
         return instance;
@@ -38,14 +29,6 @@ public class BigPonyClient implements ClientModInitializer {
 
     public static boolean isClientPlayer(PlayerEntity player) {
         return MinecraftClient.getInstance().player == player;
-    }
-
-    public Config getConfig() {
-        return config;
-    }
-
-    public Scaling getScaling() {
-        return config.scale.get();
     }
 
     public BigPonyClient() {
@@ -61,13 +44,6 @@ public class BigPonyClient implements ClientModInitializer {
     private void onClientTick(MinecraftClient client) {
         if (keybind.isPressed()) {
             client.openScreen(new GuiBigSettings(client.currentScreen));
-        }
-    }
-
-    public void onRenderEntity(LivingEntity entity, MatrixStack stack) {
-        if (entity instanceof Scaled) {
-            Scaling scale = ((Scaled)entity).getScaling();
-            stack.scale(scale.getScale().x, scale.getScale().x, scale.getScale().x);
         }
     }
 

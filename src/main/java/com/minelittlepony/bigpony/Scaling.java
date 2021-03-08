@@ -1,6 +1,5 @@
 package com.minelittlepony.bigpony;
 
-import com.google.gson.annotations.Expose;
 import com.minelittlepony.bigpony.client.BigPonyClient;
 
 import net.minecraft.entity.EntityPose;
@@ -11,75 +10,80 @@ import net.minecraft.entity.EntityDimensions;
 
 public class Scaling {
 
-    @Expose
-    protected Triple scale = new Triple(1);
+    protected Triple body = new Triple(1);
 
-    @Expose
-    protected float height = 1F;
+    protected Cam camera = new Cam(1);
 
-    @Expose
-    protected float distance = 1F;
+    private transient EntityDimensions knownVanillaSize = PlayerEntity.STANDING_DIMENSIONS;
+    private transient EntityDimensions calculatedSize;
 
-    //private EntitySize knownVanillaSize = PlayerEntity.STANDING_SIZE;
-    //private EntitySize calculatedSize;
+    private transient boolean configured;
+    private transient boolean dirty;
 
-    protected boolean configured;
-    protected boolean dirty;
+    private transient boolean serverConsentChanged;
+    private transient boolean serverConsentCamera;
+    private transient boolean serverConsentHitbox;
 
-    public Scaling(Triple scale, float height, float distance) {
-        this.scale = scale;
-        this.height = height;
-        this.distance = distance;
+    public Scaling(Triple body, Cam camera) {
+        this.body = body;
+        this.camera = camera;
     }
 
     public void setScale(Triple scale) {
-        if (!this.scale.equals(scale)) {
-            this.scale = scale;
+        if (!this.body.equals(scale)) {
+            this.body = scale;
 
+            markDirty();
+        }
+    }
+
+    public void setCamera(Cam camera) {
+        if (this.camera.height != camera.height || this.camera.distance != camera.distance) {
+            this.camera = camera;
             markDirty();
         }
     }
 
     public float setHeight(float height) {
-        if (height != this.height) {
-            this.height = height;
+        if (camera.height != height) {
+            camera.height = height;
             markDirty();
         }
-        return this.height;
+        return camera.height;
     }
 
     public float setDistance(float distance) {
-        if (distance != this.distance) {
-            this.distance = distance;
+        if (distance != camera.distance) {
+            camera.distance = distance;
             markDirty();
         }
-        return this.distance;
+        return camera.distance;
     }
 
     public Triple getScale() {
-        return scale;
+        return body;
     }
 
-    public float getHeight() {
-        return height;
+    public Cam getCamera() {
+        return camera;
     }
 
-    public float getDistance() {
-        return distance;
-    }
+    public EntityDimensions getReplacementSize(PlayerEntity entity, EntityPose pose, EntityDimensions existing) {
 
-    public EntityDimensions getReplacementSize(EntityPose pose, EntityDimensions existing) {
+        if (!(entity instanceof ServerPlayerEntity || serverConsentHitbox)) {
+            return existing;
+        }
         // This ends up changing hitboxes.
-        /*if (pose == EntityPose.SNEAKING || pose == EntityPose.STANDING) {
+        if (pose == EntityPose.CROUCHING || pose == EntityPose.STANDING) {
             if (calculatedSize == null || existing.height != knownVanillaSize.height || existing.width != knownVanillaSize.width) {
-                calculatedSize = EntitySize.resizeable(
-                        knownVanillaSize.width * xScale,
-                        Math.max(0.14F, knownVanillaSize.height * yScale)
+                knownVanillaSize = EntityDimensions.fixed(existing.width, existing.height);
+                calculatedSize = EntityDimensions.changing(
+                        knownVanillaSize.width * body.x,
+                        Math.max(0.14F, knownVanillaSize.height * body.y)
                 );
-                knownVanillaSize = EntitySize.constant(existing.width, existing.height);
             }
             return calculatedSize;
-        }*/
+        }
 
         return existing;
     }
@@ -89,37 +93,47 @@ public class Scaling {
     }
 
     public double getCameraDistance(double existing) {
-        return existing * getDistance();
+        return serverConsentCamera ? Math.max(0.09F, existing * camera.distance) : existing;
     }
 
     public float getReplacementActiveEyeHeight(EntityPose pose, EntityDimensions size, float existing) {
-        return Math.max(0.14F, existing * getHeight());
+        return serverConsentCamera ? Math.max(0.14F, existing * camera.height) : existing;
     }
 
     public float getReplacementPassiveEyeHeight(EntityPose pose, EntityDimensions size, float existing) {
-        return Math.max(0.14F, existing * getHeight());
+        return serverConsentCamera ? Math.max(0.14F, existing * camera.height) : existing;
     }
 
     public void markDirty() {
-        //calculatedSize = null;
-        this.dirty = true;
+        calculatedSize = null;
+        dirty = true;
     }
 
     public boolean isConfigured() {
         return configured;
     }
 
+    public void updateConsent(boolean camera, boolean hitbox) {
+        serverConsentCamera = camera;
+        serverConsentHitbox = hitbox;
+        serverConsentChanged = true;
+    }
+
     public void tick(PlayerEntity entity) {
 
         if (!configured && entity.world.isClient) {
             System.out.println("[CLIENT] Requesting size for " + entity.getName().asString());
-            initFrom(BigPonyClient.getInstance().getScaling());
+            initFrom(BigPony.getInstance().getScaling());
             Network.CLIENT_UPDATE_PLAYER_SIZE.send(new MsgPlayerSize(entity.getUuid(), this, false));
+        }
+
+        if (dirty || serverConsentChanged) {
+            serverConsentChanged = false;
+            entity.calculateDimensions();
         }
 
         if (dirty) {
             dirty = false;
-            entity.calculateDimensions();
 
             if (entity instanceof ServerPlayerEntity) {
                 System.out.println("[SERVER] Sending new size for " + entity.getName().asString());
@@ -140,23 +154,20 @@ public class Scaling {
     public void copyFrom(Scaling scale) {
         if (scale != this) {
             setScale(scale.getScale());
-            setHeight(scale.getHeight());
-            setDistance(scale.getDistance());
+            setCamera(scale.getCamera());
         }
     }
 
     public void fromTag(CompoundTag tag) {
-        setHeight(tag.getFloat("height"));
-        setDistance(tag.getFloat("distance"));
-        scale.fromTag(tag.getCompound("scale"));
+        camera.fromTag(tag.getCompound("camera"));
+        body.fromTag(tag.getCompound("body"));
         configured = true;
         dirty = false;
     }
 
     public CompoundTag toTag(CompoundTag tag) {
-        tag.putFloat("height", getHeight());
-        tag.putFloat("distance", getDistance());
-        tag.put("scale", scale.toTag(new CompoundTag()));
+        tag.put("camera", camera.toTag(new CompoundTag()));
+        tag.put("body", body.toTag(new CompoundTag()));
         return tag;
     }
 }

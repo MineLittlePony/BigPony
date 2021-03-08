@@ -12,7 +12,7 @@ import net.minecraft.client.render.Camera;
 
 @Mixin(Camera.class)
 abstract class MixinCamera {
-    @Inject(method = "method_19318(D)D",
+    @Inject(method = "clipToSpace(D)D",
             at = @At("RETURN"),
             cancellable = true)
     private void redirectCameraDistance(double initial, CallbackInfoReturnable<Double> info) {
