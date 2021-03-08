@@ -3,6 +3,7 @@ package com.minelittlepony.bigpony.mixin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.minelittlepony.bigpony.Scaled;
@@ -13,6 +14,7 @@ import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundTag;
 
 @Mixin(PlayerEntity.class)
 abstract class MixinPlayerEntity extends LivingEntity implements Scaled {
@@ -34,17 +36,28 @@ abstract class MixinPlayerEntity extends LivingEntity implements Scaled {
         info.setReturnValue(getScaling().getReplacementActiveEyeHeight(pose, size, info.getReturnValue()));
     }
 
+    @Inject(method = "writeCustomDataToTag(Lnet/minecraft/nbt/CompoundTag;)V", at = @At("HEAD"))
+    private void onWriteCustomDataToTag(CompoundTag tag, CallbackInfo info) {
+        tag.put("big_pony_data", getScaling().toTag(new CompoundTag()));
+    }
+
+    @Inject(method = "readCustomDataFromTag(Lnet/minecraft/nbt/CompoundTag;)V", at = @At("HEAD"))
+    private void onReadCustomDataFromTag(CompoundTag tag, CallbackInfo info) {
+        if (tag.contains("big_pony_data")) {
+            getScaling().fromTag(tag.getCompound("big_pony_data"));
+        }
+    }
+
+    @Inject(method = "tick()V", at = @At("RETURN"))
+    private void afterTick(CallbackInfo info) {
+        getScaling().tick((PlayerEntity)(Object)this);
+    }
+
     @Override
     public Scaling getScaling() {
         if (playerScale == null) {
             playerScale = new Scaling(new Triple(1), 1, 1);
         }
         return playerScale;
-    }
-
-    @Override
-    public void setScale(Scaling scale) {
-        playerScale = scale;
-        calculateDimensions();
     }
 }

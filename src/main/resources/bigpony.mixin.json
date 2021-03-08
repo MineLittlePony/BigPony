@@ -6,10 +6,11 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "MixinPlayerEntity",
-    "MixinServerPlayerEntity",
-    "MixinClientPlayerEntity",
-    "MixinCamera",
-    "MixinEntityRenderDispatcher",
-    "MixinLivingEntityRenderer"
+    "MixinServerPlayerEntity"
+  ],
+  "client": [
+    "client.MixinCamera",
+    "client.MixinEntityRenderDispatcher",
+    "client.MixinLivingEntityRenderer"
   ]
 }

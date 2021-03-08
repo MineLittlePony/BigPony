@@ -1,4 +1,4 @@
-package com.minelittlepony.bigpony.gui;
+package com.minelittlepony.bigpony.client.gui;
 
 import com.minelittlepony.common.client.gui.element.Button;
 

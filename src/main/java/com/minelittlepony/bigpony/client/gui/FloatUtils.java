@@ -1,4 +1,4 @@
-package com.minelittlepony.bigpony.gui;
+package com.minelittlepony.bigpony.client.gui;
 
 public class FloatUtils {
 

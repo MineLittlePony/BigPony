@@ -1,8 +1,12 @@
 package com.minelittlepony.bigpony;
 
 import com.google.gson.annotations.Expose;
+import com.minelittlepony.bigpony.client.BigPonyClient;
 
 import net.minecraft.entity.EntityPose;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.entity.EntityDimensions;
 
 public class Scaling {
@@ -19,6 +23,9 @@ public class Scaling {
     //private EntitySize knownVanillaSize = PlayerEntity.STANDING_SIZE;
     //private EntitySize calculatedSize;
 
+    protected boolean configured;
+    protected boolean dirty;
+
     public Scaling(Triple scale, float height, float distance) {
         this.scale = scale;
         this.height = height;
@@ -34,16 +41,18 @@ public class Scaling {
     }
 
     public float setHeight(float height) {
-        this.height = height;
-        markDirty();
-
+        if (height != this.height) {
+            this.height = height;
+            markDirty();
+        }
         return this.height;
     }
 
     public float setDistance(float distance) {
-        this.distance = distance;
-        markDirty();
-
+        if (distance != this.distance) {
+            this.distance = distance;
+            markDirty();
+        }
         return this.distance;
     }
 
@@ -75,12 +84,6 @@ public class Scaling {
         return existing;
     }
 
-    public void copyFrom(Scaling scale) {
-        setScale(scale.getScale());
-        setHeight(scale.getHeight());
-        setDistance(scale.getDistance());
-    }
-
     public float getShadowScale() {
         return Math.max(getScale().x, getScale().z);
     }
@@ -99,5 +102,61 @@ public class Scaling {
 
     public void markDirty() {
         //calculatedSize = null;
+        this.dirty = true;
+    }
+
+    public boolean isConfigured() {
+        return configured;
+    }
+
+    public void tick(PlayerEntity entity) {
+
+        if (!configured && entity.world.isClient) {
+            System.out.println("[CLIENT] Requesting size for " + entity.getName().asString());
+            initFrom(BigPonyClient.getInstance().getScaling());
+            Network.CLIENT_UPDATE_PLAYER_SIZE.send(new MsgPlayerSize(entity.getUuid(), this, false));
+        }
+
+        if (dirty) {
+            dirty = false;
+            entity.calculateDimensions();
+
+            if (entity instanceof ServerPlayerEntity) {
+                System.out.println("[SERVER] Sending new size for " + entity.getName().asString());
+                Network.SERVER_OTHER_PLAYER_SIZE.send(entity.world, new MsgOtherPlayerSize(entity.getUuid(), this));
+            } else if (entity.world.isClient && BigPonyClient.isClientPlayer(entity)) {
+                System.out.println("[CLIENT] Sending new size for " + entity.getName().asString());
+                Network.CLIENT_UPDATE_PLAYER_SIZE.send(new MsgPlayerSize(entity.getUuid(), this, true));
+            }
+        }
+    }
+
+    public void initFrom(Scaling scale) {
+        copyFrom(scale);
+        dirty = false;
+        configured = true;
+    }
+
+    public void copyFrom(Scaling scale) {
+        if (scale != this) {
+            setScale(scale.getScale());
+            setHeight(scale.getHeight());
+            setDistance(scale.getDistance());
+        }
+    }
+
+    public void fromTag(CompoundTag tag) {
+        setHeight(tag.getFloat("height"));
+        setDistance(tag.getFloat("distance"));
+        scale.fromTag(tag.getCompound("scale"));
+        configured = true;
+        dirty = false;
+    }
+
+    public CompoundTag toTag(CompoundTag tag) {
+        tag.putFloat("height", getHeight());
+        tag.putFloat("distance", getDistance());
+        tag.put("scale", scale.toTag(new CompoundTag()));
+        return tag;
     }
 }

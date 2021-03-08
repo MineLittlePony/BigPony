@@ -1,9 +1,14 @@
-package com.minelittlepony.bigpony.gui;
+package com.minelittlepony.bigpony.client.gui;
 
+import com.minelittlepony.bigpony.Scaled;
 import com.minelittlepony.bigpony.Scaling;
+import com.minelittlepony.bigpony.client.BigPonyClient;
 import com.minelittlepony.common.client.gui.GameGui;
+import com.minelittlepony.common.client.gui.element.Button;
 import com.minelittlepony.common.client.gui.element.Label;
 
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
@@ -15,9 +20,14 @@ public class GuiBigSettings extends GameGui {
 
     private CameraPresetButton[] presets;
 
-    public GuiBigSettings(Scaling bigPony) {
+    public GuiBigSettings(Screen parent) {
         super(new TranslatableText("minebp.options.title"));
-        this.bigPony = bigPony;
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) {
+            bigPony = BigPonyClient.getInstance().getScaling();
+        } else {
+            bigPony = ((Scaled)client.player).getScaling();
+        }
     }
 
     @Override
@@ -81,6 +91,11 @@ public class GuiBigSettings extends GameGui {
             presets[i] = new CameraPresetButton(this, values[i], right);
         }
 
+        addButton(new Button(width / 2 - 50, super.height - 25, 100, 20))
+            .onClick(sender -> finish())
+            .getStyle()
+            .setText("gui.done");
+
         tick();
     }
 
@@ -100,6 +115,13 @@ public class GuiBigSettings extends GameGui {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    @Override
+    public void onClose() {
+        super.onClose();
+        BigPonyClient.getInstance().getScaling().copyFrom(bigPony);
+        BigPonyClient.getInstance().getConfig().save();
     }
 
     public void applyPreset(CameraPresets preset, boolean camera, boolean body) {

@@ -1,11 +1,11 @@
-package com.minelittlepony.bigpony.mixin;
+package com.minelittlepony.bigpony.mixin.client;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import com.minelittlepony.bigpony.BigPony;
+import com.minelittlepony.bigpony.client.BigPonyClient;
 
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
@@ -33,7 +33,7 @@ abstract class MixinEntityRenderDispatcher {
                         + "F"
                         + ")V"))
     private void redirectRenderShadow(MatrixStack matrices, VertexConsumerProvider vertices, Entity entity, float opacity, float tickDelta, WorldView world, float radius) {
-        BigPony.getInstance().onRenderShadow(radius, entity, matrices, newRadius -> {
+        BigPonyClient.getInstance().onRenderShadow(radius, entity, matrices, newRadius -> {
             renderShadow(matrices, vertices, entity, opacity, tickDelta, world, newRadius);
         });
     }

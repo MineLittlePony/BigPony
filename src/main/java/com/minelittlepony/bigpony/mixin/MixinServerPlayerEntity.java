@@ -17,6 +17,6 @@ abstract class MixinServerPlayerEntity extends PlayerEntity implements ScreenHan
 
     @Inject(method = "copyFrom(Lnet/minecraft/server/network/ServerPlayerEntity;Z)V", at = @At("RETURN"))
     public void injectCopyFrom(ServerPlayerEntity other, boolean alive, CallbackInfo info) {
-        ((Scaled)this).setScale(((Scaled)other).getScaling());
+        ((Scaled)this).getScaling().copyFrom(((Scaled)other).getScaling());
     }
 }
