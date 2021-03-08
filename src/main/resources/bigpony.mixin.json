@@ -9,7 +9,7 @@
     "MixinServerPlayerEntity",
     "MixinClientPlayerEntity",
     "MixinCamera",
-    "MixinPlayerEntityRenderer",
+    "MixinEntityRenderDispatcher",
     "MixinLivingEntityRenderer"
   ]
 }

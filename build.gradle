@@ -1,17 +1,32 @@
-// Fabric build script
-// 03/06/2019
-// https://github.com/FabricMC/fabric-example-mod/blob/master/build.gradle
-
 plugins {
-    id 'fabric-loom' version '0.2.4-SNAPSHOT'
+    id 'java-library'
+    id 'fabric-loom' version '0.4-SNAPSHOT'
     id 'maven-publish'
 }
 
 targetCompatibility = JavaVersion.VERSION_1_8
 sourceCompatibility = JavaVersion.VERSION_1_8
 
-if (project.release != 'RELEASE') {
-    version += "-${project.release}"
+def createVersion() {
+    def parts = []
+
+    if (project.release != 'RELEASE') {
+        parts.push project.release
+    }
+
+    def branch = System.env.TRAVIS_BRANCH
+
+    if (branch != null && branch != 'master' && !project.minecraft_version.startsWith(branch)) {
+        parts.push branch
+    }
+
+    parts.push project.minecraft_version
+
+    def ver = project.version
+    if (parts.size > 0) {
+      return ver + '-' + parts.join('-')
+    }
+    return ver
 }
 
 group = project.group
@@ -27,18 +42,27 @@ repositories {
         name = 'minelp'
         url = 'http://repo.minelittlepony-mod.com/maven/snapshot'
     }
+    maven {
+        name = 'minelp-release'
+        url = 'https://repo.minelittlepony-mod.com/maven/release'
+    }
 }
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}"
-    modCompile "net.fabricmc:fabric-loader:${project.loader_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modApi "net.fabricmc:fabric-loader:${project.loader_version}"
+
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
 
-    modCompile "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modCompile "com.minelittlepony:Kirin:${project.kirin_version}"
+    modApi "com.minelittlepony:Kirin:${project.kirin_version}"
     include "com.minelittlepony:Kirin:${project.kirin_version}"
+    
+    modCompileOnly("io.github.prospector:modmenu:${project.modmenu_version}") {
+        transitive = false
+    }
 }
 
 processResources {
@@ -69,7 +93,7 @@ publishing {
     publications {
         maven(MavenPublication) {
             afterEvaluate {
-                artifact(remapJar.output)
+                artifact(remapJar)
             }
             artifact(sourcesJar) {
                 builtBy remapSourcesJar
@@ -87,9 +111,12 @@ publishing {
                 }
                 developers {
                     developer {
+                        id = "killjoy1221"
+                        name = "Matthew Messinger"
+                        email = "mattmess1221@gmail.com"
+                    }
+                    developer {
                         id = "sollace"
-                        name = ""
-                        email = ""
                     }
                 }
                 scm {

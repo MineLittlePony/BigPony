@@ -5,47 +5,46 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.minelittlepony.bigpony.ducks.IEntityPlayer;
-import com.minelittlepony.bigpony.scale.IPlayerScale;
-import com.minelittlepony.bigpony.scale.PlayerScale;
+import com.minelittlepony.bigpony.Scaled;
+import com.minelittlepony.bigpony.Scaling;
+import com.minelittlepony.bigpony.Triple;
 
+import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
 @Mixin(PlayerEntity.class)
-public abstract class MixinPlayerEntity extends LivingEntity implements IEntityPlayer {
-
+abstract class MixinPlayerEntity extends LivingEntity implements Scaled {
     private MixinPlayerEntity() {super(null, null);}
 
-    private IPlayerScale playerScale;
+    private Scaling playerScale;
 
     @Inject(method = "getSize(Lnet/minecraft/entity/EntityPose;)Lnet/minecraft/entity/EntitySize;",
             at = @At("RETURN"),
             cancellable = true)
-    protected void redirectGetSize(EntityPose pose, CallbackInfoReturnable<EntitySize> info) {
-        info.setReturnValue(getPlayerScale().getReplacementSize(pose, info.getReturnValue()));
+    protected void redirectGetSize(EntityPose pose, CallbackInfoReturnable<EntityDimensions> info) {
+        info.setReturnValue(getScaling().getReplacementSize(pose, info.getReturnValue()));
     }
 
     @Inject(method = "getActiveEyeHeight(Lnet/minecraft/entity/EntityPose;Lnet/minecraft/entity/EntitySize;)F",
             at = @At("RETURN"),
             cancellable = true)
-    protected void redirectGetActiveEyeHeight(EntityPose pose, EntitySize size, CallbackInfoReturnable<Float> info) {
-        info.setReturnValue(getPlayerScale().getReplacementActiveEyeHeight(pose, size, info.getReturnValue()));
+    protected void redirectGetActiveEyeHeight(EntityPose pose, EntityDimensions size, CallbackInfoReturnable<Float> info) {
+        info.setReturnValue(getScaling().getReplacementActiveEyeHeight(pose, size, info.getReturnValue()));
     }
 
     @Override
-    public IPlayerScale getPlayerScale() {
+    public Scaling getScaling() {
         if (playerScale == null) {
-            playerScale = new PlayerScale(1, 1, 1, 1);
+            playerScale = new Scaling(new Triple(1), 1, 1);
         }
         return playerScale;
     }
 
     @Override
-    public void setPlayerScale(IPlayerScale scale) {
+    public void setScale(Scaling scale) {
         playerScale = scale;
-        refreshSize();
+        calculateDimensions();
     }
 }

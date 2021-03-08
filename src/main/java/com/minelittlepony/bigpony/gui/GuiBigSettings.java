@@ -1,21 +1,22 @@
 package com.minelittlepony.bigpony.gui;
 
-import com.minelittlepony.bigpony.scale.IPlayerScale;
+import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.common.client.gui.GameGui;
 import com.minelittlepony.common.client.gui.element.Label;
 
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.TranslatableText;
 
 public class GuiBigSettings extends GameGui {
 
-    private final IPlayerScale bigPony;
+    private final Scaling bigPony;
 
     private ResettableSlider xSize, ySize, zSize, height, distance;
 
     private CameraPresetButton[] presets;
 
-    public GuiBigSettings(IPlayerScale bigPony) {
-        super(new TranslatableComponent("minebp.options.title"));
+    public GuiBigSettings(Scaling bigPony) {
+        super(new TranslatableText("minebp.options.title"));
         this.bigPony = bigPony;
     }
 
@@ -30,7 +31,7 @@ public class GuiBigSettings extends GameGui {
         addButton(new Label(left + 80, 120)).getStyle().setText("minebp.options.camera");
         addButton(new Label((width / 2 + 16) + 90, 20)).getStyle().setText("minebp.options.presets");
 
-        addButton(new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getXScale()))
+        addButton(new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getScale().x))
             .onChange(value -> {
                 xSize.setValue(value);
                 ySize.setValue(value);
@@ -39,14 +40,26 @@ public class GuiBigSettings extends GameGui {
                 return value;
             })
             .getStyle().setText("minebp.scale.global");
-        addButton(xSize = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getXScale()))
-            .onChange(bigPony::setXScale)
+        addButton(xSize = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getScale().x))
+            .onChange(v -> {
+                bigPony.getScale().x = v;
+                bigPony.markDirty();
+                return v;
+            })
             .getStyle().setText("minebp.scale.x");
-        addButton(ySize = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getYScale()))
-            .onChange(bigPony::setYScale)
+        addButton(ySize = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getScale().y))
+            .onChange(v -> {
+                bigPony.getScale().y = v;
+                bigPony.markDirty();
+                return v;
+            })
             .getStyle().setText("minebp.scale.y");
-        addButton(zSize = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getZScale()))
-            .onChange(bigPony::setZScale)
+        addButton(zSize = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getScale().z))
+            .onChange(v -> {
+                bigPony.getScale().z = v;
+                bigPony.markDirty();
+                return v;
+            })
             .getStyle().setText("minebp.scale.z");
 
         top += 20;
@@ -72,9 +85,9 @@ public class GuiBigSettings extends GameGui {
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
-        super.renderBackground();
-        super.render(mouseX, mouseY, partialTicks);
+    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        renderBackground(stack);
+        super.render(stack, mouseX, mouseY, partialTicks);
     }
 
     @Override

@@ -16,7 +16,7 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "com.minelittlepony.bigpony.FabMod"
+      "com.minelittlepony.bigpony.BigPony"
     ]
   },
   "mixins": [

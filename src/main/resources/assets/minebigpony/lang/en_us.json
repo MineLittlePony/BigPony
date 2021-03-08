@@ -11,11 +11,11 @@
 	"minebp.camera.height": "Eye Height",
 	"minebp.camera.distance": "Camera Distance",
 	"minebp.camera.auto": "Auto-Detect from Mine Little Pony",
-	"minebp.presets.human": "Human",
+	"minebp.presets.human": "Default",
 	"minebp.presets.mare": "Mare",
 	"minebp.presets.stallion": "Stallion",
 	"minebp.presets.alicorn": "Alicorn",
 	"minebp.presets.filly": "Filly",
 	"minebp.presets.giant": "Giant",
-	"minebp.presets.ant": "Ant"
+	"minebp.presets.ant": "Tiny"
 }
