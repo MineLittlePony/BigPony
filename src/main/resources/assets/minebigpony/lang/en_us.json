@@ -4,6 +4,7 @@
 	"minebp.options.body": "Body",
 	"minebp.options.camera": "Camera",
 	"minebp.options.presets": "Presets",
+	"minebp.options.disabled": "* Some features are disabled. Please contact your server administrator.",
 	"minebp.scale.global": "Global Scale",
 	"minebp.scale.x": "X Scale",
 	"minebp.scale.y": "Y Scale",

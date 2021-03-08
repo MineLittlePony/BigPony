@@ -2,6 +2,8 @@ package com.minelittlepony.bigpony.client.gui;
 
 import com.minelittlepony.common.client.gui.element.Button;
 
+import net.minecraft.client.gui.screen.Screen;
+
 public class CameraPresetButton {
 
     private final GuiBigSettings gui;
@@ -16,7 +18,7 @@ public class CameraPresetButton {
         this.gui = gui;
         this.preset = preset;
 
-        int y = 40 + (20 * preset.ordinal());
+        int y = ((Screen)gui).height / 8 + 20 + (20 * preset.ordinal());
 
         gui.addButton(camera = new PresetButton(right + 100, y, 20, true, false, "c"));
         gui.addButton(scale = new PresetButton(right + 80, y, 20, false, true, "b"));
@@ -27,6 +29,9 @@ public class CameraPresetButton {
         camera.setEnabled(!preset.isEqual(height, distance));
         scale.setEnabled(!preset.isEqual(xSize, ySize, zSize));
         combined.setEnabled(camera.active || scale.active);
+        if (!gui.hasCameraConsent()) {
+            camera.setEnabled(false);
+        }
     }
 
     private class PresetButton extends Button {

@@ -113,6 +113,14 @@ public class Scaling {
         return configured;
     }
 
+    public boolean hasCameraConsent() {
+        return serverConsentCamera;
+    }
+
+    public boolean hasHitboxConsent() {
+        return serverConsentHitbox;
+    }
+
     public void updateConsent(boolean camera, boolean hitbox) {
         serverConsentCamera = camera;
         serverConsentHitbox = hitbox;

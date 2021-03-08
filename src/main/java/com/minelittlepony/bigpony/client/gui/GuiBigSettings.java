@@ -11,6 +11,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 
 public class GuiBigSettings extends GameGui {
 
@@ -30,16 +31,23 @@ public class GuiBigSettings extends GameGui {
         }
     }
 
+    public boolean hasCameraConsent() {
+        return client.player == null || bigPony.hasCameraConsent();
+    }
+
     @Override
     protected void init() {
-        int top = 20;
+        int top = super.height / 8;
         int left = width / 2 - 200;
-        int right = width / 2 + 50;
+        int right = width / 2 + 60;
+
+        boolean allowCamera = hasCameraConsent();
+        boolean allowHitbox = client.player == null || bigPony.hasHitboxConsent();
 
         addButton(new Label(width / 2, 6)).setCentered().getStyle().setText(getTitle().getString());
-        addButton(new Label(left + 80, 20)).getStyle().setText("minebp.options.body");
-        addButton(new Label(left + 80, 120)).getStyle().setText("minebp.options.camera");
-        addButton(new Label((width / 2 + 16) + 90, 20)).getStyle().setText("minebp.options.presets");
+        addButton(new Label(left + 95, top)).setCentered().getStyle().setText("minebp.options.body");
+        addButton(new Label(left + 95, top + 100)).setCentered().getStyle().setText("minebp.options.camera");
+        addButton(new Label(right + 40, top)).setCentered().getStyle().setText("minebp.options.presets");
 
         addButton(new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getScale().x))
             .onChange(value -> {
@@ -47,6 +55,7 @@ public class GuiBigSettings extends GameGui {
                 ySize.setValue(value);
                 zSize.setValue(value);
                 height.setValue(value);
+                distance.setValue(1 + (value - 1) / 2);
                 return value;
             })
             .getStyle().setText("minebp.scale.global");
@@ -76,10 +85,16 @@ public class GuiBigSettings extends GameGui {
 
         addButton(height = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getCamera().height))
             .onChange(bigPony::setHeight)
+            .setEnabled(allowCamera)
             .getStyle().setText("minebp.camera.height");
         addButton(distance = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getCamera().distance))
             .onChange(bigPony::setDistance)
+            .setEnabled(allowCamera)
             .getStyle().setText("minebp.camera.distance");
+
+        if (!allowCamera || !allowHitbox) {
+            addButton(new Label(left, top += 20)).getStyle().setText(new TranslatableText("minebp.options.disabled").formatted(Formatting.YELLOW));
+        }
 
         top += 20;
 
