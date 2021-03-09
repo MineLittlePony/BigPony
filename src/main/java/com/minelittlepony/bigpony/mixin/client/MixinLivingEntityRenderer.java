@@ -17,11 +17,21 @@ import net.minecraft.entity.LivingEntity;
 
 @Mixin(LivingEntityRenderer.class)
 abstract class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityModel<T>> {
-    @Inject(method = "render",
+    @Inject(method = "render("
+            + "Lnet/minecraft/entity/LivingEntity;"
+            + "FF"
+            + "Lnet/minecraft/client/util/math/MatrixStack;"
+            + "Lnet/minecraft/client/render/VertexConsumerProvider;"
+            + "I"
+            + ")V",
             require = 1,
             at = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;setupTransforms",
+                target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;setupTransforms("
+                        + "Lnet/minecraft/entity/LivingEntity;"
+                        + "Lnet/minecraft/client/util/math/MatrixStack;"
+                        + "FFF"
+                        + ")V",
                 shift = Shift.AFTER))
     private void onPrepareScale(T entity, float yaw, float tickDelta, MatrixStack stack, VertexConsumerProvider vertices, int lighting, CallbackInfo ci) {
         if (entity instanceof Scaled) {
