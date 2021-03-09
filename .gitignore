@@ -1,18 +1,15 @@
-### Gradle
 .gradle/
+.settings/
+bin/
 build/
 run/
-
-### JetBrains
-.idea/
-*.iws
-/out/
-
-### Eclipse
-bin/
-.settings/
+.classpath
 .project
 *.launch
-.classpath
+/.apt_generated/
 .factorypath
-
+logs/
+.idea/
+*.iml
+classes/
+out/
