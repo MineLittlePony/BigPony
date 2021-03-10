@@ -22,7 +22,7 @@ public interface Network {
     static void bootstrap() { }
 
     static <T extends Packet> SPacketType<T> clientToServer(Identifier id, Function<PacketByteBuf, T> factory) {
-        ServerPlayNetworking.registerGlobalReceiver(id, (server, player, ignored, buffer, responder) -> {
+        ServerPlayNetworking.registerGlobalReceiver(id, (server, player, ignored, buffer, ignored2) -> {
             T packet = factory.apply(buffer);
             server.execute(() -> packet.handle(player));
         });
@@ -34,24 +34,9 @@ public interface Network {
         };
     }
 
-    static <T extends Packet> CPacketType<T> serverToClient(Identifier id, Function<PacketByteBuf, T> factory) {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientPlayNetworking.registerGlobalReceiver(id, (client, ignore1, buffer, ignore2) -> {
-                T packet = factory.apply(buffer);
-                client.execute(() -> packet.handle(client.player));
-            });
-        }
-        return (recipient, packet) -> {
-            ServerPlayNetworking.send((ServerPlayerEntity)recipient, id, toBuffer(packet));
-        };
-    }
-
     static <T extends Packet> MPacketType<T> serverToClients(Identifier id, Function<PacketByteBuf, T> factory) {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientPlayNetworking.registerGlobalReceiver(id, (client, ignore1, buffer, ignore2) -> {
-                T packet = factory.apply(buffer);
-                client.execute(() -> packet.handle(client.player));
-            });
+            ClientProxy.register(id, factory);
         }
         return (world, packet) -> {
             world.getPlayers().forEach(player -> {
@@ -64,10 +49,6 @@ public interface Network {
 
     interface MPacketType<T extends Packet> {
         void send(World world, T packet);
-    }
-
-    interface CPacketType<T extends Packet> {
-        void send(PlayerEntity recipient, T packet);
     }
 
     interface SPacketType<T extends Packet> {
@@ -84,5 +65,14 @@ public interface Network {
         void toBuffer(PacketByteBuf buffer);
 
         void handle(PlayerEntity sender);
+    }
+
+    class ClientProxy {
+        static <T extends Packet> void register(Identifier id, Function<PacketByteBuf, T> factory) {
+            ClientPlayNetworking.registerGlobalReceiver(id, (client, ignore1, buffer, ignore2) -> {
+                T packet = factory.apply(buffer);
+                client.execute(() -> packet.handle(client.player));
+            });
+        }
     }
 }
