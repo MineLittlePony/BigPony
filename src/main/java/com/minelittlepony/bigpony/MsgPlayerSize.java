@@ -53,7 +53,7 @@ public class MsgPlayerSize implements Network.Packet {
 
     @Override
     public void handle(PlayerEntity sender) {
-        System.out.println("[SERVER] Got size for " + sender.getName().asString());
+        BigPony.LOGGER.info("[SERVER] Got size for " + sender.getName().asString());
 
         Scaling sc = ((Scaled)sender).getScaling();
         if (force || !sc.isConfigured()) {

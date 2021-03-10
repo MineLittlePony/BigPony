@@ -130,7 +130,6 @@ public class Scaling {
     public void tick(PlayerEntity entity) {
 
         if (!configured && entity.world.isClient) {
-            System.out.println("[CLIENT] Requesting size for " + entity.getName().asString());
             initFrom(BigPony.getInstance().getScaling());
             Network.CLIENT_UPDATE_PLAYER_SIZE.send(new MsgPlayerSize(entity.getUuid(), this, false));
         }
@@ -144,10 +143,8 @@ public class Scaling {
             dirty = false;
 
             if (entity instanceof ServerPlayerEntity) {
-                System.out.println("[SERVER] Sending new size for " + entity.getName().asString());
                 Network.SERVER_OTHER_PLAYER_SIZE.send(entity.world, new MsgOtherPlayerSize(entity.getUuid(), this));
             } else if (entity.world.isClient && BigPonyClient.isClientPlayer(entity)) {
-                System.out.println("[CLIENT] Sending new size for " + entity.getName().asString());
                 Network.CLIENT_UPDATE_PLAYER_SIZE.send(new MsgPlayerSize(entity.getUuid(), this, true));
             }
         }

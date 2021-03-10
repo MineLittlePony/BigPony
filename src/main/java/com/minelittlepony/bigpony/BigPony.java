@@ -9,8 +9,7 @@ import net.fabricmc.api.ModInitializer;
 
 public class BigPony implements ModInitializer {
 
-
-    public static final Logger logger = LogManager.getLogger("BigPony");
+    public static final Logger LOGGER = LogManager.getLogger("BigPony");
 
     private static BigPony instance;
 
