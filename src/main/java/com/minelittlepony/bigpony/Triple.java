@@ -1,15 +1,10 @@
 package com.minelittlepony.bigpony;
 
-import com.google.gson.annotations.Expose;
-
 import net.minecraft.nbt.CompoundTag;
 
 public class Triple {
-    @Expose
     public float x;
-    @Expose
     public float y;
-    @Expose
     public float z;
 
     public Triple(float x, float y, float z) {

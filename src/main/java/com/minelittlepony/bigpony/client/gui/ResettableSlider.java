@@ -9,7 +9,7 @@ public class ResettableSlider extends Slider {
     public final Button reset;
 
     public ResettableSlider(GameGui gui, int left, int top, float min, float max, float value) {
-        super(left, top, min, max, value);
+        super(left, top, min, max, Math.min(value, max));
 
         gui.addButton(reset = new Button(left + width + 5, top, 20, 20)
                 .onClick(o -> setValue(1F))

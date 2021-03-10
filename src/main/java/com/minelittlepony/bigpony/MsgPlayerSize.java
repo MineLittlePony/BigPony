@@ -33,6 +33,7 @@ public class MsgPlayerSize implements Network.Packet {
                 new Triple(buff.readFloat(), buff.readFloat(), buff.readFloat()),
                 new Cam(buff.readFloat(),  buff.readFloat())
         );
+        scaling.maxMultiplier = buff.readFloat();
         force = buff.readBoolean();
         consentHitboxes = buff.readBoolean();
         consentcamera = buff.readBoolean();
@@ -46,6 +47,7 @@ public class MsgPlayerSize implements Network.Packet {
         buff.writeFloat(scaling.getScale().z);
         buff.writeFloat(scaling.getCamera().distance);
         buff.writeFloat(scaling.getCamera().height);
+        buff.writeFloat(scaling.getMaxMultiplier());
         buff.writeBoolean(force);
         buff.writeBoolean(consentHitboxes);
         buff.writeBoolean(consentcamera);
@@ -59,7 +61,10 @@ public class MsgPlayerSize implements Network.Packet {
         if (force || !sc.isConfigured()) {
             sc.initFrom(scaling);
         }
+        sc.updateConsent(consentcamera, consentHitboxes, Math.min(
+                scaling.getMaxMultiplier(),
+                BigPony.getInstance().getScaling().getMaxMultiplier()
+        ));
         sc.markDirty();
-        sc.updateConsent(consentcamera, consentHitboxes);
     }
 }

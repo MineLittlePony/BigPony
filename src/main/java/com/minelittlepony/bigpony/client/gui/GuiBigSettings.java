@@ -1,5 +1,7 @@
 package com.minelittlepony.bigpony.client.gui;
 
+import java.util.function.Function;
+
 import com.minelittlepony.bigpony.BigPony;
 import com.minelittlepony.bigpony.Scaled;
 import com.minelittlepony.bigpony.Scaling;
@@ -9,6 +11,7 @@ import com.minelittlepony.common.client.gui.element.Label;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
@@ -49,7 +52,9 @@ public class GuiBigSettings extends GameGui {
         addButton(new Label(left + 95, top + 100)).setCentered().getStyle().setText("minebp.options.camera");
         addButton(new Label(right + 40, top)).setCentered().getStyle().setText("minebp.options.presets");
 
-        addButton(new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getScale().x))
+        float max = bigPony.getMaxMultiplier();
+
+        addButton(new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getScale().x))
             .onChange(value -> {
                 xSize.setValue(value);
                 ySize.setValue(value);
@@ -59,38 +64,38 @@ public class GuiBigSettings extends GameGui {
                 return value;
             })
             .getStyle().setText("minebp.scale.global");
-        addButton(xSize = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getScale().x))
+        addButton(xSize = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getScale().x))
             .onChange(v -> {
                 bigPony.getScale().x = v;
                 bigPony.markDirty();
                 return v;
             })
-            .getStyle().setText("minebp.scale.x");
-        addButton(ySize = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getScale().y))
+            .setFormatter(format("minebp.scale.x"));
+        addButton(ySize = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getScale().y))
             .onChange(v -> {
                 bigPony.getScale().y = v;
                 bigPony.markDirty();
                 return v;
             })
-            .getStyle().setText("minebp.scale.y");
-        addButton(zSize = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getScale().z))
+            .setFormatter(format("minebp.scale.y"));
+        addButton(zSize = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getScale().z))
             .onChange(v -> {
                 bigPony.getScale().z = v;
                 bigPony.markDirty();
                 return v;
             })
-            .getStyle().setText("minebp.scale.z");
+            .setFormatter(format("minebp.scale.z"));
 
         top += 20;
 
-        addButton(height = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getCamera().height))
+        addButton(height = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getCamera().height))
             .onChange(bigPony::setHeight)
-            .setEnabled(allowCamera)
-            .getStyle().setText("minebp.camera.height");
-        addButton(distance = new ResettableSlider(this, left, top += 20, .1F, 2F, bigPony.getCamera().distance))
+            .setFormatter(format("minebp.camera.height"))
+            .setEnabled(allowCamera);
+        addButton(distance = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getCamera().distance))
             .onChange(bigPony::setDistance)
-            .setEnabled(allowCamera)
-            .getStyle().setText("minebp.camera.distance");
+            .setFormatter(format("minebp.camera.distance"))
+            .setEnabled(allowCamera);
 
         if (!allowCamera || !allowHitbox) {
             addButton(new Label(left, top += 20)).getStyle().setText(new TranslatableText("minebp.options.disabled").formatted(Formatting.YELLOW));
@@ -112,6 +117,10 @@ public class GuiBigSettings extends GameGui {
             .setText("gui.done");
 
         tick();
+    }
+
+    static Function<Float, String> format(String key) {
+        return f -> I18n.translate(key, String.format("%.2f", f));
     }
 
     @Override

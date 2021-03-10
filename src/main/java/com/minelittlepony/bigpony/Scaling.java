@@ -14,6 +14,8 @@ public class Scaling {
 
     protected Cam camera = new Cam(1);
 
+    protected float maxMultiplier = 2;
+
     private transient EntityDimensions knownVanillaSize = PlayerEntity.STANDING_DIMENSIONS;
     private transient EntityDimensions calculatedSize;
 
@@ -60,6 +62,10 @@ public class Scaling {
         return camera.distance;
     }
 
+    public float getMaxMultiplier() {
+        return maxMultiplier;
+    }
+
     public Triple getScale() {
         return body;
     }
@@ -78,8 +84,8 @@ public class Scaling {
             if (calculatedSize == null || existing.height != knownVanillaSize.height || existing.width != knownVanillaSize.width) {
                 knownVanillaSize = EntityDimensions.fixed(existing.width, existing.height);
                 calculatedSize = EntityDimensions.changing(
-                        Math.max(0.25F, knownVanillaSize.width * body.x),
-                        Math.max(0.14F, knownVanillaSize.height * body.y)
+                        Math.max(0.25F, multiply(knownVanillaSize.width, body.x)),
+                        Math.max(0.14F, multiply(knownVanillaSize.height, body.y))
                 );
             }
             return calculatedSize;
@@ -89,19 +95,27 @@ public class Scaling {
     }
 
     public float getShadowScale() {
-        return Math.max(getScale().x, getScale().z);
+        return Math.min(Math.max(getScale().x, getScale().z), maxMultiplier);
     }
 
     public double getCameraDistance(double existing) {
-        return serverConsentCamera ? existing * camera.distance : existing;
+        return serverConsentCamera ? multiply(existing, camera.distance) : existing;
     }
 
     public float getReplacementActiveEyeHeight(EntityPose pose, EntityDimensions size, float existing) {
-        return serverConsentCamera ? Math.max(0.14F, existing * camera.height) : existing;
+        return getReplacementPassiveEyeHeight(pose, size, existing);
     }
 
     public float getReplacementPassiveEyeHeight(EntityPose pose, EntityDimensions size, float existing) {
-        return serverConsentCamera ? Math.max(0.14F, existing * camera.height) : existing;
+        return serverConsentCamera ? Math.max(0.14F, multiply(existing, camera.height)) : existing;
+    }
+
+    private float multiply(float existing, float multiplier) {
+        return existing * Math.min(multiplier, maxMultiplier);
+    }
+
+    private double multiply(double existing, float multiplier) {
+        return existing * Math.min(multiplier, maxMultiplier);
     }
 
     public void markDirty() {
@@ -121,10 +135,11 @@ public class Scaling {
         return serverConsentHitbox;
     }
 
-    public void updateConsent(boolean camera, boolean hitbox) {
+    public void updateConsent(boolean camera, boolean hitbox, float multiplier) {
         serverConsentCamera = camera;
         serverConsentHitbox = hitbox;
         serverConsentChanged = true;
+        maxMultiplier = multiplier;
     }
 
     public void tick(PlayerEntity entity) {
@@ -160,6 +175,7 @@ public class Scaling {
         if (scale != this) {
             setScale(scale.getScale());
             setCamera(scale.getCamera());
+            maxMultiplier = scale.getMaxMultiplier();
         }
     }
 
