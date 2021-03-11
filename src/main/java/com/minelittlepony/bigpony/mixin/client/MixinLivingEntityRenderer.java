@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.minelittlepony.bigpony.Scaled;
-import com.minelittlepony.bigpony.Scaling;
+import com.minelittlepony.bigpony.Triple;
 
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
@@ -35,8 +35,8 @@ abstract class MixinLivingEntityRenderer<T extends LivingEntity, M extends Entit
                 shift = Shift.AFTER))
     private void onPrepareScale(T entity, float yaw, float tickDelta, MatrixStack stack, VertexConsumerProvider vertices, int lighting, CallbackInfo ci) {
         if (entity instanceof Scaled) {
-            Scaling scale = ((Scaled)entity).getScaling();
-            stack.scale(scale.getScale().x, scale.getScale().y, scale.getScale().z);
+            Triple scale = ((Scaled)entity).getScaling().getVisualScale();
+            stack.scale(scale.x, scale.y, scale.z);
         }
     }
 }

@@ -4,7 +4,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import com.minelittlepony.bigpony.Scaled;
-import com.minelittlepony.bigpony.Scaling;
+import com.minelittlepony.bigpony.Triple;
 
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
@@ -19,7 +19,7 @@ abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<AbstractCl
 
     @ModifyConstant(method = "getPositionOffset", constant = @Constant(doubleValue = -0.125D ))
     private double fixSneakingheight(double offset, AbstractClientPlayerEntity player) {
-        Scaling scale = ((Scaled)player).getScaling();
-        return offset * scale.getScale().y;
+        Triple scale = ((Scaled)player).getScaling().getVisualScale();
+        return offset * scale.y;
     }
 }

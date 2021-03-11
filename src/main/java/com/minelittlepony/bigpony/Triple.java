@@ -3,6 +3,8 @@ package com.minelittlepony.bigpony;
 import net.minecraft.nbt.CompoundTag;
 
 public class Triple {
+    static final Triple DEFAULT = new Triple(1);
+
     public float x;
     public float y;
     public float z;

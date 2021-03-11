@@ -22,6 +22,9 @@
     ],
     "modmenu": [
       "com.minelittlepony.bigpony.modmenu.MenuFactory"
+    ],
+    "minelittlepony": [
+      "com.minelittlepony.bigpony.minelittlepony.Main"
     ]
   },
   "mixins": [

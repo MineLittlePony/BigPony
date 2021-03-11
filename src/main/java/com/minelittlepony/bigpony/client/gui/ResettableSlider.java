@@ -10,7 +10,7 @@ public class ResettableSlider extends Slider {
 
     public ResettableSlider(GameGui gui, int left, int top, float min, float max, float value) {
         super(left, top, min, max, Math.min(value, max));
-
+        width = 150;
         gui.addButton(reset = new Button(left + width + 5, top, 20, 20)
                 .onClick(o -> setValue(1F))
                 .setEnabled(!FloatUtils.equals(getValue(), 1)))
@@ -21,5 +21,12 @@ public class ResettableSlider extends Slider {
     protected void setClampedValue(float value) {
         super.setClampedValue(value);
         reset.setEnabled(!FloatUtils.equals(getValue(), 1));
+    }
+
+    @Override
+    public Button setEnabled(boolean enable) {
+        active = enable;
+        reset.setEnabled(enable && !FloatUtils.equals(getValue(), 1));
+        return this;
     }
 }

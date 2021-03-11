@@ -34,6 +34,7 @@ public class MsgPlayerSize implements Network.Packet {
                 new Cam(buff.readFloat(),  buff.readFloat())
         );
         scaling.maxMultiplier = buff.readFloat();
+        scaling.setVisual(buff.readBoolean());
         force = buff.readBoolean();
         consentHitboxes = buff.readBoolean();
         consentcamera = buff.readBoolean();
@@ -48,6 +49,7 @@ public class MsgPlayerSize implements Network.Packet {
         buff.writeFloat(scaling.getCamera().distance);
         buff.writeFloat(scaling.getCamera().height);
         buff.writeFloat(scaling.getMaxMultiplier());
+        buff.writeBoolean(scaling.isVisual());
         buff.writeBoolean(force);
         buff.writeBoolean(consentHitboxes);
         buff.writeBoolean(consentcamera);

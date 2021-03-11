@@ -1,6 +1,7 @@
 package com.minelittlepony.bigpony;
 
 import com.minelittlepony.bigpony.client.BigPonyClient;
+import com.minelittlepony.bigpony.minelittlepony.PresetDetector;
 
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.player.PlayerEntity;
@@ -16,6 +17,8 @@ public class Scaling {
 
     protected float maxMultiplier = 2;
 
+    protected boolean visual = true;
+
     private transient EntityDimensions knownVanillaSize = PlayerEntity.STANDING_DIMENSIONS;
     private transient EntityDimensions calculatedSize;
 
@@ -26,9 +29,22 @@ public class Scaling {
     private transient boolean serverConsentCamera;
     private transient boolean serverConsentHitbox;
 
+    private transient boolean isPony;
+
     public Scaling(Triple body, Cam camera) {
         this.body = body;
         this.camera = camera;
+    }
+
+    public void setVisual(boolean visual) {
+        if (visual != this.visual) {
+            this.visual = visual;
+            markDirty();
+        }
+    }
+
+    public boolean isVisual() {
+        return visual;
     }
 
     public void setScale(Triple scale) {
@@ -70,6 +86,10 @@ public class Scaling {
         return body;
     }
 
+    public Triple getVisualScale() {
+        return visual || !isPony ? body : Triple.DEFAULT;
+    }
+
     public Cam getCamera() {
         return camera;
     }
@@ -95,11 +115,11 @@ public class Scaling {
     }
 
     public float getShadowScale() {
-        return Math.min(Math.max(getScale().x, getScale().z), maxMultiplier);
+        return Math.min(Math.max(getVisualScale().x, getVisualScale().z), maxMultiplier);
     }
 
     public double getCameraDistance(double existing) {
-        return serverConsentCamera ? multiply(existing, camera.distance) : existing;
+        return canAlterCamera() ? multiply(existing, camera.distance) : existing;
     }
 
     public float getReplacementActiveEyeHeight(EntityPose pose, EntityDimensions size, float existing) {
@@ -107,7 +127,11 @@ public class Scaling {
     }
 
     public float getReplacementPassiveEyeHeight(EntityPose pose, EntityDimensions size, float existing) {
-        return serverConsentCamera ? Math.max(0.14F, multiply(existing, camera.height)) : existing;
+        return canAlterCamera() ? Math.max(0.14F, multiply(existing, camera.height)) : existing;
+    }
+
+    private boolean canAlterCamera() {
+        return serverConsentCamera && !(!visual && isPony && PresetDetector.getInstance().isFillyCam());
     }
 
     private float multiply(float existing, float multiplier) {
@@ -144,6 +168,10 @@ public class Scaling {
 
     public void tick(PlayerEntity entity) {
 
+        if (entity.world.isClient) {
+            isPony = PresetDetector.getInstance().isPony(entity);
+        }
+
         if (!configured && entity.world.isClient) {
             initFrom(BigPony.getInstance().getScaling());
             Network.CLIENT_UPDATE_PLAYER_SIZE.send(new MsgPlayerSize(entity.getUuid(), this, false));
@@ -175,6 +203,7 @@ public class Scaling {
         if (scale != this) {
             setScale(scale.getScale());
             setCamera(scale.getCamera());
+            setVisual(scale.isVisual());
             maxMultiplier = scale.getMaxMultiplier();
         }
     }

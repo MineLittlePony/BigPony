@@ -5,9 +5,11 @@ import java.util.function.Function;
 import com.minelittlepony.bigpony.BigPony;
 import com.minelittlepony.bigpony.Scaled;
 import com.minelittlepony.bigpony.Scaling;
+import com.minelittlepony.bigpony.minelittlepony.PresetDetector;
 import com.minelittlepony.common.client.gui.GameGui;
 import com.minelittlepony.common.client.gui.element.Button;
 import com.minelittlepony.common.client.gui.element.Label;
+import com.minelittlepony.common.client.gui.element.Toggle;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -20,7 +22,7 @@ public class GuiBigSettings extends GameGui {
 
     private final Scaling bigPony;
 
-    private ResettableSlider xSize, ySize, zSize, height, distance;
+    private ResettableSlider global, xSize, ySize, zSize, height, distance;
 
     private CameraPresetButton[] presets;
 
@@ -41,11 +43,12 @@ public class GuiBigSettings extends GameGui {
     @Override
     protected void init() {
         int top = super.height / 8;
-        int left = width / 2 - 200;
-        int right = width / 2 + 60;
+        int left = width / 2 - 150;
+        int right = width / 2 + 30;
 
         boolean allowCamera = hasCameraConsent();
         boolean allowHitbox = client.player == null || bigPony.hasHitboxConsent();
+        boolean allowScaling = bigPony.isVisual();
 
         addButton(new Label(width / 2, 6)).setCentered().getStyle().setText(getTitle().getString());
         addButton(new Label(left + 95, top)).setCentered().getStyle().setText("minebp.options.body");
@@ -54,7 +57,7 @@ public class GuiBigSettings extends GameGui {
 
         float max = bigPony.getMaxMultiplier();
 
-        addButton(new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getScale().x))
+        addButton(global = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getScale().x))
             .onChange(value -> {
                 xSize.setValue(value);
                 ySize.setValue(value);
@@ -63,6 +66,7 @@ public class GuiBigSettings extends GameGui {
                 distance.setValue(1 + (value - 1) / 2);
                 return value;
             })
+            .setEnabled(allowScaling)
             .getStyle().setText("minebp.scale.global");
         addButton(xSize = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getScale().x))
             .onChange(v -> {
@@ -70,32 +74,51 @@ public class GuiBigSettings extends GameGui {
                 bigPony.markDirty();
                 return v;
             })
-            .setFormatter(format("minebp.scale.x"));
+            .setFormatter(format("minebp.scale.x"))
+            .setEnabled(allowScaling);
         addButton(ySize = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getScale().y))
             .onChange(v -> {
                 bigPony.getScale().y = v;
                 bigPony.markDirty();
                 return v;
             })
-            .setFormatter(format("minebp.scale.y"));
+            .setFormatter(format("minebp.scale.y"))
+            .setEnabled(allowScaling);
         addButton(zSize = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getScale().z))
             .onChange(v -> {
                 bigPony.getScale().z = v;
                 bigPony.markDirty();
                 return v;
             })
-            .setFormatter(format("minebp.scale.z"));
+            .setFormatter(format("minebp.scale.z"))
+            .setEnabled(allowScaling);
 
         top += 20;
 
         addButton(height = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getCamera().height))
             .onChange(bigPony::setHeight)
             .setFormatter(format("minebp.camera.height"))
-            .setEnabled(allowCamera);
+            .setEnabled(allowCamera && allowScaling);
         addButton(distance = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getCamera().distance))
             .onChange(bigPony::setDistance)
             .setFormatter(format("minebp.camera.distance"))
-            .setEnabled(allowCamera);
+            .setEnabled(allowCamera && allowScaling);
+
+        addButton(new Toggle(left, top += 20, !bigPony.isVisual()))
+            .onChange(v -> {
+                bigPony.setVisual(!v);
+                if (v) {
+                    PresetDetector.getInstance().detectPreset(client.player, bigPony);
+                    xSize.setValue(bigPony.getScale().x);
+                    ySize.setValue(bigPony.getScale().y);
+                    zSize.setValue(bigPony.getScale().z);
+                    height.setValue(bigPony.getCamera().height);
+                    distance.setValue(bigPony.getCamera().distance);
+                }
+                tick();
+                return v;
+            })
+            .getStyle().setText("minebp.camera.auto");
 
         if (!allowCamera || !allowHitbox) {
             addButton(new Label(left, top += 20)).getStyle().setText(new TranslatableText("minebp.options.disabled").formatted(Formatting.YELLOW));
@@ -111,7 +134,7 @@ public class GuiBigSettings extends GameGui {
             presets[i] = new CameraPresetButton(this, values[i], right);
         }
 
-        addButton(new Button(width / 2 - 50, super.height - 25, 100, 20))
+        addButton(new Button(width / 2 - 100, super.height - 25, 200, 20))
             .onClick(sender -> finish())
             .getStyle()
             .setText("gui.done");
@@ -131,9 +154,20 @@ public class GuiBigSettings extends GameGui {
 
     @Override
     public void tick() {
+        boolean allowCamera = hasCameraConsent();
+        boolean allowScaling = bigPony.isVisual();
+
         for (int i = 0; i < presets.length; i++) {
             presets[i].updateEnabled(height.getValue(), distance.getValue(), xSize.getValue(), ySize.getValue(), zSize.getValue());
         }
+
+        global.setEnabled(allowScaling);
+        xSize.setEnabled(allowScaling);
+        ySize.setEnabled(allowScaling);
+        zSize.setEnabled(allowScaling);
+
+        height.setEnabled(allowCamera && allowScaling);
+        distance.setEnabled(allowCamera && allowScaling);
     }
 
     @Override
