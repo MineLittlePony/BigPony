@@ -7,6 +7,7 @@ import com.minelittlepony.bigpony.Scaled;
 import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.bigpony.minelittlepony.PresetDetector;
 import com.minelittlepony.common.client.gui.GameGui;
+import com.minelittlepony.common.client.gui.ScrollContainer;
 import com.minelittlepony.common.client.gui.element.Button;
 import com.minelittlepony.common.client.gui.element.Label;
 import com.minelittlepony.common.client.gui.element.Toggle;
@@ -22,6 +23,8 @@ public class GuiBigSettings extends GameGui {
 
     private final Scaling bigPony;
 
+    final ScrollContainer content = new ScrollContainer();
+
     private ResettableSlider global, xSize, ySize, zSize, height, distance;
 
     private CameraPresetButton[] presets;
@@ -34,6 +37,13 @@ public class GuiBigSettings extends GameGui {
         } else {
             bigPony = ((Scaled)client.player).getScaling();
         }
+
+        content.margin.top = 30;
+        content.margin.bottom = 30;
+        content.padding.top = 10;
+        content.padding.right = 10;
+        content.padding.bottom = 20;
+        content.padding.left = 10;
     }
 
     public boolean hasCameraConsent() {
@@ -42,7 +52,13 @@ public class GuiBigSettings extends GameGui {
 
     @Override
     protected void init() {
-        int top = super.height / 8;
+        content.init(this::rebuildContent);
+    }
+
+    private void rebuildContent() {
+        children().add(content);
+
+        int top = 0;
         int left = width / 2 - 150;
         int right = width / 2 + 30;
 
@@ -51,13 +67,14 @@ public class GuiBigSettings extends GameGui {
         boolean allowScaling = bigPony.isVisual();
 
         addButton(new Label(width / 2, 6)).setCentered().getStyle().setText(getTitle().getString());
-        addButton(new Label(left + 95, top)).setCentered().getStyle().setText("minebp.options.body");
-        addButton(new Label(left + 95, top + 100)).setCentered().getStyle().setText("minebp.options.camera");
-        addButton(new Label(right + 40, top)).setCentered().getStyle().setText("minebp.options.presets");
+
+        content.addButton(new Label(left, top)).getStyle().setText("minebp.options.body");
+        content.addButton(new Label(left, top + 100)).getStyle().setText("minebp.options.camera");
+        content.addButton(new Label(right, top)).getStyle().setText("minebp.options.presets");
 
         float max = bigPony.getMaxMultiplier();
 
-        addButton(global = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getScale().x))
+        content.addButton(global = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getScale().x))
             .onChange(value -> {
                 xSize.setValue(value);
                 ySize.setValue(value);
@@ -68,7 +85,7 @@ public class GuiBigSettings extends GameGui {
             })
             .setEnabled(allowScaling)
             .getStyle().setText("minebp.scale.global");
-        addButton(xSize = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getScale().x))
+        content.addButton(xSize = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getScale().x))
             .onChange(v -> {
                 bigPony.getScale().x = v;
                 bigPony.markDirty();
@@ -76,7 +93,7 @@ public class GuiBigSettings extends GameGui {
             })
             .setFormatter(format("minebp.scale.x"))
             .setEnabled(allowScaling);
-        addButton(ySize = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getScale().y))
+        content.addButton(ySize = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getScale().y))
             .onChange(v -> {
                 bigPony.getScale().y = v;
                 bigPony.markDirty();
@@ -84,7 +101,7 @@ public class GuiBigSettings extends GameGui {
             })
             .setFormatter(format("minebp.scale.y"))
             .setEnabled(allowScaling);
-        addButton(zSize = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getScale().z))
+        content.addButton(zSize = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getScale().z))
             .onChange(v -> {
                 bigPony.getScale().z = v;
                 bigPony.markDirty();
@@ -95,16 +112,16 @@ public class GuiBigSettings extends GameGui {
 
         top += 20;
 
-        addButton(height = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getCamera().height))
+        content.addButton(height = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getCamera().height))
             .onChange(bigPony::setHeight)
             .setFormatter(format("minebp.camera.height"))
             .setEnabled(allowCamera && allowScaling);
-        addButton(distance = new ResettableSlider(this, left, top += 20, .1F, max, bigPony.getCamera().distance))
+        content.addButton(distance = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getCamera().distance))
             .onChange(bigPony::setDistance)
             .setFormatter(format("minebp.camera.distance"))
             .setEnabled(allowCamera && allowScaling);
 
-        addButton(new Toggle(left, top += 20, !bigPony.isVisual()))
+        content.addButton(new Toggle(left, top += 30, !bigPony.isVisual()))
             .onChange(v -> {
                 bigPony.setVisual(!v);
                 if (v) {
@@ -121,7 +138,7 @@ public class GuiBigSettings extends GameGui {
             .getStyle().setText("minebp.camera.auto");
 
         if (!allowCamera || !allowHitbox) {
-            addButton(new Label(left, top += 20)).getStyle().setText(new TranslatableText("minebp.options.disabled").formatted(Formatting.YELLOW));
+            content.addButton(new Label(left, top += 20)).getStyle().setText(new TranslatableText("minebp.options.disabled").formatted(Formatting.YELLOW));
         }
 
         top += 20;
@@ -150,6 +167,7 @@ public class GuiBigSettings extends GameGui {
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         renderBackground(stack);
         super.render(stack, mouseX, mouseY, partialTicks);
+        content.render(stack, mouseX, mouseY, partialTicks);
     }
 
     @Override
