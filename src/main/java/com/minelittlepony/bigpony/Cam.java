@@ -1,6 +1,6 @@
 package com.minelittlepony.bigpony;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 public class Cam {
     public float distance;
@@ -21,12 +21,12 @@ public class Cam {
         return this;
     }
 
-    public void fromTag(CompoundTag tag) {
+    public void fromTag(NbtCompound tag) {
         distance = tag.getFloat("distance");
         height = tag.getFloat("height");
     }
 
-    public CompoundTag toTag(CompoundTag tag) {
+    public NbtCompound toTag(NbtCompound tag) {
         tag.putFloat("distance", distance);
         tag.putFloat("height", height);
         return tag;

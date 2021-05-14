@@ -6,9 +6,9 @@ import com.minelittlepony.bigpony.Scaled;
 import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.bigpony.Triple;
 import com.minelittlepony.client.MineLittlePony;
-import com.minelittlepony.client.render.EquineRenderManager;
-import com.minelittlepony.model.IModel;
-import com.minelittlepony.model.capabilities.fabric.PonyModelPrepareCallback;
+import com.minelittlepony.api.model.IModel;
+import com.minelittlepony.api.model.ModelAttributes;
+import com.minelittlepony.api.model.fabric.PonyModelPrepareCallback;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.entity.Entity;
@@ -23,7 +23,7 @@ public class Main extends PresetDetector implements ClientModInitializer {
         PonyModelPrepareCallback.EVENT.register(this::onPonyModelPrepared);
     }
 
-    private void onPonyModelPrepared(Entity entity, IModel model, EquineRenderManager.Mode mode) {
+    private void onPonyModelPrepared(Entity entity, IModel model, ModelAttributes.Mode mode) {
 
         if (entity instanceof Scaled && !((Scaled)entity).getScaling().isVisual() && isPony((PlayerEntity)entity)) {
             model.getAttributes().visualHeight = entity.getHeight() / model.getSize().getScaleFactor();
@@ -45,9 +45,7 @@ public class Main extends PresetDetector implements ClientModInitializer {
         // Turn on filly cam so we can get the camera parameters
         MineLittlePony.getInstance().getConfig().fillycam.set(true);
 
-        Size size = MineLittlePony.getInstance().getManager().getPony(player).getMetadata()
-                .getSize()
-                .getEffectiveSize();
+        Size size = MineLittlePony.getInstance().getManager().getPony(player).getMetadata().getSize();
 
         into.setScale(new Triple(size.getScaleFactor()));
         into.setCamera(new Cam(size.getEyeDistanceFactor(), size.getEyeHeightFactor()));

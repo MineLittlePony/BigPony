@@ -5,7 +5,7 @@ import com.minelittlepony.bigpony.minelittlepony.PresetDetector;
 
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.entity.EntityDimensions;
 
@@ -208,16 +208,16 @@ public class Scaling {
         }
     }
 
-    public void fromTag(CompoundTag tag) {
+    public void fromTag(NbtCompound tag) {
         camera.fromTag(tag.getCompound("camera"));
         body.fromTag(tag.getCompound("body"));
         configured = true;
         dirty = false;
     }
 
-    public CompoundTag toTag(CompoundTag tag) {
-        tag.put("camera", camera.toTag(new CompoundTag()));
-        tag.put("body", body.toTag(new CompoundTag()));
+    public NbtCompound toTag(NbtCompound tag) {
+        tag.put("camera", camera.toTag(new NbtCompound()));
+        tag.put("body", body.toTag(new NbtCompound()));
         return tag;
     }
 }

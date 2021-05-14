@@ -1,6 +1,6 @@
 package com.minelittlepony.bigpony;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 public class Triple {
     static final Triple DEFAULT = new Triple(1);
@@ -26,13 +26,13 @@ public class Triple {
         return this;
     }
 
-    public void fromTag(CompoundTag tag) {
+    public void fromTag(NbtCompound tag) {
         x = tag.getFloat("x");
         y = tag.getFloat("y");
         z = tag.getFloat("z");
     }
 
-    public CompoundTag toTag(CompoundTag tag) {
+    public NbtCompound toTag(NbtCompound tag) {
         tag.putFloat("x", x);
         tag.putFloat("y", y);
         tag.putFloat("z", z);

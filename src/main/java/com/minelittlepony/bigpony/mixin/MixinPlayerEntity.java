@@ -15,7 +15,7 @@ import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 @Mixin(PlayerEntity.class)
 abstract class MixinPlayerEntity extends LivingEntity implements Scaled {
@@ -37,13 +37,13 @@ abstract class MixinPlayerEntity extends LivingEntity implements Scaled {
         info.setReturnValue(getScaling().getReplacementActiveEyeHeight(pose, size, info.getReturnValue()));
     }
 
-    @Inject(method = "writeCustomDataToTag(Lnet/minecraft/nbt/CompoundTag;)V", at = @At("HEAD"))
-    private void onWriteCustomDataToTag(CompoundTag tag, CallbackInfo info) {
-        tag.put("big_pony_data", getScaling().toTag(new CompoundTag()));
+    @Inject(method = "writeCustomDataToTag(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("HEAD"))
+    private void onWriteCustomDataToTag(NbtCompound tag, CallbackInfo info) {
+        tag.put("big_pony_data", getScaling().toTag(new NbtCompound()));
     }
 
-    @Inject(method = "readCustomDataFromTag(Lnet/minecraft/nbt/CompoundTag;)V", at = @At("HEAD"))
-    private void onReadCustomDataFromTag(CompoundTag tag, CallbackInfo info) {
+    @Inject(method = "readCustomDataFromTag(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("HEAD"))
+    private void onReadCustomDataFromTag(NbtCompound tag, CallbackInfo info) {
         if (tag.contains("big_pony_data")) {
             getScaling().fromTag(tag.getCompound("big_pony_data"));
         }
