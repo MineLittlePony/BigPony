@@ -8,14 +8,15 @@ import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.bigpony.minelittlepony.PresetDetector;
 import com.minelittlepony.common.client.gui.GameGui;
 import com.minelittlepony.common.client.gui.ScrollContainer;
+import com.minelittlepony.common.client.gui.element.AbstractSlider;
 import com.minelittlepony.common.client.gui.element.Button;
 import com.minelittlepony.common.client.gui.element.Label;
 import com.minelittlepony.common.client.gui.element.Toggle;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 
@@ -40,10 +41,10 @@ public class GuiBigSettings extends GameGui {
 
         content.margin.top = 30;
         content.margin.bottom = 30;
-        content.padding.top = 10;
-        content.padding.right = 10;
-        content.padding.bottom = 20;
-        content.padding.left = 10;
+        content.getContentPadding().top = 10;
+        content.getContentPadding().right = 10;
+        content.getContentPadding().bottom = 20;
+        content.getContentPadding().left = 10;
     }
 
     public boolean hasCameraConsent() {
@@ -56,7 +57,7 @@ public class GuiBigSettings extends GameGui {
     }
 
     private void rebuildContent() {
-        children().add(content);
+        getChildElements().add(content);
 
         int top = 0;
         int left = width / 2 - 150;
@@ -91,7 +92,7 @@ public class GuiBigSettings extends GameGui {
                 bigPony.markDirty();
                 return v;
             })
-            .setFormatter(format("minebp.scale.x"))
+            .setTextFormat(format("minebp.scale.x"))
             .setEnabled(allowScaling);
         content.addButton(ySize = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getScale().y))
             .onChange(v -> {
@@ -99,7 +100,7 @@ public class GuiBigSettings extends GameGui {
                 bigPony.markDirty();
                 return v;
             })
-            .setFormatter(format("minebp.scale.y"))
+            .setTextFormat(format("minebp.scale.y"))
             .setEnabled(allowScaling);
         content.addButton(zSize = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getScale().z))
             .onChange(v -> {
@@ -107,18 +108,18 @@ public class GuiBigSettings extends GameGui {
                 bigPony.markDirty();
                 return v;
             })
-            .setFormatter(format("minebp.scale.z"))
+            .setTextFormat(format("minebp.scale.z"))
             .setEnabled(allowScaling);
 
         top += 20;
 
         content.addButton(height = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getCamera().height))
             .onChange(bigPony::setHeight)
-            .setFormatter(format("minebp.camera.height"))
+            .setTextFormat(format("minebp.camera.height"))
             .setEnabled(allowCamera && allowScaling);
         content.addButton(distance = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getCamera().distance))
             .onChange(bigPony::setDistance)
-            .setFormatter(format("minebp.camera.distance"))
+            .setTextFormat(format("minebp.camera.distance"))
             .setEnabled(allowCamera && allowScaling);
 
         content.addButton(new Toggle(left, top += 30, !bigPony.isVisual()))
@@ -159,8 +160,8 @@ public class GuiBigSettings extends GameGui {
         tick();
     }
 
-    static Function<Float, String> format(String key) {
-        return f -> I18n.translate(key, String.format("%.2f", f));
+    static Function<AbstractSlider<Float>, Text> format(String key) {
+        return slider -> new TranslatableText(key, String.format("%.2f", slider.getValue()));
     }
 
     @Override
