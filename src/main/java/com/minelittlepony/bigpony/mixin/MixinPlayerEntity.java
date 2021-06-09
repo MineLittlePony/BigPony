@@ -37,12 +37,12 @@ abstract class MixinPlayerEntity extends LivingEntity implements Scaled {
         info.setReturnValue(getScaling().getReplacementActiveEyeHeight(pose, size, info.getReturnValue()));
     }
 
-    @Inject(method = "writeCustomDataToTag(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("HEAD"))
+    @Inject(method = "writeCustomDataToNbt(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("HEAD"))
     private void onWriteCustomDataToTag(NbtCompound tag, CallbackInfo info) {
         tag.put("big_pony_data", getScaling().toTag(new NbtCompound()));
     }
 
-    @Inject(method = "readCustomDataFromTag(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("HEAD"))
+    @Inject(method = "readCustomDataFromNbt(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("HEAD"))
     private void onReadCustomDataFromTag(NbtCompound tag, CallbackInfo info) {
         if (tag.contains("big_pony_data")) {
             getScaling().fromTag(tag.getCompound("big_pony_data"));
