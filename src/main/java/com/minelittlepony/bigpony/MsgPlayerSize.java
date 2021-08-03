@@ -2,6 +2,7 @@ package com.minelittlepony.bigpony;
 
 import java.util.UUID;
 
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 
@@ -41,7 +42,8 @@ public class MsgPlayerSize implements Network.Packet {
     }
 
     @Override
-    public void toBuffer(PacketByteBuf buff) {
+    public PacketByteBuf toBuffer() {
+        PacketByteBuf buff = PacketByteBufs.create();
         buff.writeUuid(playerId);
         buff.writeFloat(scaling.getScale().x);
         buff.writeFloat(scaling.getScale().y);
@@ -53,12 +55,11 @@ public class MsgPlayerSize implements Network.Packet {
         buff.writeBoolean(force);
         buff.writeBoolean(consentHitboxes);
         buff.writeBoolean(consentcamera);
+        return buff;
     }
 
     @Override
     public void handle(PlayerEntity sender) {
-        BigPony.LOGGER.info("[SERVER] Got size for " + sender.getName().asString());
-
         Scaling sc = ((Scaled)sender).getScaling();
         if (force || !sc.isConfigured()) {
             sc.initFrom(scaling);

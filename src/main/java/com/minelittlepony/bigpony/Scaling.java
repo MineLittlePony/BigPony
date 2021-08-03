@@ -174,7 +174,7 @@ public class Scaling {
 
         if (!configured && entity.world.isClient) {
             initFrom(BigPony.getInstance().getScaling());
-            Network.CLIENT_UPDATE_PLAYER_SIZE.send(new MsgPlayerSize(entity.getUuid(), this, false));
+            Network.sendPlayerSizeToServer(new MsgPlayerSize(entity.getUuid(), this, false));
         }
 
         if (dirty || serverConsentChanged) {
@@ -186,9 +186,9 @@ public class Scaling {
             dirty = false;
 
             if (entity instanceof ServerPlayerEntity) {
-                Network.SERVER_OTHER_PLAYER_SIZE.send(entity.world, new MsgOtherPlayerSize(entity.getUuid(), this));
+                Network.sendPlayerSizeToClient(entity.world, new MsgOtherPlayerSize(entity.getUuid(), this));
             } else if (entity.world.isClient && BigPonyClient.isClientPlayer(entity)) {
-                Network.CLIENT_UPDATE_PLAYER_SIZE.send(new MsgPlayerSize(entity.getUuid(), this, true));
+                Network.sendPlayerSizeToServer(new MsgPlayerSize(entity.getUuid(), this, true));
             }
         }
     }

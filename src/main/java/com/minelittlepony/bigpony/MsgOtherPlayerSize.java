@@ -23,7 +23,6 @@ public class MsgOtherPlayerSize extends MsgPlayerSize {
     public void handle(PlayerEntity sender) {
         Scaled player = ((Scaled)MinecraftClient.getInstance().world.getPlayerByUuid(playerId));
         if (player != null) {
-            BigPony.LOGGER.info("[CLIENT] Got size for " + playerId + " from " + ((PlayerEntity)player).getName().asString());
             player.getScaling().initFrom(scaling);
             player.getScaling().updateConsent(consentcamera, consentHitboxes, scaling.getMaxMultiplier());
         }

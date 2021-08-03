@@ -2,9 +2,11 @@ package com.minelittlepony.bigpony;
 
 import java.util.function.Function;
 
-import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,61 +15,67 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
-public interface Network {
+public class Network {
+    private static final Identifier CLIENT_UPDATE_PLAYER_SIZE_ID = new Identifier("minebp", "client_player_size");
+    private static final Identifier SERVER_OTHER_PLAYER_SIZE_ID = new Identifier("minebp", "server_other_player_size");
+    private static final Identifier CONSENT_ID = new Identifier("minebp", "consent");
 
-    SPacketType<MsgPlayerSize> CLIENT_UPDATE_PLAYER_SIZE = clientToServer(new Identifier("minebp", "client_player_size"), MsgPlayerSize::new);
+    private static boolean registered;
 
-    MPacketType<MsgOtherPlayerSize> SERVER_OTHER_PLAYER_SIZE = serverToClients(new Identifier("minebp", "server_other_player_size"), MsgOtherPlayerSize::new);
+    static void bootstrap() {
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            BigPony.LOGGER.info("Sending consent packet to " + handler.getPlayer().getName().getString());
+            sender.sendPacket(CONSENT_ID, PacketByteBufs.empty());
+        });
+        register(CLIENT_UPDATE_PLAYER_SIZE_ID, MsgPlayerSize::new);
 
-    static void bootstrap() { }
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            ClientProxy.bootstrap();
+        }
+    }
 
-    static <T extends Packet> SPacketType<T> clientToServer(Identifier id, Function<PacketByteBuf, T> factory) {
+    public static void sendPlayerSizeToClient(World world, MsgOtherPlayerSize msg) {
+        world.getPlayers().forEach(player -> {
+            if (player != null) {
+                ServerPlayNetworking.send((ServerPlayerEntity)player, SERVER_OTHER_PLAYER_SIZE_ID, msg.toBuffer());
+            }
+        });
+    }
+
+    public static void sendPlayerSizeToServer(MsgPlayerSize msg) {
+        if (registered) {
+            if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT) {
+                throw new RuntimeException("Client packet send called by the server");
+            }
+            ClientPlayNetworking.send(CLIENT_UPDATE_PLAYER_SIZE_ID, msg.toBuffer());
+        }
+    }
+
+    private static <T extends Packet> void register(Identifier id, Function<PacketByteBuf, T> factory) {
         ServerPlayNetworking.registerGlobalReceiver(id, (server, player, ignored, buffer, ignored2) -> {
             T packet = factory.apply(buffer);
             server.execute(() -> packet.handle(player));
         });
-        return packet -> {
-            if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT) {
-                throw new RuntimeException("Client packet send called by the server");
-            }
-            ClientPlayNetworking.send(id, toBuffer(packet));
-        };
-    }
-
-    static <T extends Packet> MPacketType<T> serverToClients(Identifier id, Function<PacketByteBuf, T> factory) {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientProxy.register(id, factory);
-        }
-        return (world, packet) -> {
-            world.getPlayers().forEach(player -> {
-                if (player != null) {
-                    ServerPlayNetworking.send((ServerPlayerEntity)player, id, toBuffer(packet));
-                }
-            });
-        };
-    }
-
-    interface MPacketType<T extends Packet> {
-        void send(World world, T packet);
-    }
-
-    interface SPacketType<T extends Packet> {
-        void send(T packet);
-    }
-
-    static PacketByteBuf toBuffer(Packet packet) {
-        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-        packet.toBuffer(buf);
-        return buf;
     }
 
     interface Packet {
-        void toBuffer(PacketByteBuf buffer);
+        PacketByteBuf toBuffer();
 
         void handle(PlayerEntity sender);
     }
 
-    class ClientProxy {
+    private static class ClientProxy {
+        static void bootstrap() {
+            ClientLoginConnectionEvents.INIT.register((handler, client) -> {
+                registered = false;
+                BigPony.LOGGER.info("Resetting registered flag");
+            });
+            ClientPlayNetworking.registerGlobalReceiver(CONSENT_ID, (client, ignore1, buffer, ignore2) -> {
+                registered = true;
+            });
+            register(SERVER_OTHER_PLAYER_SIZE_ID, MsgOtherPlayerSize::new);
+        }
+
         static <T extends Packet> void register(Identifier id, Function<PacketByteBuf, T> factory) {
             ClientPlayNetworking.registerGlobalReceiver(id, (client, ignore1, buffer, ignore2) -> {
                 T packet = factory.apply(buffer);
