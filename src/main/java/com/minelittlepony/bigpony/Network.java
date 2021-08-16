@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -69,6 +70,11 @@ public class Network {
             ClientLoginConnectionEvents.INIT.register((handler, client) -> {
                 registered = false;
                 BigPony.LOGGER.info("Resetting registered flag");
+            });
+            ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+                if (client.player instanceof Scaled) {
+                    ((Scaled)client.player).getScaling().setInitial(client.player);
+                }
             });
             ClientPlayNetworking.registerGlobalReceiver(CONSENT_ID, (client, ignore1, buffer, ignore2) -> {
                 registered = true;

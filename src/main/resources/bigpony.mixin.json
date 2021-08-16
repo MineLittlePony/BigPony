@@ -10,6 +10,7 @@
   ],
   "client": [
     "client.MixinCamera",
+    "client.MixinClientPlayNetworkHandler",
     "client.MixinEntityRenderDispatcher",
     "client.MixinLivingEntityRenderer",
     "client.MixinPlayerEntityRenderer"

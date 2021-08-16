@@ -166,15 +166,17 @@ public class Scaling {
         maxMultiplier = multiplier;
     }
 
+    public void setInitial(PlayerEntity entity) {
+        if (!configured && entity.world.isClient) {
+            initFrom(BigPony.getInstance().getScaling());
+            Network.sendPlayerSizeToServer(new MsgPlayerSize(entity.getUuid(), this, false));
+        }
+    }
+
     public void tick(PlayerEntity entity) {
 
         if (entity.world.isClient) {
             isPony = PresetDetector.getInstance().isPony(entity);
-        }
-
-        if (!configured && entity.world.isClient) {
-            initFrom(BigPony.getInstance().getScaling());
-            Network.sendPlayerSizeToServer(new MsgPlayerSize(entity.getUuid(), this, false));
         }
 
         if (dirty || serverConsentChanged) {
@@ -205,6 +207,8 @@ public class Scaling {
             setCamera(scale.getCamera());
             setVisual(scale.isVisual());
             maxMultiplier = scale.getMaxMultiplier();
+            configured = true;
+            dirty = true;
         }
     }
 
