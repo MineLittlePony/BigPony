@@ -1,13 +1,13 @@
 plugins {
     id 'java-library'
-    id 'fabric-loom' version '0.8-SNAPSHOT'
+    id 'fabric-loom' version '0.10-SNAPSHOT'
     id 'maven-publish'
     id 'org.ajoberstar.reckon' version '0.13.0'
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(16)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -15,8 +15,8 @@ group = project.group
 description = project.displayname
 archivesBaseName = project.name
 
-minecraft {
-    refmapName = 'bigpony.mixin.refmap.json'
+loom {
+    mixin.defaultRefmapName = 'bigpony.mixin.refmap.json'
 }
 
 reckon {
@@ -75,12 +75,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 publishing {
     publications {
         maven(MavenPublication) {
-            afterEvaluate {
-                artifact(remapJar)
-            }
-            artifact(sourcesJar) {
-                builtBy remapSourcesJar
-            }
+            from components.java
 
             pom {
                 name = "BigPony"

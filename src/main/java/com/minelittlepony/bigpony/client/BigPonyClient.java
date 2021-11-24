@@ -43,7 +43,7 @@ public class BigPonyClient implements ClientModInitializer {
 
     private void onClientTick(MinecraftClient client) {
         if (keybind.isPressed()) {
-            client.openScreen(new GuiBigSettings(client.currentScreen));
+            client.setScreen(new GuiBigSettings(client.currentScreen));
         }
     }
 
