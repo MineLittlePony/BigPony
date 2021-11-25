@@ -2,8 +2,7 @@ package com.minelittlepony.bigpony.mixin.client;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import com.minelittlepony.bigpony.Scaled;
 
@@ -12,10 +11,8 @@ import net.minecraft.client.render.Camera;
 
 @Mixin(Camera.class)
 abstract class MixinCamera {
-    @Inject(method = "clipToSpace(D)D",
-            at = @At("RETURN"),
-            cancellable = true)
-    private void redirectCameraDistance(double initial, CallbackInfoReturnable<Double> info) {
-        info.setReturnValue(((Scaled)MinecraftClient.getInstance().player).getScaling().getCameraDistance(info.getReturnValueD()));
+    @ModifyVariable(method = "clipToSpace(D)D", at = @At("HEAD"), argsOnly = true, index = 1)
+    private double adjustDistance(double initial) {
+        return ((Scaled)MinecraftClient.getInstance().player).getScaling().getCameraDistance(initial);
     }
 }
