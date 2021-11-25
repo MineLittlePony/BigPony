@@ -100,18 +100,16 @@ public class Scaling {
             return existing;
         }
         // This ends up changing hitboxes.
-        if (pose == EntityPose.CROUCHING || pose == EntityPose.STANDING) {
-            if (calculatedSize == null || existing.height != knownVanillaSize.height || existing.width != knownVanillaSize.width) {
-                knownVanillaSize = EntityDimensions.fixed(existing.width, existing.height);
-                calculatedSize = EntityDimensions.changing(
-                        Math.max(0.04F, multiply(knownVanillaSize.width, getScale().x)),
-                        Math.max(0.14F, multiply(knownVanillaSize.height, getScale().y))
-                );
-            }
-            return calculatedSize;
+
+        if (calculatedSize == null || existing.height != knownVanillaSize.height || existing.width != knownVanillaSize.width) {
+            knownVanillaSize = EntityDimensions.fixed(existing.width, existing.height);
+            calculatedSize = EntityDimensions.changing(
+                    Math.max(0.04F, multiply(knownVanillaSize.width, getScale().x)),
+                    Math.max(0.04F, multiply(knownVanillaSize.height, getScale().y))
+            );
         }
 
-        return existing;
+        return calculatedSize;
     }
 
     public float getShadowScale() {
