@@ -87,7 +87,7 @@ public class Scaling {
     }
 
     public Triple getVisualScale() {
-        return visual || !isPony ? body : Triple.DEFAULT;
+        return visual || !isPony ? getScale() : Triple.DEFAULT;
     }
 
     public Cam getCamera() {
@@ -104,8 +104,8 @@ public class Scaling {
             if (calculatedSize == null || existing.height != knownVanillaSize.height || existing.width != knownVanillaSize.width) {
                 knownVanillaSize = EntityDimensions.fixed(existing.width, existing.height);
                 calculatedSize = EntityDimensions.changing(
-                        Math.max(0.25F, multiply(knownVanillaSize.width, body.x)),
-                        Math.max(0.14F, multiply(knownVanillaSize.height, body.y))
+                        Math.max(0.04F, multiply(knownVanillaSize.width, getScale().x)),
+                        Math.max(0.14F, multiply(knownVanillaSize.height, getScale().y))
                 );
             }
             return calculatedSize;
@@ -127,7 +127,7 @@ public class Scaling {
     }
 
     public float getReplacementPassiveEyeHeight(EntityPose pose, EntityDimensions size, float existing) {
-        return canAlterCamera() ? Math.max(0.14F, multiply(existing, camera.height)) : existing;
+        return canAlterCamera() ? Math.max(0.04F, multiply(existing, camera.height)) : existing;
     }
 
     private boolean canAlterCamera() {

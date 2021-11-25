@@ -17,7 +17,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 
-@Mixin(PlayerEntity.class)
+@Mixin(value = PlayerEntity.class, priority = 1001)
 abstract class MixinPlayerEntity extends LivingEntity implements Scaled {
     private MixinPlayerEntity() {super(null, null);}
 
