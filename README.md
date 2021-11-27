@@ -1,6 +1,6 @@
 # BigPony
 
-[![Build Status](https://travis-ci.org/MineLittlePony/BigPony.svg?branch=1.17)](https://travis-ci.org/MineLittlePony/MineLittlePony)
+[![Build Status](https://travis-ci.org/MineLittlePony/BigPony.svg?branch=1.18)](https://travis-ci.org/MineLittlePony/MineLittlePony)
 ![Downloads](https://img.shields.io/github/downloads/MineLittlePony/BigPony/total.svg?color=yellowgreen)
 [![Discord Server](https://img.shields.io/discord/182490536119107584.svg?color=blueviolet)](https://discord.gg/HbJSFyu)
 ![License](https://img.shields.io/github/license/MineLittlePony/BigPony)
