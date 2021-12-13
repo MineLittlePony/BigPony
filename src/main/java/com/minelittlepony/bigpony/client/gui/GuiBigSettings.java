@@ -122,16 +122,22 @@ public class GuiBigSettings extends GameGui {
             .setTextFormat(format("minebp.camera.distance"))
             .setEnabled(allowCamera && allowScaling);
 
-        content.addButton(new Toggle(left, top += 30, !bigPony.isVisual()))
+        Toggle visual;
+        content.addButton(visual = new Toggle(left, top += 30, !bigPony.isVisual()))
             .onChange(v -> {
                 bigPony.setVisual(!v);
                 if (v) {
-                    PresetDetector.getInstance().detectPreset(client.player, bigPony);
-                    xSize.setValue(bigPony.getScale().x);
-                    ySize.setValue(bigPony.getScale().y);
-                    zSize.setValue(bigPony.getScale().z);
-                    height.setValue(bigPony.getCamera().height);
-                    distance.setValue(bigPony.getCamera().distance);
+                    visual.setEnabled(false);
+                    PresetDetector.getInstance().detectPreset(client.getSession().getProfile(), bigPony).handle((skin, ex) -> {
+                        visual.setEnabled(true);
+                        xSize.setValue(bigPony.getScale().x);
+                        ySize.setValue(bigPony.getScale().y);
+                        zSize.setValue(bigPony.getScale().z);
+                        height.setValue(bigPony.getCamera().height);
+                        distance.setValue(bigPony.getCamera().distance);
+                        tick();
+                        return null;
+                    });
                 }
                 tick();
                 return v;

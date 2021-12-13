@@ -25,6 +25,9 @@
     ],
     "minelittlepony": [
       "com.minelittlepony.bigpony.minelittlepony.Main"
+    ],
+    "hdskins": [
+      "com.minelittlepony.bigpony.hdskins.Main"
     ]
   },
   "mixins": [

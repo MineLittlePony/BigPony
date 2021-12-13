@@ -60,7 +60,8 @@ dependencies {
     modApi "com.minelittlepony:kirin:${project.kirin_version}"
     include "com.minelittlepony:kirin:${project.kirin_version}"
     
-    modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
+    modCompileOnly "com.minelittlepony:hdskins:${project.hd_skins_version}"
+    modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
 }
 
 processResources {
