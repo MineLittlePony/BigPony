@@ -1,7 +1,5 @@
 package com.minelittlepony.bigpony.client;
 
-import java.util.function.Consumer;
-
 import org.lwjgl.glfw.GLFW;
 
 import com.minelittlepony.bigpony.Scaled;
@@ -47,15 +45,7 @@ public class BigPonyClient implements ClientModInitializer {
         }
     }
 
-    public void onRenderShadow(float initial, Entity entity, MatrixStack stack, Consumer<Float> shadowRender) {
-        if (!(entity instanceof Scaled)) {
-            shadowRender.accept(initial);
-        } else {
-            stack.push();
-            // The shadows render a tiny bit off the ground, so let's shift it down so as not to cut through people's legs.
-            stack.translate(0, -0.01F, 0);
-            shadowRender.accept(initial * ((Scaled)entity).getScaling().getShadowScale());
-            stack.pop();
-        }
+    public float onRenderShadow(float radius, Entity entity, MatrixStack stack) {
+        return radius * (entity instanceof Scaled ? ((Scaled)entity).getScaling().getShadowScale() : 1);
     }
 }
