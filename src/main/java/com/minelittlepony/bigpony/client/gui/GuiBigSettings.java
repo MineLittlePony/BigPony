@@ -196,13 +196,13 @@ public class GuiBigSettings extends GameGui {
     }
 
     @Override
-    public boolean isPauseScreen() {
+    public boolean shouldPause() {
         return false;
     }
 
     @Override
-    public void onClose() {
-        super.onClose();
+    public void close() {
+        super.close();
         BigPony.getInstance().getScaling().copyFrom(bigPony);
         BigPony.getInstance().getConfig().save();
     }
