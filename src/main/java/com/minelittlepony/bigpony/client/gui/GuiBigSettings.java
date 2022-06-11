@@ -17,10 +17,11 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 
 public class GuiBigSettings extends GameGui {
+    public static final Text TITLE = Text.translatable("minebp.options.title");
+    public static final Text OPTION_DISABLED = Text.translatable("minebp.options.disabled").formatted(Formatting.YELLOW);
 
     private final Scaling bigPony;
 
@@ -31,7 +32,7 @@ public class GuiBigSettings extends GameGui {
     private CameraPresetButton[] presets;
 
     public GuiBigSettings(Screen parent) {
-        super(new TranslatableText("minebp.options.title"));
+        super(TITLE);
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) {
             bigPony = BigPony.getInstance().getScaling();
@@ -145,7 +146,7 @@ public class GuiBigSettings extends GameGui {
             .getStyle().setText("minebp.camera.auto");
 
         if (!allowCamera || !allowHitbox) {
-            content.addButton(new Label(left, top += 20)).getStyle().setText(new TranslatableText("minebp.options.disabled").formatted(Formatting.YELLOW));
+            content.addButton(new Label(left, top += 20)).getStyle().setText(OPTION_DISABLED);
         }
 
         top += 20;
@@ -167,7 +168,7 @@ public class GuiBigSettings extends GameGui {
     }
 
     static Function<AbstractSlider<Float>, Text> format(String key) {
-        return slider -> new TranslatableText(key, String.format("%.2f", slider.getValue()));
+        return slider -> Text.translatable(key, String.format("%.2f", slider.getValue()));
     }
 
     @Override
