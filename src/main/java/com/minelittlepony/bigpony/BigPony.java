@@ -33,6 +33,7 @@ public class BigPony implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        config.load();
         Network.bootstrap();
     }
 }
