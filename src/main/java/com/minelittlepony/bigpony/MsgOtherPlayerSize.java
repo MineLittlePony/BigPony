@@ -24,7 +24,7 @@ public class MsgOtherPlayerSize extends MsgPlayerSize {
         Scaled player = ((Scaled)MinecraftClient.getInstance().world.getPlayerByUuid(playerId));
         if (player != null) {
             player.getScaling().initFrom(scaling);
-            player.getScaling().updateConsent(consentcamera, consentHitboxes, scaling.getMaxMultiplier());
+            player.getScaling().updateConsent(consentCamera, consentHitboxes, consentFreeform, scaling.getMaxMultiplier());
         }
     }
 }

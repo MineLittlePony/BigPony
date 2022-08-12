@@ -28,6 +28,7 @@ public class Scaling {
     private transient boolean serverConsentChanged;
     private transient boolean serverConsentCamera;
     private transient boolean serverConsentHitbox;
+    private transient boolean serverConsentFreeform;
 
     private transient boolean isPony;
 
@@ -157,9 +158,14 @@ public class Scaling {
         return serverConsentHitbox;
     }
 
-    public void updateConsent(boolean camera, boolean hitbox, float multiplier) {
+    public boolean hasFreeformConsent() {
+        return serverConsentFreeform;
+    }
+
+    public void updateConsent(boolean camera, boolean hitbox, boolean freeform, float multiplier) {
         serverConsentCamera = camera;
         serverConsentHitbox = hitbox;
+        serverConsentFreeform = freeform;
         serverConsentChanged = true;
         maxMultiplier = multiplier;
     }

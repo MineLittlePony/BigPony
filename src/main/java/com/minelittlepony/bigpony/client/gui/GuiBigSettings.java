@@ -1,6 +1,7 @@
 package com.minelittlepony.bigpony.client.gui;
 
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import com.minelittlepony.bigpony.BigPony;
 import com.minelittlepony.bigpony.Scaled;
@@ -49,7 +50,11 @@ public class GuiBigSettings extends GameGui {
     }
 
     public boolean hasCameraConsent() {
-        return client.player == null || bigPony.hasCameraConsent();
+        return client.player == null || (bigPony.hasFreeformConsent() && bigPony.hasCameraConsent());
+    }
+
+    public boolean hasScalingConsent() {
+        return (client.player == null || bigPony.hasFreeformConsent()) && bigPony.isVisual();
     }
 
     @Override
@@ -66,7 +71,7 @@ public class GuiBigSettings extends GameGui {
 
         boolean allowCamera = hasCameraConsent();
         boolean allowHitbox = client.player == null || bigPony.hasHitboxConsent();
-        boolean allowScaling = bigPony.isVisual();
+        boolean allowScaling = hasScalingConsent();
 
         addButton(new Label(width / 2, 6)).setCentered().getStyle().setText(getTitle().getString());
 
@@ -149,15 +154,9 @@ public class GuiBigSettings extends GameGui {
             content.addButton(new Label(left, top += 20)).getStyle().setText(OPTION_DISABLED);
         }
 
-        top += 20;
-
-        CameraPresets[] values = CameraPresets.values();
-
-        presets = new CameraPresetButton[values.length];
-
-        for (int i = 0; i < presets.length; i++) {
-            presets[i] = new CameraPresetButton(this, values[i], right);
-        }
+        presets = Stream.of(CameraPresets.values())
+                .map(preset -> new CameraPresetButton(this, preset, right))
+                .toArray(CameraPresetButton[]::new);
 
         addButton(new Button(width / 2 - 100, super.height - 25, 200, 20))
             .onClick(sender -> finish())
@@ -181,7 +180,7 @@ public class GuiBigSettings extends GameGui {
     @Override
     public void tick() {
         boolean allowCamera = hasCameraConsent();
-        boolean allowScaling = bigPony.isVisual();
+        boolean allowScaling = hasScalingConsent();
 
         for (int i = 0; i < presets.length; i++) {
             presets[i].updateEnabled(height.getValue(), distance.getValue(), xSize.getValue(), ySize.getValue(), zSize.getValue());

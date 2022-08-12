@@ -24,16 +24,15 @@ public class CameraPresetButton {
     }
 
     public void updateEnabled(float height, float distance, float xSize, float ySize, float zSize) {
-        camera.setEnabled(!preset.isEqual(height, distance));
-        scale.setEnabled(!preset.isEqual(xSize, ySize, zSize));
-        combined.setEnabled(camera.active || scale.active);
+        camera.setEnabled(!preset.isEqual(height, distance) && gui.hasScalingConsent());
+        scale.setEnabled(!preset.isEqual(xSize, ySize, zSize) && gui.hasScalingConsent());
+        combined.setEnabled((camera.active || scale.active) && gui.hasScalingConsent());
         if (!gui.hasCameraConsent()) {
             camera.setEnabled(false);
         }
     }
 
     private class PresetButton extends Button {
-
         public PresetButton(int x, int y, int width, boolean camera, boolean body, String label) {
             super(x, y, width, 20);
             onClick(self -> gui.applyPreset(preset, camera, body));

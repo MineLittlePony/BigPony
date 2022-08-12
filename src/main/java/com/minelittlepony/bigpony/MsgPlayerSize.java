@@ -18,14 +18,16 @@ public class MsgPlayerSize implements Network.Packet {
     protected final boolean force;
 
     protected final boolean consentHitboxes;
-    protected final boolean consentcamera;
+    protected final boolean consentCamera;
+    protected final boolean consentFreeform;
 
     public MsgPlayerSize(UUID sender, Scaling scaling, boolean force) {
         playerId = sender;
         this.scaling = scaling;
         this.force = force;
         consentHitboxes = BigPony.getInstance().getConfig().allowHitboxChanges.get();
-        consentcamera = BigPony.getInstance().getConfig().allowCameraChanges.get();
+        consentCamera = BigPony.getInstance().getConfig().allowCameraChanges.get();
+        consentFreeform = BigPony.getInstance().getConfig().allowFreeformResizing.get();
     }
 
     public MsgPlayerSize(PacketByteBuf buff) {
@@ -38,7 +40,8 @@ public class MsgPlayerSize implements Network.Packet {
         scaling.setVisual(buff.readBoolean());
         force = buff.readBoolean();
         consentHitboxes = buff.readBoolean();
-        consentcamera = buff.readBoolean();
+        consentCamera = buff.readBoolean();
+        consentFreeform = buff.readBoolean();
     }
 
     @Override
@@ -54,7 +57,8 @@ public class MsgPlayerSize implements Network.Packet {
         buff.writeBoolean(scaling.isVisual());
         buff.writeBoolean(force);
         buff.writeBoolean(consentHitboxes);
-        buff.writeBoolean(consentcamera);
+        buff.writeBoolean(consentCamera);
+        buff.writeBoolean(consentFreeform);
         return buff;
     }
 
@@ -64,7 +68,7 @@ public class MsgPlayerSize implements Network.Packet {
         if (force || !sc.isConfigured()) {
             sc.initFrom(scaling);
         }
-        sc.updateConsent(consentcamera, consentHitboxes, Math.min(
+        sc.updateConsent(consentCamera, consentHitboxes, consentFreeform, Math.min(
                 scaling.getMaxMultiplier(),
                 BigPony.getInstance().getScaling().getMaxMultiplier()
         ));

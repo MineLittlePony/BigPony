@@ -11,6 +11,7 @@ public class Config extends JsonConfig {
 
     public final Setting<Boolean> allowHitboxChanges = value("allowHitboxChanges", true);
     public final Setting<Boolean> allowCameraChanges = value("allowCameraChanges", true);
+    public final Setting<Boolean> allowFreeformResizing = value("allowFreeformResizing", true);
 
     public Config(Path path) {
         super(path);
