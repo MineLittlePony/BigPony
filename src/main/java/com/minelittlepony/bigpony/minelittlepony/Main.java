@@ -2,10 +2,9 @@ package com.minelittlepony.bigpony.minelittlepony;
 
 import com.minelittlepony.api.pony.IPony;
 import com.minelittlepony.api.pony.meta.Size;
-import com.minelittlepony.bigpony.Cam;
-import com.minelittlepony.bigpony.Scaled;
-import com.minelittlepony.bigpony.Scaling;
-import com.minelittlepony.bigpony.Triple;
+import com.minelittlepony.api.pony.network.fabric.PonyDataCallback;
+import com.minelittlepony.bigpony.*;
+import com.minelittlepony.bigpony.client.BigPonyClient;
 import com.minelittlepony.bigpony.hdskins.SkinDetecter;
 import com.minelittlepony.client.MineLittlePony;
 import com.mojang.authlib.GameProfile;
@@ -17,6 +16,7 @@ import com.minelittlepony.api.model.ModelAttributes;
 import com.minelittlepony.api.model.fabric.PonyModelPrepareCallback;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -29,10 +29,16 @@ public class Main extends PresetDetector implements ClientModInitializer {
         INSTANCE = this;
 
         PonyModelPrepareCallback.EVENT.register(this::onPonyModelPrepared);
+        PonyDataCallback.EVENT.register((sender, data, noSkin, env) -> {
+            if (!BigPony.getInstance().getScaling().isVisual()
+                    && env == EnvType.CLIENT
+                    && BigPonyClient.isClientPlayer(sender)) {
+                detectPreset(sender.getGameProfile(), ((Scaled)sender).getScaling());
+            }
+        });
     }
 
     private void onPonyModelPrepared(Entity entity, IModel model, ModelAttributes.Mode mode) {
-
         if (entity instanceof Scaled && !((Scaled)entity).getScaling().isVisual() && isPony((PlayerEntity)entity)) {
             model.getAttributes().visualHeight = entity.getHeight() / model.getSize().getScaleFactor();
         }
