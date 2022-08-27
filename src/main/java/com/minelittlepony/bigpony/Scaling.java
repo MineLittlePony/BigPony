@@ -219,6 +219,7 @@ public class Scaling {
     public void fromTag(NbtCompound tag) {
         camera.fromTag(tag.getCompound("camera"));
         body.fromTag(tag.getCompound("body"));
+        visual = tag.getBoolean("visual");
         configured = true;
         dirty = false;
     }
@@ -226,6 +227,7 @@ public class Scaling {
     public NbtCompound toTag(NbtCompound tag) {
         tag.put("camera", camera.toTag(new NbtCompound()));
         tag.put("body", body.toTag(new NbtCompound()));
+        tag.putBoolean("visual", visual);
         return tag;
     }
 }
