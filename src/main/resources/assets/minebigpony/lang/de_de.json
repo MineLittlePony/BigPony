@@ -1,0 +1,22 @@
+{
+	"key.minebp.settings": "Big Pony",
+	"minebp.options.title": "Big Pony Einstellungen",
+	"minebp.options.body": "Körper",
+	"minebp.options.camera": "Kamera",
+	"minebp.options.presets": "Voreinstellungen",
+	"minebp.options.disabled": "* Einige Funktionen sind deaktiviert. Bitte wenden Sie sich an Ihren Serveradministrator.",
+	"minebp.scale.global": "Globale Größenordnung",
+	"minebp.scale.x": "X Größenordnung: %dx",
+	"minebp.scale.y": "Y Größenordnung: %dx",
+	"minebp.scale.z": "Z Größenordnung: %dx",
+	"minebp.camera.height": "Augen Höhe: %dx",
+	"minebp.camera.distance": "Kamera Entfernung: %dx",
+	"minebp.camera.auto": "Automatische Erkennung von Mine Little Pony",
+	"minebp.presets.human": "Standard",
+	"minebp.presets.mare": "Stute",
+	"minebp.presets.stallion": "Hengst",
+	"minebp.presets.alicorn": "Alicorn",
+	"minebp.presets.filly": "Fohlen",
+	"minebp.presets.giant": "Riese",
+	"minebp.presets.ant": "Winzig"
+}
