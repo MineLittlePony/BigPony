@@ -1,0 +1,22 @@
+ {
+	"key.minebp.settings": "Big Pony",
+	"minebp.options.title": "Настройки Big Pony",
+	"minebp.options.body": "Тело",
+	"minebp.options.camera": "Камера",
+	"minebp.options.presets": "Пресеты",
+	"minebp.options.disabled": "* Некоторые свойства отключены. Свяжитесь с администратором сервера.",
+	"minebp.scale.global": "Общий масштаб",
+	"minebp.scale.x": "Масштаб по X: %dx",
+	"minebp.scale.z": "Масштаб по Z: %dx",
+	"minebp.scale.y": "Масштаб по Y: %dx",
+	"minebp.camera.height": "Высота глаз: %dx",
+	"minebp.camera.distance": "Расстояние камеры: %dx",
+	"minebp.camera.auto": "Автоопределение через Mine Little Pony",
+	"minebp.presets.human": "По умолчанию",
+	"minebp.presets.mare": "Кобылка",
+	"minebp.presets.stallion": "Жеребец",
+	"minebp.presets.alicorn": "Аликорн",
+	"minebp.presets.filly": "Жеребёнок",
+	"minebp.presets.giant": "Гигант",
+	"minebp.presets.ant": "Муравей"
+}
