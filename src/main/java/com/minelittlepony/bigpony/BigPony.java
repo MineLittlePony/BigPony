@@ -17,13 +17,13 @@ public class BigPony implements ModInitializer {
         return instance;
     }
 
-    private final Config config = new Config(GamePaths.getConfigDirectory().resolve("bigpony.json"));
+    private final BigPonyConfig config = new BigPonyConfig(GamePaths.getConfigDirectory().resolve("bigpony.json"));
 
     public BigPony() {
         instance = this;
     }
 
-    public Config getConfig() {
+    public BigPonyConfig getConfig() {
         return config;
     }
 

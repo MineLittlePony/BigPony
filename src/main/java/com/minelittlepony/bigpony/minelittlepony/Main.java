@@ -51,7 +51,7 @@ public class Main extends PresetDetector implements ClientModInitializer {
 
     @Override
     public boolean isPony(PlayerEntity player) {
-        return !MineLittlePony.getInstance().getManager().getPony(player).getRace(false).isHuman();
+        return !MineLittlePony.getInstance().getManager().getPony(player).race().isHuman();
     }
 
     @Override
@@ -60,8 +60,8 @@ public class Main extends PresetDetector implements ClientModInitializer {
             // Turn on filly cam so we can get the camera parameters
             MineLittlePony.getInstance().getConfig().fillycam.set(true);
 
-            IPony pony = IPony.forResource(skin);
-            Size size = pony.getMetadata().getSize();
+            IPony pony = IPony.getManager().getPony(skin);
+            Size size = pony.metadata().getSize();
 
             into.setScale(new Triple(size.getScaleFactor()));
             into.setCamera(new Cam(size.getEyeDistanceFactor(), size.getEyeHeightFactor()));

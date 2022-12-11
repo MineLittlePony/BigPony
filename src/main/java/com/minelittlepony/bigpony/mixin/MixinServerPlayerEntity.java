@@ -13,7 +13,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 @Mixin(ServerPlayerEntity.class)
 abstract class MixinServerPlayerEntity extends PlayerEntity implements ScreenHandlerListener {
-    MixinServerPlayerEntity() { super(null, null, 0, null, null); }
+    MixinServerPlayerEntity() { super(null, null, 0, null); }
 
     @Inject(method = "copyFrom(Lnet/minecraft/server/network/ServerPlayerEntity;Z)V", at = @At("RETURN"))
     public void injectCopyFrom(ServerPlayerEntity other, boolean alive, CallbackInfo info) {

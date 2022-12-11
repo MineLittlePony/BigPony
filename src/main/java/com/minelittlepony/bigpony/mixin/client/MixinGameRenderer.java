@@ -14,7 +14,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.resource.SynchronousResourceReloader;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.RotationAxis;
 
 @Mixin(GameRenderer.class)
 abstract class MixinGameRenderer implements SynchronousResourceReloader, AutoCloseable {
@@ -42,10 +42,10 @@ abstract class MixinGameRenderer implements SynchronousResourceReloader, AutoClo
                 -Math.abs(MathHelper.cos(h * (float)Math.PI) * i) * scale.y,
                 0
         );
-        matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(
+        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(
                 MathHelper.sin(h * (float)Math.PI) * i * 3 * scale.z
         ));
-        matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(
                 Math.abs(MathHelper.cos(h * (float)Math.PI - 0.2f) * i) * 5 * scale.x
         ));
     }
