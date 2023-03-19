@@ -1,0 +1,22 @@
+{
+	"key.minebp.settings": "Veliki Poni",
+	"minebp.options.title": "Veliki Poni Podešavanja",
+	"minebp.options.body": "Telo",
+	"minebp.options.camera": "Kamera",
+	"minebp.options.presets": "Pokloni",
+	"minebp.options.disabled": "* Neke opcije su onemogućene. Molimo, kontaktiraj tvog server administratora.",
+	"minebp.scale.global": "Globalna Skala",
+	"minebp.scale.x": "X Skala: %dx",
+	"minebp.scale.y": "Y Skala: %dx",
+	"minebp.scale.z": "Z Skala: %dx",
+	"minebp.camera.height": "Visina Oka: %dx",
+	"minebp.camera.distance": "Distanca Kamere: %dx",
+	"minebp.camera.auto": "Auto-Detektuj iz Mine Mali Poni",
+	"minebp.presets.human": "Podrazumevano",
+	"minebp.presets.mare": "Ženka (Žensko)",
+	"minebp.presets.stallion": "Mužjak (Muško)",
+	"minebp.presets.alicorn": "Alicorn",
+	"minebp.presets.filly": "Ždrebe (dete)",
+	"minebp.presets.giant": "Ogromna/Ogroman",
+	"minebp.presets.ant": "Sićušan/Sićušna"
+}
