@@ -171,7 +171,7 @@ public class Scaling {
     }
 
     public void setInitial(PlayerEntity entity) {
-        if (!configured && entity.world.isClient) {
+        if (!configured && entity.getWorld().isClient) {
             initFrom(BigPony.getInstance().getScaling());
             Network.sendPlayerSizeToServer(new MsgPlayerSize(entity.getUuid(), this, false));
         }
@@ -179,7 +179,7 @@ public class Scaling {
 
     public void tick(PlayerEntity entity) {
 
-        if (entity.world.isClient) {
+        if (entity.getWorld().isClient) {
             isPony = PresetDetector.getInstance().isPony(entity);
         }
 
@@ -192,8 +192,8 @@ public class Scaling {
             dirty = false;
 
             if (entity instanceof ServerPlayerEntity) {
-                Network.sendPlayerSizeToClient(entity.world, new MsgOtherPlayerSize(entity.getUuid(), this));
-            } else if (entity.world.isClient && BigPonyClient.isClientPlayer(entity)) {
+                Network.sendPlayerSizeToClient(entity.getWorld(), new MsgOtherPlayerSize(entity.getUuid(), this));
+            } else if (entity.getWorld().isClient && BigPonyClient.isClientPlayer(entity)) {
                 Network.sendPlayerSizeToServer(new MsgPlayerSize(entity.getUuid(), this, true));
             }
         }
