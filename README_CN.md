@@ -16,7 +16,7 @@
 
 ## 构建
 
-1. 需要JDK 17。使用https://adoptium.net/?variant=openjdk17&jvmVariant=hotspot安装。
+1. 需要JDK 17。使用https://adoptium.net/?variant=openjdk17&jvmVariant=hotspot 安装。
 
 2. 在资源（git克隆或是从zip中解压）的同目录中打开一个终端窗口，运行以下指令（使用Windows系统）。
 
@@ -27,9 +27,9 @@ gradlew build
 3. 过一会后，构建出的模组将位于 `/build/libs` 中。
 
 ## 安装
-需要Fabric （和FabricAPI）。请参考https://fabricmc.net，并在完成安装后继续续下一步。
+需要Fabric （和FabricAPI）。请参考<a href="https://fabricmc.net">这里</a>，并在完成安装后继续续下一步。
 
-安装好fabric后，只需要从https://github.com/MineLittlePony/BigPony/releases下载和您的fabric版本对应的BigPony-version.jar文件，并和fabric-api.jar文件一起放到您的mods文件夹中即可。
+安装好fabric后，只需要从[releases page](https://github.com/MineLittlePony/BigPony/releases)下载和您的fabric版本对应的BigPony-version.jar文件，并和fabric-api.jar文件一起放到您的mods文件夹中即可。
 **记得使用fabric版本来启动游戏！**
 
 
@@ -41,5 +41,5 @@ gradlew build
 
 依赖：`com.minelittlepony:BigPony:<version>`
 
-请检查https://github.com/MineLittlePony/BigPony/releases以获取最新发布的版本，或是 `gradle.properties` 的最新快照版本。
+请检查[releases](https://github.com/MineLittlePony/BigPony/releases)以获取最新发布的版本，或是 `gradle.properties` 的最新快照版本。
 
