@@ -7,7 +7,7 @@
 ![License](https://img.shields.io/github/license/MineLittlePony/BigPony)
 ![](https://img.shields.io/badge/api-fabric-orange.svg)
 
-彩虹大马是MineLittlePony（非必需安装）的联动模组。本模组允许您改变您在世界中的形象，包括模型大小和摄像机位置。这个模组也是由Hepolite制作的[FillyCam]（https://github.com//MineLittlePony/FillyCam）的精神续作。
+彩虹大马是MineLittlePony（非必需安装）的联动模组。本模组允许您改变您在世界中的形象，包括模型大小和摄像机位置。这个模组也是由Hepolite制作的[FillyCam](https://github.com//MineLittlePony/FillyCam)的精神续作。
 
 ## 多人游戏支持
 
