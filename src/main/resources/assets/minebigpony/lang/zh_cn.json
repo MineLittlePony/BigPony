@@ -1,0 +1,22 @@
+{
+	"key.minebp.settings": "彩虹大马",
+	"minebp.options.title": "彩虹大马设定",
+	"minebp.options.body": "身体",
+	"minebp.options.camera": "摄像机",
+	"minebp.options.presets": "预设",
+	"minebp.options.disabled": "* 某些设置已停用。请与此服务器管理员沟通。",
+	"minebp.scale.global": "整体大小",
+	"minebp.scale.x": "X 值: %dx",
+	"minebp.scale.y": "Y 值: %dx",
+	"minebp.scale.z": "Z 值: %dx",
+	"minebp.camera.height": "眼睛高度： %dx",
+	"minebp.camera.distance": "摄像机距离 %dx",
+	"minebp.camera.auto": "从Mine little pony自动检测",
+	"minebp.presets.human": "默认",
+	"minebp.presets.mare": "雌驹",
+	"minebp.presets.stallion": "雄驹",
+	"minebp.presets.alicorn": "天角兽",
+	"minebp.presets.filly": "幼驹",
+	"minebp.presets.giant": "巨型",
+	"minebp.presets.ant": "小型"
+}

@@ -30,7 +30,7 @@ gradlew build
 
 Fabric (And FabricAPI) are required. Please refer to their installation instructions <a href="https://fabricmc.net">here</a> and come back once you have Fabric functioning.
 
-Once you have fabric installed, simply download the BigPony-version.jar for your particular version from [the releases page](https://github.com/MineLittlePony/BigPony/releases) and place it into your mods folder next to the fabric-api jar
+Once you have fabric installed, simply download the BigPony-version.jar for your particular version from [the releases page](https://github.com/MineLittlePony/BigPony/releases) and place it into your mods folder next to the fabric-api.jar.
 
 **Remember to use the fabric launcher profile when starting the game!**
 
