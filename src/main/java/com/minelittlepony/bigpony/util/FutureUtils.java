@@ -16,4 +16,12 @@ public interface FutureUtils {
         CompletableFuture.runAsync(() -> action.accept(waiter::complete), Util.getMainWorkerExecutor());
         return waiter;
     }
+
+    @SuppressWarnings("unchecked")
+    static <T> CompletableFuture<T> either(CompletableFuture<T> incomplete, Supplier<T> fallback) {
+        return (CompletableFuture<T>)CompletableFuture.anyOf(
+                incomplete,
+                CompletableFuture.supplyAsync(fallback, DELAYED_EXECUTOR)
+        );
+    }
 }
