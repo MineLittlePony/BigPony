@@ -63,7 +63,8 @@ processResources {
                 "minecraftVersion": project.minecraft_version_range,
                 "loaderVersion": ">=${project.loader_version}",
                 "fabricVersion": ">=${project.fabric_version}",
-                "hdSkinsVersion": ">=${project.hd_skins_version}"
+                "hdSkinsVersion": ">=${project.hd_skins_version}",
+                "kirinVersion": ">=${project.kirin_version}"
     }
 
     from 'LICENSE'
