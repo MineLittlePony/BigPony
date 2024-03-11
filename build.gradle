@@ -93,8 +93,10 @@ modrinth {
       gameVersions.add ver
     }
     dependencies {
-       required.project 'P7dR8mSH'
-       optional.project 'JBjInUXM'
+       required.project 'P7dR8mSH' //fabric-api
+       optional.project 'JBjInUXM' //minelp
+       optional.project 'FzE9gshV' //hdskins
+       embedded.project '9aNz8Zqn' //kirin
     }
 }
 
