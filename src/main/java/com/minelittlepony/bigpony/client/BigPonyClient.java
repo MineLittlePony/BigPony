@@ -19,7 +19,7 @@ public class BigPonyClient implements ClientModInitializer {
 
     private static BigPonyClient instance;
 
-    private KeyBinding keybind = new KeyBinding("key.category.misc", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F10, "bigpony:settings");
+    private KeyBinding keybind;
 
     public static BigPonyClient getInstance() {
         return instance;
@@ -35,7 +35,7 @@ public class BigPonyClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        KeyBindingHelper.registerKeyBinding(keybind);
+        keybind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.minebp.settings", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F8, KeyBinding.MISC_CATEGORY));
         ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
     }
 
