@@ -21,7 +21,7 @@ public class SkinDetecter {
     public CompletableFuture<Identifier> loadSkin(GameProfile profile) {
         return FutureUtils.either(
                 MinecraftClient.getInstance().getSkinProvider().fetchSkinTextures(profile),
-                () -> DefaultSkinHelper.getTexture(profile.getId())
+                () -> DefaultSkinHelper.getSkinTextures(profile.getId())
         ).thenApply(SkinTextures::texture);
     }
 }
