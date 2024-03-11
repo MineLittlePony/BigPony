@@ -134,7 +134,7 @@ public class GuiBigSettings extends GameGui {
                 bigPony.setVisual(!v);
                 if (v) {
                     visual.setEnabled(false);
-                    PresetDetector.getInstance().detectPreset(client.getGameProfile(), bigPony).handle((skin, ex) -> {
+                    PresetDetector.getInstance().detectPreset(client.getSession().getProfile(), bigPony).handle((skin, ex) -> {
                         visual.setEnabled(true);
                         xSize.setValue(bigPony.getScale().x);
                         ySize.setValue(bigPony.getScale().y);

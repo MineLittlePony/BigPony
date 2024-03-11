@@ -1,7 +1,8 @@
 package com.minelittlepony.bigpony.minelittlepony;
 
-import com.minelittlepony.api.pony.Pony;
+import com.minelittlepony.api.pony.IPony;
 import com.minelittlepony.api.pony.meta.Size;
+import com.minelittlepony.api.pony.network.fabric.PonyDataCallback;
 import com.minelittlepony.bigpony.*;
 import com.minelittlepony.bigpony.client.BigPonyClient;
 import com.minelittlepony.bigpony.hdskins.SkinDetecter;
@@ -9,11 +10,10 @@ import com.mojang.authlib.GameProfile;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.minelittlepony.api.model.PonyModel;
 import com.minelittlepony.api.config.PonyConfig;
-import com.minelittlepony.api.events.PonyDataCallback;
-import com.minelittlepony.api.events.PonyModelPrepareCallback;
+import com.minelittlepony.api.model.IModel;
 import com.minelittlepony.api.model.ModelAttributes;
+import com.minelittlepony.api.model.fabric.PonyModelPrepareCallback;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -29,7 +29,7 @@ public class Main extends PresetDetector implements ClientModInitializer {
         INSTANCE = this;
 
         PonyModelPrepareCallback.EVENT.register(this::onPonyModelPrepared);
-        PonyDataCallback.EVENT.register((sender, data, env) -> {
+        PonyDataCallback.EVENT.register((sender, data, noSkin, env) -> {
             if (!BigPony.getInstance().getScaling().isVisual()
                     && env == EnvType.CLIENT
                     && BigPonyClient.isClientPlayer(sender)) {
@@ -38,9 +38,9 @@ public class Main extends PresetDetector implements ClientModInitializer {
         });
     }
 
-    private void onPonyModelPrepared(Entity entity, PonyModel<?> model, ModelAttributes.Mode mode) {
+    private void onPonyModelPrepared(Entity entity, IModel model, ModelAttributes.Mode mode) {
         if (entity instanceof Scaled && !((Scaled)entity).getScaling().isVisual() && isPony((PlayerEntity)entity)) {
-            model.getAttributes().visualHeight = entity.getHeight() / model.getSize().scaleFactor();
+            model.getAttributes().visualHeight = entity.getHeight() / model.getSize().getScaleFactor();
         }
     }
 
@@ -51,7 +51,7 @@ public class Main extends PresetDetector implements ClientModInitializer {
 
     @Override
     public boolean isPony(PlayerEntity player) {
-        return !Pony.getManager().getPony(player).race().isHuman();
+        return !IPony.getManager().getPony(player).race().isHuman();
     }
 
     @Override
@@ -60,11 +60,11 @@ public class Main extends PresetDetector implements ClientModInitializer {
             // Turn on filly cam so we can get the camera parameters
             PonyConfig.getInstance().fillycam.set(true);
 
-            Pony pony = Pony.getManager().getPony(skin);
-            Size size = pony.metadata().size();
+            IPony pony = IPony.getManager().getPony(skin);
+            Size size = pony.metadata().getSize();
 
-            into.setScale(new Triple(size.scaleFactor()));
-            into.setCamera(new Cam(size.eyeDistanceFactor(), size.eyeHeightFactor()));
+            into.setScale(new Triple(size.getScaleFactor()));
+            into.setCamera(new Cam(size.getEyeDistanceFactor(), size.getEyeHeightFactor()));
 
             // We turn off filly cam because it's not needed and might cause issues with buckets if left enabled
             PonyConfig.getInstance().fillycam.set(false);
