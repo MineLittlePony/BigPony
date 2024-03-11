@@ -172,6 +172,7 @@ public class GuiBigSettings extends GameGui {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
+        renderBackground(context);
         super.render(context, mouseX, mouseY, partialTicks);
         content.render(context, mouseX, mouseY, partialTicks);
     }
