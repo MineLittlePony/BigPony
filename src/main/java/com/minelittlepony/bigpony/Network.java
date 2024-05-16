@@ -72,8 +72,8 @@ public class Network {
                 BigPony.LOGGER.info("Resetting registered flag");
             });
             ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-                if (client.player instanceof Scaled) {
-                    ((Scaled)client.player).getScaling().setInitial(client.player);
+                if (client.player instanceof Scaled scaled) {
+                    scaled.getScaling().setInitial(client.player);
                 }
             });
             ClientPlayNetworking.registerGlobalReceiver(CONSENT_ID, (client, ignore1, buffer, ignore2) -> {
