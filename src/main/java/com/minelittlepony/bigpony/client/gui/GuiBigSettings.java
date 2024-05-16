@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 import com.minelittlepony.bigpony.BigPony;
 import com.minelittlepony.bigpony.Scaled;
 import com.minelittlepony.bigpony.Scaling;
-import com.minelittlepony.bigpony.minelittlepony.PresetDetector;
 import com.minelittlepony.common.client.gui.GameGui;
 import com.minelittlepony.common.client.gui.ScrollContainer;
 import com.minelittlepony.common.client.gui.element.AbstractSlider;
@@ -128,23 +127,9 @@ public class GuiBigSettings extends GameGui {
             .setTextFormat(format("minebp.camera.distance"))
             .setEnabled(allowCamera && allowScaling);
 
-        Toggle visual;
-        content.addButton(visual = new Toggle(left, top += 30, !bigPony.isVisual()))
+        content.addButton(new Toggle(left, top += 30, !bigPony.isVisual()))
             .onChange(v -> {
                 bigPony.setVisual(!v);
-                if (v) {
-                    visual.setEnabled(false);
-                    PresetDetector.getInstance().detectPreset(client.getSession().getProfile(), bigPony).handle((skin, ex) -> {
-                        visual.setEnabled(true);
-                        xSize.setValue(bigPony.getScale().x);
-                        ySize.setValue(bigPony.getScale().y);
-                        zSize.setValue(bigPony.getScale().z);
-                        height.setValue(bigPony.getCamera().height);
-                        distance.setValue(bigPony.getCamera().distance);
-                        tick();
-                        return null;
-                    });
-                }
                 tick();
                 return v;
             })
