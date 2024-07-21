@@ -1,233 +1,94 @@
 package com.minelittlepony.bigpony;
 
 import com.minelittlepony.bigpony.client.BigPonyClient;
+import com.minelittlepony.bigpony.data.BodyScale;
+import com.minelittlepony.bigpony.data.EntityScale;
 import com.minelittlepony.bigpony.minelittlepony.PresetDetector;
-
+import com.minelittlepony.bigpony.network.MsgPlayerSize;
+import com.minelittlepony.bigpony.network.Network;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
 
 public class Scaling {
+    private EntityScale dimensions = EntityScale.DEFAULT;
 
-    protected Triple body = new Triple(1);
+    private boolean isPony;
+    private boolean dirty;
 
-    protected Cam camera = new Cam(1);
+    private long lastSettingsUpdateTime;
 
-    protected float maxMultiplier = 2;
-
-    protected boolean visual = true;
-
-    private transient EntityDimensions knownVanillaSize = PlayerEntity.STANDING_DIMENSIONS;
-    private transient EntityDimensions calculatedSize;
-
-    private transient boolean configured;
-    private transient boolean dirty;
-
-    private transient boolean serverConsentChanged;
-    private transient boolean serverConsentCamera;
-    private transient boolean serverConsentHitbox;
-    private transient boolean serverConsentFreeform;
-
-    private transient boolean isPony;
-
-    public Scaling(Triple body, Cam camera) {
-        this.body = body;
-        this.camera = camera;
+    public EntityScale getDimensions() {
+        return dimensions;
     }
 
-    public void setVisual(boolean visual) {
-        if (visual != this.visual) {
-            this.visual = visual;
+    public void setDimensions(EntityScale dimensions) {
+        if (!this.dimensions.equals(dimensions)) {
+            this.dimensions = dimensions;
             markDirty();
         }
     }
 
-    public boolean isVisual() {
-        return visual;
-    }
-
-    public void setScale(Triple scale) {
-        if (!this.body.equals(scale)) {
-            this.body = scale;
-
-            markDirty();
-        }
-    }
-
-    public void setCamera(Cam camera) {
-        if (this.camera.height != camera.height || this.camera.distance != camera.distance) {
-            this.camera = camera;
-            markDirty();
-        }
-    }
-
-    public float setHeight(float height) {
-        if (camera.height != height) {
-            camera.height = height;
-            markDirty();
-        }
-        return camera.height;
-    }
-
-    public float setDistance(float distance) {
-        if (distance != camera.distance) {
-            camera.distance = distance;
-            markDirty();
-        }
-        return camera.distance;
-    }
-
-    public float getMaxMultiplier() {
-        return maxMultiplier;
-    }
-
-    public Triple getScale() {
-        return body;
-    }
-
-    public Triple getVisualScale() {
-        return visual || !isPony ? getScale() : Triple.DEFAULT;
-    }
-
-    public Cam getCamera() {
-        return camera;
+    public BodyScale getRenderedBodyScale() {
+        return (dimensions.visual() || !isPony) ? dimensions.body() : BodyScale.DEFAULT;
     }
 
     public EntityDimensions getReplacementSize(PlayerEntity entity, EntityPose pose, EntityDimensions existing) {
-
-        if (!(entity instanceof ServerPlayerEntity || serverConsentHitbox)) {
-            return existing;
-        }
-        // This ends up changing hitboxes.
-
-        if (calculatedSize == null || existing.height != knownVanillaSize.height || existing.width != knownVanillaSize.width) {
-            knownVanillaSize = EntityDimensions.fixed(existing.width, existing.height);
-            calculatedSize = EntityDimensions.changing(
-                    Math.max(0.04F, multiply(knownVanillaSize.width, getScale().x)),
-                    Math.max(0.04F, multiply(knownVanillaSize.height, getScale().y))
-            );
-        }
-
-        return calculatedSize;
+        long permissions = InteractionManager.getInstance().getPermissions();
+        boolean changeHitbox = Permissions.hitbox(permissions);
+        boolean changeCamera = Permissions.camera(permissions);
+        return new EntityDimensions(
+                changeHitbox ? Math.max(0.04F, multiply(existing.width(), dimensions.body().x())) : existing.width(),
+                changeHitbox ? Math.max(0.04F, multiply(existing.height(), dimensions.body().y())) : existing.height(),
+                changeCamera ? Math.max(0.004F, multiply(existing.eyeHeight(), dimensions.camera().height())) : existing.eyeHeight(),
+                existing.attachments(),
+                false
+        );
     }
 
     public float getShadowScale() {
-        return Math.min(Math.max(getVisualScale().x, getVisualScale().z), maxMultiplier);
+        return Math.min(getRenderedBodyScale().shadowScale(), InteractionManager.getInstance().getMaxMultiplier());
     }
 
-    public double getCameraDistance(double existing) {
-        return canAlterCamera() ? multiply(existing, camera.distance) : existing;
-    }
-
-    public float getReplacementActiveEyeHeight(EntityPose pose, EntityDimensions size, float existing) {
-        return getReplacementPassiveEyeHeight(pose, size, existing);
-    }
-
-    public float getReplacementPassiveEyeHeight(EntityPose pose, EntityDimensions size, float existing) {
-        return canAlterCamera() ? Math.max(0.04F, multiply(existing, camera.height)) : existing;
-    }
-
-    private boolean canAlterCamera() {
-        return serverConsentCamera && !(!visual && isPony && PresetDetector.getInstance().isFillyCam());
-    }
-
-    private float multiply(float existing, float multiplier) {
-        return existing * Math.min(multiplier, maxMultiplier);
-    }
-
-    private double multiply(double existing, float multiplier) {
-        return existing * Math.min(multiplier, maxMultiplier);
+    public float getCameraDistanceMultiplier() {
+        return Permissions.camera(InteractionManager.getInstance().getPermissions()) ?  Math.min(dimensions.camera().distance(), InteractionManager.getInstance().getMaxMultiplier()) : 1;
     }
 
     public void markDirty() {
-        calculatedSize = null;
         dirty = true;
     }
 
-    public boolean isConfigured() {
-        return configured;
-    }
-
-    public boolean hasCameraConsent() {
-        return serverConsentCamera;
-    }
-
-    public boolean hasHitboxConsent() {
-        return serverConsentHitbox;
-    }
-
-    public boolean hasFreeformConsent() {
-        return serverConsentFreeform;
-    }
-
-    public void updateConsent(boolean camera, boolean hitbox, boolean freeform, float multiplier) {
-        serverConsentCamera = camera;
-        serverConsentHitbox = hitbox;
-        serverConsentFreeform = freeform;
-        serverConsentChanged = true;
-        maxMultiplier = multiplier;
-    }
-
-    public void setInitial(PlayerEntity entity) {
-        if (!configured && entity.getWorld().isClient) {
-            initFrom(BigPony.getInstance().getScaling());
-            Network.sendPlayerSizeToServer(new MsgPlayerSize(entity.getUuid(), this, false));
-        }
-    }
-
     public void tick(PlayerEntity entity) {
+        isPony = PresetDetector.getInstance().isPony(entity);
 
-        if (entity.getWorld().isClient) {
-            isPony = PresetDetector.getInstance().isPony(entity);
-        }
-
-        if (dirty || serverConsentChanged) {
-            serverConsentChanged = false;
-            entity.calculateDimensions();
+        long lastSettingsUpdateTime = InteractionManager.getInstance().getLastSettingsUpdateTime();
+        if (lastSettingsUpdateTime != this.lastSettingsUpdateTime) {
+            dirty = true;
+            this.lastSettingsUpdateTime = lastSettingsUpdateTime;
         }
 
         if (dirty) {
             dirty = false;
-
+            entity.calculateDimensions();
             if (entity instanceof ServerPlayerEntity) {
-                Network.sendPlayerSizeToClient(entity.getWorld(), new MsgOtherPlayerSize(entity.getUuid(), this));
+                Network.OTHER_PLAYER_SIZE.sendToSurroundingPlayers(toUpdatePacket(entity), entity);
             } else if (entity.getWorld().isClient && BigPonyClient.isClientPlayer(entity)) {
-                Network.sendPlayerSizeToServer(new MsgPlayerSize(entity.getUuid(), this, true));
+                Network.PLAYER_SIZE.sendToServer(toUpdatePacket(entity));
             }
         }
     }
 
-    public void initFrom(Scaling scale) {
-        copyFrom(scale);
-        dirty = false;
-        configured = true;
+    public MsgPlayerSize toUpdatePacket(Entity owner) {
+        return new MsgPlayerSize(owner.getId(), dimensions, true);
     }
 
-    public void copyFrom(Scaling scale) {
-        if (scale != this) {
-            setScale(scale.getScale());
-            setCamera(scale.getCamera());
-            setVisual(scale.isVisual());
-            maxMultiplier = scale.getMaxMultiplier();
-            configured = true;
-            dirty = true;
-        }
+    private static float multiply(float existing, float multiplier) {
+        return existing * Math.min(multiplier, InteractionManager.getInstance().getMaxMultiplier());
     }
 
-    public void fromTag(NbtCompound tag) {
-        camera.fromTag(tag.getCompound("camera"));
-        body.fromTag(tag.getCompound("body"));
-        visual = tag.getBoolean("visual");
-        configured = true;
-        dirty = false;
-    }
-
-    public NbtCompound toTag(NbtCompound tag) {
-        tag.put("camera", camera.toTag(new NbtCompound()));
-        tag.put("body", body.toTag(new NbtCompound()));
-        tag.putBoolean("visual", visual);
-        return tag;
+    public interface Holder {
+        Scaling getScaling();
     }
 }

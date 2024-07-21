@@ -3,9 +3,11 @@ package com.minelittlepony.bigpony;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.minelittlepony.bigpony.network.Network;
 import com.minelittlepony.common.util.GamePaths;
 
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.util.Identifier;
 
 public class BigPony implements ModInitializer {
 
@@ -17,6 +19,10 @@ public class BigPony implements ModInitializer {
         return instance;
     }
 
+    public static Identifier id(String name) {
+        return Identifier.of("minebp", name);
+    }
+
     private final BigPonyConfig config = new BigPonyConfig(GamePaths.getConfigDirectory().resolve("bigpony.json"));
 
     public BigPony() {
@@ -25,10 +31,6 @@ public class BigPony implements ModInitializer {
 
     public BigPonyConfig getConfig() {
         return config;
-    }
-
-    public Scaling getScaling() {
-        return config.scale.get();
     }
 
     @Override

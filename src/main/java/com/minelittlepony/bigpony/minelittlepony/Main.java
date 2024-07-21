@@ -4,23 +4,21 @@ import com.minelittlepony.api.pony.Pony;
 import com.minelittlepony.api.pony.meta.Size;
 import com.minelittlepony.bigpony.*;
 import com.minelittlepony.bigpony.client.BigPonyClient;
+import com.minelittlepony.bigpony.data.BodyScale;
+import com.minelittlepony.bigpony.data.CameraScale;
+import com.minelittlepony.bigpony.data.EntityScale;
 import com.minelittlepony.bigpony.hdskins.SkinDetecter;
 import com.mojang.authlib.GameProfile;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.minelittlepony.api.model.PonyModel;
 import com.minelittlepony.api.config.PonyConfig;
 import com.minelittlepony.api.events.PonyDataCallback;
 import com.minelittlepony.api.events.PonyModelPrepareCallback;
-import com.minelittlepony.api.model.ModelAttributes;
-
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
 
 public class Main extends PresetDetector implements ClientModInitializer {
 
@@ -28,20 +26,18 @@ public class Main extends PresetDetector implements ClientModInitializer {
     public void onInitializeClient() {
         INSTANCE = this;
 
-        PonyModelPrepareCallback.EVENT.register(this::onPonyModelPrepared);
-        PonyDataCallback.EVENT.register((sender, data, env) -> {
-            if (!BigPony.getInstance().getScaling().isVisual()
-                    && env == EnvType.CLIENT
-                    && BigPonyClient.isClientPlayer(sender)) {
-                detectPreset(sender.getGameProfile(), ((Scaled)sender).getScaling());
+        PonyModelPrepareCallback.EVENT.register((entity, model, mode) -> {
+            if (BigPony.getInstance().getConfig().useDetectedPonyScaling.get() && isPony((PlayerEntity)entity)) {
+                model.getAttributes().visualHeight = entity.getHeight() / model.getSize().scaleFactor();
             }
         });
-    }
-
-    private void onPonyModelPrepared(Entity entity, PonyModel<?> model, ModelAttributes.Mode mode) {
-        if (entity instanceof Scaled && !((Scaled)entity).getScaling().isVisual() && isPony((PlayerEntity)entity)) {
-            model.getAttributes().visualHeight = entity.getHeight() / model.getSize().scaleFactor();
-        }
+        PonyDataCallback.EVENT.register((sender, data, env) -> {
+            if (sender instanceof Scaling.Holder holder
+                    && BigPony.getInstance().getConfig().useDetectedPonyScaling.get()
+                    && env == EnvType.CLIENT && BigPonyClient.isClientPlayer(sender)) {
+                detectPreset(sender.getGameProfile()).thenAccept(holder.getScaling()::setDimensions);
+            }
+        });
     }
 
     @Override
@@ -55,7 +51,7 @@ public class Main extends PresetDetector implements ClientModInitializer {
     }
 
     @Override
-    public CompletableFuture<Identifier> detectPreset(GameProfile profile, Scaling into) {
+    public CompletableFuture<EntityScale> detectPreset(GameProfile profile) {
         return SkinDetecter.getInstance().loadSkin(profile).thenApplyAsync(skin -> {
             // Turn on filly cam so we can get the camera parameters
             PonyConfig.getInstance().fillycam.set(true);
@@ -63,13 +59,16 @@ public class Main extends PresetDetector implements ClientModInitializer {
             Pony pony = Pony.getManager().getPony(skin);
             Size size = pony.metadata().size();
 
-            into.setScale(new Triple(size.scaleFactor()));
-            into.setCamera(new Cam(size.eyeDistanceFactor(), size.eyeHeightFactor()));
+            EntityScale scale = new EntityScale(
+                    BodyScale.of(size.scaleFactor()),
+                    new CameraScale(size.eyeDistanceFactor(), size.eyeHeightFactor()),
+                    false
+            );
 
             // We turn off filly cam because it's not needed and might cause issues with buckets if left enabled
             PonyConfig.getInstance().fillycam.set(false);
             PonyConfig.getInstance().save();
-            return skin;
+            return scale;
         }, MinecraftClient.getInstance());
     }
 }

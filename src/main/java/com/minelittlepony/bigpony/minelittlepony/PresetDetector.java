@@ -2,11 +2,10 @@ package com.minelittlepony.bigpony.minelittlepony;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.minelittlepony.bigpony.Scaling;
+import com.minelittlepony.bigpony.data.EntityScale;
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
 
 public class PresetDetector {
     static PresetDetector INSTANCE = new PresetDetector();
@@ -25,7 +24,7 @@ public class PresetDetector {
         return false;
     }
 
-    public CompletableFuture<Identifier> detectPreset(GameProfile profile, Scaling into) {
+    public CompletableFuture<EntityScale> detectPreset(GameProfile profile) {
         return CompletableFuture.failedFuture(null);
     }
 }

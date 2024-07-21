@@ -6,46 +6,40 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.minelittlepony.bigpony.Cam;
-import com.minelittlepony.bigpony.Scaled;
 import com.minelittlepony.bigpony.Scaling;
-import com.minelittlepony.bigpony.Triple;
+import com.minelittlepony.bigpony.data.EntityScale;
+import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
 
 @Mixin(value = PlayerEntity.class, priority = 1001)
-abstract class MixinPlayerEntity extends LivingEntity implements Scaled {
+abstract class MixinPlayerEntity extends LivingEntity implements Scaling.Holder {
     private MixinPlayerEntity() {super(null, null);}
 
-    private Scaling playerScale;
+    private final Scaling playerScale = new Scaling();
 
-    @Inject(method = "getDimensions(Lnet/minecraft/entity/EntityPose;)Lnet/minecraft/entity/EntityDimensions;",
-            at = @At("RETURN"),
-            cancellable = true)
+    @Inject(method = "getBaseDimensions(Lnet/minecraft/entity/EntityPose;)Lnet/minecraft/entity/EntityDimensions;", at = @At("RETURN"), cancellable = true)
     protected void redirectGetSize(EntityPose pose, CallbackInfoReturnable<EntityDimensions> info) {
         info.setReturnValue(getScaling().getReplacementSize((PlayerEntity)(Object)this, pose, info.getReturnValue()));
     }
 
-    @Inject(method = "getActiveEyeHeight(Lnet/minecraft/entity/EntityPose;Lnet/minecraft/entity/EntityDimensions;)F",
-            at = @At("RETURN"),
-            cancellable = true)
-    protected void redirectGetActiveEyeHeight(EntityPose pose, EntityDimensions size, CallbackInfoReturnable<Float> info) {
-        info.setReturnValue(getScaling().getReplacementActiveEyeHeight(pose, size, info.getReturnValue()));
-    }
-
     @Inject(method = "writeCustomDataToNbt(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("HEAD"))
     private void onWriteCustomDataToTag(NbtCompound tag, CallbackInfo info) {
-        tag.put("big_pony_data", getScaling().toTag(new NbtCompound()));
+        EntityScale.CODEC.encodeStart(NbtOps.INSTANCE, getScaling().getDimensions()).result().ifPresent(nbt -> {
+            tag.put("big_pony_data", nbt);
+        });
     }
 
     @Inject(method = "readCustomDataFromNbt(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("HEAD"))
     private void onReadCustomDataFromTag(NbtCompound tag, CallbackInfo info) {
-        if (tag.contains("big_pony_data")) {
-            getScaling().fromTag(tag.getCompound("big_pony_data"));
+        if (tag.contains("big_pony_data", NbtElement.COMPOUND_TYPE)) {
+            EntityScale.CODEC.decode(NbtOps.INSTANCE, tag.getCompound("big_pony_data")).result().map(Pair::getFirst).ifPresent(getScaling()::setDimensions);
         }
     }
 
@@ -56,9 +50,6 @@ abstract class MixinPlayerEntity extends LivingEntity implements Scaled {
 
     @Override
     public Scaling getScaling() {
-        if (playerScale == null) {
-            playerScale = new Scaling(new Triple(1), new Cam(1));
-        }
         return playerScale;
     }
 }

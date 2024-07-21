@@ -4,8 +4,10 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.minelittlepony.bigpony.BigPony;
-import com.minelittlepony.bigpony.Scaled;
+import com.minelittlepony.bigpony.InteractionManager;
+import com.minelittlepony.bigpony.Permissions;
 import com.minelittlepony.bigpony.Scaling;
+import com.minelittlepony.bigpony.data.EntityScale;
 import com.minelittlepony.bigpony.minelittlepony.PresetDetector;
 import com.minelittlepony.common.client.gui.GameGui;
 import com.minelittlepony.common.client.gui.ScrollContainer;
@@ -24,7 +26,7 @@ public class GuiBigSettings extends GameGui {
     public static final Text TITLE = Text.translatable("minebp.options.title");
     public static final Text OPTION_DISABLED = Text.translatable("minebp.options.disabled").formatted(Formatting.YELLOW);
 
-    private final Scaling bigPony;
+    private EntityScale dimensions;
 
     final ScrollContainer content = new ScrollContainer();
 
@@ -36,9 +38,9 @@ public class GuiBigSettings extends GameGui {
         super(TITLE);
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) {
-            bigPony = BigPony.getInstance().getScaling();
+            dimensions = BigPony.getInstance().getConfig().scale.get();
         } else {
-            bigPony = ((Scaled)client.player).getScaling();
+            dimensions = ((Scaling.Holder)client.player).getScaling().getDimensions();
         }
 
         content.margin.top = 30;
@@ -50,12 +52,17 @@ public class GuiBigSettings extends GameGui {
     }
 
     public boolean hasCameraConsent() {
-        return client.player == null || (bigPony.hasFreeformConsent() && bigPony.hasCameraConsent());
+        return client.player == null || Permissions.camera(InteractionManager.getInstance().getPermissions());
     }
 
     public boolean hasScalingConsent() {
-        return (client.player == null || bigPony.hasFreeformConsent()) && bigPony.isVisual();
+        return (client.player == null || Permissions.freeform(InteractionManager.getInstance().getPermissions())) && dimensions.visual();
     }
+
+    public boolean hasHitboxConsent() {
+        return client.player == null || Permissions.hitbox(InteractionManager.getInstance().getPermissions());
+    }
+
 
     @Override
     protected void init() {
@@ -70,7 +77,7 @@ public class GuiBigSettings extends GameGui {
         int right = width / 2 + 30;
 
         boolean allowCamera = hasCameraConsent();
-        boolean allowHitbox = client.player == null || bigPony.hasHitboxConsent();
+        boolean allowHitbox = hasHitboxConsent();
         boolean allowScaling = hasScalingConsent();
 
         addButton(new Label(width / 2, 6)).setCentered().getStyle().setText(getTitle().getString());
@@ -79,9 +86,9 @@ public class GuiBigSettings extends GameGui {
         content.addButton(new Label(left, top + 100)).getStyle().setText("minebp.options.camera");
         content.addButton(new Label(right, top)).getStyle().setText("minebp.options.presets");
 
-        float max = bigPony.getMaxMultiplier();
+        float max = InteractionManager.getInstance().getMaxMultiplier();
 
-        content.addButton(global = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getScale().x))
+        content.addButton(global = new ResettableSlider(content, left, top += 20, .1F, max, dimensions.body().x()))
             .onChange(value -> {
                 xSize.setValue(value);
                 ySize.setValue(value);
@@ -92,26 +99,26 @@ public class GuiBigSettings extends GameGui {
             })
             .setEnabled(allowScaling)
             .getStyle().setText("minebp.scale.global");
-        content.addButton(xSize = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getScale().x))
+        content.addButton(xSize = new ResettableSlider(content, left, top += 20, .1F, max, dimensions.body().x()))
             .onChange(v -> {
-                bigPony.getScale().x = v;
-                bigPony.markDirty();
+                dimensions = dimensions.withBody(dimensions.body().withX(v));
+                updateDimensions();
                 return v;
             })
             .setTextFormat(format("minebp.scale.x"))
             .setEnabled(allowScaling);
-        content.addButton(ySize = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getScale().y))
+        content.addButton(ySize = new ResettableSlider(content, left, top += 20, .1F, max, dimensions.body().y()))
             .onChange(v -> {
-                bigPony.getScale().y = v;
-                bigPony.markDirty();
+                dimensions = dimensions.withBody(dimensions.body().withY(v));
+                updateDimensions();
                 return v;
             })
             .setTextFormat(format("minebp.scale.y"))
             .setEnabled(allowScaling);
-        content.addButton(zSize = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getScale().z))
+        content.addButton(zSize = new ResettableSlider(content, left, top += 20, .1F, max, dimensions.body().z()))
             .onChange(v -> {
-                bigPony.getScale().z = v;
-                bigPony.markDirty();
+                dimensions = dimensions.withBody(dimensions.body().withZ(v));
+                updateDimensions();
                 return v;
             })
             .setTextFormat(format("minebp.scale.z"))
@@ -119,31 +126,42 @@ public class GuiBigSettings extends GameGui {
 
         top += 20;
 
-        content.addButton(height = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getCamera().height))
-            .onChange(bigPony::setHeight)
+        content.addButton(height = new ResettableSlider(content, left, top += 20, .1F, max, dimensions.camera().height()))
+            .onChange(v -> {
+                dimensions = dimensions.withCamera(dimensions.camera().withHeight(v));
+                updateDimensions();
+                return v;
+            })
             .setTextFormat(format("minebp.camera.height"))
             .setEnabled(allowCamera && allowScaling);
-        content.addButton(distance = new ResettableSlider(content, left, top += 20, .1F, max, bigPony.getCamera().distance))
-            .onChange(bigPony::setDistance)
+        content.addButton(distance = new ResettableSlider(content, left, top += 20, .1F, max, dimensions.camera().distance()))
+            .onChange(v -> {
+                dimensions = dimensions.withCamera(dimensions.camera().withDistance(v));
+                updateDimensions();
+                return v;
+            })
             .setTextFormat(format("minebp.camera.distance"))
             .setEnabled(allowCamera && allowScaling);
 
         Toggle visual;
-        content.addButton(visual = new Toggle(left, top += 30, !bigPony.isVisual()))
-            .onChange(v -> {
-                bigPony.setVisual(!v);
+        content.addButton(visual = new Toggle(left, top += 30, BigPony.getInstance().getConfig().useDetectedPonyScaling.get())).onChange(v -> {
+            BigPony.getInstance().getConfig().useDetectedPonyScaling.set(v);
                 if (v) {
                     visual.setEnabled(false);
-                    PresetDetector.getInstance().detectPreset(client.getGameProfile(), bigPony).handle((skin, ex) -> {
-                        visual.setEnabled(true);
-                        xSize.setValue(bigPony.getScale().x);
-                        ySize.setValue(bigPony.getScale().y);
-                        zSize.setValue(bigPony.getScale().z);
-                        height.setValue(bigPony.getCamera().height);
-                        distance.setValue(bigPony.getCamera().distance);
+                    PresetDetector.getInstance().detectPreset(client.getGameProfile()).thenAccept(dimensions -> {
+                        this.dimensions = dimensions;
+                        xSize.setValue(dimensions.body().x());
+                        ySize.setValue(dimensions.body().y());
+                        zSize.setValue(dimensions.body().z());
+                        height.setValue(dimensions.camera().height());
+                        distance.setValue(dimensions.camera().distance());
+                        updateDimensions();
                         tick();
-                        return null;
+                        visual.setEnabled(true);
                     });
+                } else {
+                    dimensions = new EntityScale(dimensions.body(), dimensions.camera(), true);
+                    updateDimensions();
                 }
                 tick();
                 return v;
@@ -199,11 +217,18 @@ public class GuiBigSettings extends GameGui {
         return false;
     }
 
+    private void updateDimensions() {
+        if (client.player instanceof Scaling.Holder holder) {
+            holder.getScaling().setDimensions(dimensions);
+        }
+    }
+
     @Override
     public void close() {
         super.close();
-        BigPony.getInstance().getScaling().copyFrom(bigPony);
+        BigPony.getInstance().getConfig().scale.set(dimensions);
         BigPony.getInstance().getConfig().save();
+        updateDimensions();
     }
 
     public void applyPreset(CameraPresets preset, boolean camera, boolean body) {

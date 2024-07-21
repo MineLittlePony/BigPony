@@ -5,8 +5,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.minelittlepony.bigpony.Scaled;
-import com.minelittlepony.bigpony.Triple;
+import com.minelittlepony.bigpony.Scaling;
+import com.minelittlepony.bigpony.data.BodyScale;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GameRenderer;
@@ -31,22 +31,22 @@ abstract class MixinGameRenderer implements SynchronousResourceReloader, AutoClo
         info.cancel();
 
         PlayerEntity player = (PlayerEntity)client.getCameraEntity();
-        Triple scale = ((Scaled)player).getScaling().getVisualScale();
+        BodyScale scale = ((Scaling.Holder)player).getScaling().getRenderedBodyScale();
 
         float g = player.horizontalSpeed - player.prevHorizontalSpeed;
         float h = -(player.horizontalSpeed + g * f);
         float i = MathHelper.lerp(f, player.prevStrideDistance, player.strideDistance);
 
         matrices.translate(
-                (MathHelper.sin(h * (float)Math.PI) * i / 2) * scale.x,
-                -Math.abs(MathHelper.cos(h * (float)Math.PI) * i) * scale.y,
+                (MathHelper.sin(h * (float)Math.PI) * i / 2) * scale.x(),
+                -Math.abs(MathHelper.cos(h * (float)Math.PI) * i) * scale.y(),
                 0
         );
         matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(
-                MathHelper.sin(h * (float)Math.PI) * i * 3 * scale.z
+                MathHelper.sin(h * (float)Math.PI) * i * 3 * scale.z()
         ));
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(
-                Math.abs(MathHelper.cos(h * (float)Math.PI - 0.2f) * i) * 5 * scale.x
+                Math.abs(MathHelper.cos(h * (float)Math.PI - 0.2f) * i) * 5 * scale.x()
         ));
     }
 }
