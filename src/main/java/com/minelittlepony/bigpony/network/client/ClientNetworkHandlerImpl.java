@@ -1,32 +1,32 @@
 package com.minelittlepony.bigpony.network.client;
 
+import java.util.Optional;
+
+import org.jetbrains.annotations.Nullable;
+
 import com.minelittlepony.bigpony.BigPony;
 import com.minelittlepony.bigpony.InteractionManager;
-import com.minelittlepony.bigpony.Permissions;
 import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.bigpony.network.ConsentPacket;
-import com.minelittlepony.bigpony.network.MsgPlayerSize;
 import com.minelittlepony.bigpony.network.Network;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
 
 public class ClientNetworkHandlerImpl extends InteractionManager {
-    private final MinecraftClient client = MinecraftClient.getInstance();
-
-    private long permissions = Permissions.DEFAULT;
-    private float maxScalingMultiplier;
+    private long lastSettingsUpdate = 0;
+    private Optional<ConsentPacket> serverConsent = Optional.empty();
 
     public ClientNetworkHandlerImpl() {
-        Network.SERVER_CONSENT.receiver().addPersistentListener(this::handleConsent);
-        Network.OTHER_PLAYER_SIZE.receiver().addPersistentListener(this::handleSizeUpdate);
-        ClientLoginConnectionEvents.INIT.register((handler, client) -> {
-            permissions = Permissions.DEFAULT;
-            maxScalingMultiplier = 2;
-            BigPony.LOGGER.info("Resetting registered flag");
+        Network.SERVER_CONSENT.receiver().addPersistentListener((sender, packet) -> {
+            updateConsent(packet);
         });
+        Network.OTHER_PLAYER_SIZE.receiver().addPersistentListener((sender, packet) -> {
+            if (sender.getWorld().getEntityById(packet.entityId()) instanceof Scaling.Holder holder) {
+                holder.getScaling().setDimensions(packet.dimensions());
+            }
+        });
+        ClientLoginConnectionEvents.INIT.register((handler, client) -> updateConsent(null));
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             if (client.player instanceof Scaling.Holder holder) {
                 Scaling scaling = holder.getScaling();
@@ -38,22 +38,26 @@ public class ClientNetworkHandlerImpl extends InteractionManager {
 
     @Override
     public long getPermissions() {
-        return permissions;
+        return serverConsent.map(ConsentPacket::permissions).orElseGet(super::getPermissions);
     }
 
     @Override
     public float getMaxMultiplier() {
-        return maxScalingMultiplier;
+        return serverConsent.map(ConsentPacket::maxMultiplier).orElseGet(super::getMaxMultiplier);
     }
 
-    private void handleConsent(PlayerEntity sender, ConsentPacket packet) {
-        permissions = packet.permissions();
-        maxScalingMultiplier = packet.maxMultiplier();
+    private void updateConsent(@Nullable ConsentPacket consent) {
+        lastSettingsUpdate = System.currentTimeMillis();
+        serverConsent = Optional.ofNullable(consent);
     }
 
-    private void handleSizeUpdate(PlayerEntity sender, MsgPlayerSize packet) {
-        if (client.world.getEntityById(packet.entityId()) instanceof Scaling.Holder holder) {
-            holder.getScaling().setDimensions(packet.dimensions());
-        }
+    @Override
+    public long getLastSettingsUpdateTime() {
+        return lastSettingsUpdate;
+    }
+
+    @Override
+    public boolean isNetworkConnected() {
+        return serverConsent.isPresent();
     }
 }

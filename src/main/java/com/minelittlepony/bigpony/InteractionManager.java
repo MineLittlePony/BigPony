@@ -24,4 +24,8 @@ public class InteractionManager {
     public long getLastSettingsUpdateTime() {
         return 0;
     }
+
+    public boolean isNetworkConnected() {
+        return true;
+    }
 }

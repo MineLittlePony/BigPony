@@ -72,10 +72,12 @@ public class Scaling {
         if (dirty) {
             dirty = false;
             entity.calculateDimensions();
-            if (entity instanceof ServerPlayerEntity) {
-                Network.OTHER_PLAYER_SIZE.sendToSurroundingPlayers(toUpdatePacket(entity), entity);
-            } else if (entity.getWorld().isClient && BigPonyClient.isClientPlayer(entity)) {
-                Network.PLAYER_SIZE.sendToServer(toUpdatePacket(entity));
+            if (InteractionManager.getInstance().isNetworkConnected()) {
+                if (entity instanceof ServerPlayerEntity) {
+                    Network.OTHER_PLAYER_SIZE.sendToSurroundingPlayers(toUpdatePacket(entity), entity);
+                } else if (entity.getWorld().isClient && BigPonyClient.isClientPlayer(entity)) {
+                    Network.PLAYER_SIZE.sendToServer(toUpdatePacket(entity));
+                }
             }
         }
     }
