@@ -13,17 +13,13 @@ import net.minecraft.entity.LivingEntity;
 
 @Mixin(LivingEntityRenderer.class)
 abstract class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityModel<T>> {
-
-
-    @ModifyVariable(method = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;setupTransforms("
-                        + "Lnet/minecraft/entity/LivingEntity;"
-                        + "Lnet/minecraft/client/util/math/MatrixStack;"
-                        + "FFF"
-                        + ")V",
-            at = @At("HEAD"),
-            ordinal = 3
+    @ModifyVariable(
+        method = "setupTransforms",
+        at = @At("HEAD"),
+        ordinal = 3,
+        argsOnly = true
     )
-    private float modifyScaleonSetupTransforms(float initial, T entity, MatrixStack matrices) {
+    private float modifyScaleOnSetupTransforms(float initial, T entity, MatrixStack matrices, float animationProgress, float bodyYaw, float tickDelta, float vanillaScale) {
         if (entity instanceof Scaling.Holder holder) {
             BodyScale scale = holder.getScaling().getRenderedBodyScale();
             matrices.scale(scale.x(), scale.y(), scale.z());

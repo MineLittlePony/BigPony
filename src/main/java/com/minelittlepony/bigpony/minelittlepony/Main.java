@@ -27,7 +27,10 @@ public class Main extends PresetDetector implements ClientModInitializer {
         INSTANCE = this;
 
         PonyModelPrepareCallback.EVENT.register((entity, model, mode) -> {
-            if (BigPony.getInstance().getConfig().useDetectedPonyScaling.get() && isPony((PlayerEntity)entity)) {
+            if (BigPony.getInstance().getConfig().useDetectedPonyScaling.get()
+                    && entity instanceof PlayerEntity player
+                    && BigPonyClient.isClientPlayer(player)
+                    && isPony(player)) {
                 model.getAttributes().visualHeight = entity.getHeight() / model.getSize().scaleFactor();
             }
         });
