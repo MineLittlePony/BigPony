@@ -16,6 +16,10 @@ public class PresetDetector {
 
     PresetDetector() {}
 
+    public void revertFillyCam() {
+
+    }
+
     public boolean isFillyCam() {
         return false;
     }

@@ -49,7 +49,7 @@ public class Scaling {
                 existing.height() * InteractionManager.getInstance().getClamped(hitboxScale.y()),
                 existing.eyeHeight() * InteractionManager.getInstance().getClamped(getCameraScale().height()),
                 existing.attachments(),
-                false
+                existing.fixed()
         );
     }
 
