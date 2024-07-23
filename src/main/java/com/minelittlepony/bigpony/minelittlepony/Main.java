@@ -22,6 +22,9 @@ import net.minecraft.entity.player.PlayerEntity;
 
 public class Main extends PresetDetector implements ClientModInitializer {
 
+    private boolean oldFillyCam;
+    private boolean writing;
+
     @Override
     public void onInitializeClient() {
         INSTANCE = this;
@@ -31,7 +34,7 @@ public class Main extends PresetDetector implements ClientModInitializer {
                     && entity instanceof PlayerEntity player
                     && BigPonyClient.isClientPlayer(player)
                     && isPony(player)) {
-                model.getAttributes().visualHeight = entity.getHeight() / model.getSize().scaleFactor();
+                model.getAttributes().visualHeight = entity.getHeight();
             }
         });
         PonyDataCallback.EVENT.register((sender, data, env) -> {
@@ -41,6 +44,30 @@ public class Main extends PresetDetector implements ClientModInitializer {
                 detectPreset(sender.getGameProfile()).thenAccept(holder.getScaling()::setDimensions);
             }
         });
+
+        PonyConfig.getInstance().onChangedExternally(config -> {
+            if (!writing) {
+                oldFillyCam = isFillyCam();
+            }
+        });
+        PonyConfig.getInstance().fillycam.onChanged(fillyCam -> {
+            if (!writing) {
+                oldFillyCam = isFillyCam();
+            }
+        });
+        oldFillyCam = isFillyCam();
+    }
+
+    public void setFillyCam(boolean enable) {
+        oldFillyCam = isFillyCam();
+        writing = true;
+        PonyConfig.getInstance().fillycam.set(enable);
+        writing = false;
+    }
+
+    @Override
+    public void revertFillyCam() {
+        PonyConfig.getInstance().fillycam.set(oldFillyCam);
     }
 
     @Override
@@ -57,7 +84,8 @@ public class Main extends PresetDetector implements ClientModInitializer {
     public CompletableFuture<EntityScale> detectPreset(GameProfile profile) {
         return SkinDetecter.getInstance().loadSkin(profile).thenApplyAsync(skin -> {
             // Turn on filly cam so we can get the camera parameters
-            PonyConfig.getInstance().fillycam.set(true);
+            boolean fillyCam = isFillyCam();
+            setFillyCam(true);
 
             Pony pony = Pony.getManager().getPony(skin);
             Size size = pony.metadata().size();
@@ -69,8 +97,10 @@ public class Main extends PresetDetector implements ClientModInitializer {
             );
 
             // We turn off filly cam because it's not needed and might cause issues with buckets if left enabled
-            PonyConfig.getInstance().fillycam.set(false);
-            PonyConfig.getInstance().save();
+            setFillyCam(false);
+            if (!fillyCam) {
+                PonyConfig.getInstance().save();
+            }
             return scale;
         }, MinecraftClient.getInstance());
     }

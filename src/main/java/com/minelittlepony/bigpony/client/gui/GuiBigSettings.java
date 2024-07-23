@@ -182,6 +182,7 @@ public class GuiBigSettings extends GameGui {
                         visual.setEnabled(true);
                     });
                 } else {
+                    PresetDetector.getInstance().revertFillyCam();
                     dimensions = new EntityScale(dimensions.body(), dimensions.camera(), true);
                     updateDimensions();
                 }
