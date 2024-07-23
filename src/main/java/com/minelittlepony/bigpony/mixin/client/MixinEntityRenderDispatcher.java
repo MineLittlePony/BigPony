@@ -4,8 +4,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-import com.minelittlepony.bigpony.client.BigPonyClient;
-
+import com.minelittlepony.bigpony.Scaling;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
@@ -31,6 +30,6 @@ abstract class MixinEntityRenderDispatcher {
                         + "F"
                         + ")V"), index = 6)
     private float modifyRadius(MatrixStack matrices, VertexConsumerProvider vertices, Entity entity, float opacity, float tickDelta, WorldView world, float radius) {
-        return BigPonyClient.getInstance().onRenderShadow(radius, entity, matrices);
+        return radius * (entity instanceof Scaling.Holder holder ? holder.getScaling().getShadowScale() : 1);
     }
 }

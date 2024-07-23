@@ -8,6 +8,7 @@ import com.sollace.fabwork.api.packets.SimpleNetworking;
 
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 
 public class Network {
@@ -16,13 +17,14 @@ public class Network {
     public static final S2CPacketType<MsgPlayerSize> OTHER_PLAYER_SIZE = SimpleNetworking.serverToClient(BigPony.id("other_player_size"), MsgPlayerSize::new);
 
     public static void bootstrap() {
+        ServerLifecycleEvents.SERVER_STARTING.register(s -> InteractionManager.getInstance().setServer(s));
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            BigPony.LOGGER.info("Sending consent packet to " + handler.getPlayer().getName().getString());
-            sender.sendPacket(SERVER_CONSENT.toPacket(new ConsentPacket()));
+            InteractionManager.getInstance().log("[S-JOIN] Sending settings update packet to " + handler.getPlayer().getName().getString());
+            sender.sendPacket(Network.SERVER_CONSENT.toPacket(new ConsentPacket()));
         });
         ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, origin, destination) -> {
-            BigPony.LOGGER.info("Sending consent packet to " + player.getName().getString());
-            SERVER_CONSENT.sendToPlayer(new ConsentPacket(), player);
+            InteractionManager.getInstance().log("[S-CNGWLD] Re-Sending settings update packet to " + player.getName().getString());
+            Network.SERVER_CONSENT.sendToPlayer(new ConsentPacket(), player);
         });
         ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
             Scaling newScaling = ((Scaling.Holder)newPlayer).getScaling();
@@ -31,7 +33,12 @@ public class Network {
         });
 
         PLAYER_SIZE.receiver().addPersistentListener((player, packet) -> {
+            InteractionManager.getInstance().log("[S] Got size packet for client player " + player.getName().getString());
             ((Scaling.Holder)player).getScaling().setDimensions(packet.dimensions());
+        });
+
+        BigPony.getInstance().getConfig().onChangedExternally(config -> {
+            InteractionManager.getInstance().onConfigurationChange();
         });
     }
 }

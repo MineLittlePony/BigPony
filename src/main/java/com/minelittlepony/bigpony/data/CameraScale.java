@@ -8,6 +8,7 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 
 public record CameraScale(float distance, float height) {
+    public static final CameraScale DEFAULT = new CameraScale(1);
     public static final Codec<CameraScale> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.FLOAT.fieldOf("distance").forGetter(CameraScale::distance),
             Codec.FLOAT.fieldOf("height").forGetter(CameraScale::height)

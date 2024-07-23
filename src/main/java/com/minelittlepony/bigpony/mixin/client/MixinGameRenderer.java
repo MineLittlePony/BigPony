@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.bigpony.data.BodyScale;
+import com.minelittlepony.bigpony.network.InteractionManager;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GameRenderer;
@@ -24,29 +25,31 @@ abstract class MixinGameRenderer implements SynchronousResourceReloader, AutoClo
     private void onBobView(MatrixStack matrices, float f, CallbackInfo info) {
         MinecraftClient client = MinecraftClient.getInstance();
 
-        if (!(client.getCameraEntity() instanceof PlayerEntity)) {
+        if (!(client.getCameraEntity() instanceof PlayerEntity player)) {
             return;
         }
 
         info.cancel();
 
-        PlayerEntity player = (PlayerEntity)client.getCameraEntity();
-        BodyScale scale = ((Scaling.Holder)player).getScaling().getRenderedBodyScale();
-
         float g = player.horizontalSpeed - player.prevHorizontalSpeed;
         float h = -(player.horizontalSpeed + g * f);
         float i = MathHelper.lerp(f, player.prevStrideDistance, player.strideDistance);
 
+        BodyScale scale = ((Scaling.Holder)player).getScaling().getRenderedBodyScale();
+        float xScale = InteractionManager.getInstance().getClamped(scale.x());
+        float yScale = InteractionManager.getInstance().getClamped(scale.y());
+        float zScale = InteractionManager.getInstance().getClamped(scale.z());
+
         matrices.translate(
-                (MathHelper.sin(h * (float)Math.PI) * i / 2) * scale.x(),
-                -Math.abs(MathHelper.cos(h * (float)Math.PI) * i) * scale.y(),
+                (MathHelper.sin(h * MathHelper.PI) * i * 0.5F) * xScale,
+                -Math.abs(MathHelper.cos(h * MathHelper.PI) * i) * yScale,
                 0
         );
         matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(
-                MathHelper.sin(h * (float)Math.PI) * i * 3 * scale.z()
+                MathHelper.sin(h * MathHelper.PI) * i * 3 * zScale
         ));
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(
-                Math.abs(MathHelper.cos(h * (float)Math.PI - 0.2f) * i) * 5 * scale.x()
+                Math.abs(MathHelper.cos(h * MathHelper.PI - 0.2F) * i) * 5 * xScale
         ));
     }
 }

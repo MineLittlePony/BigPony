@@ -1,14 +1,15 @@
 package com.minelittlepony.bigpony.client.gui;
 
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.minelittlepony.bigpony.BigPony;
-import com.minelittlepony.bigpony.InteractionManager;
 import com.minelittlepony.bigpony.Permissions;
 import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.bigpony.data.EntityScale;
 import com.minelittlepony.bigpony.minelittlepony.PresetDetector;
+import com.minelittlepony.bigpony.network.InteractionManager;
 import com.minelittlepony.common.client.gui.GameGui;
 import com.minelittlepony.common.client.gui.ScrollContainer;
 import com.minelittlepony.common.client.gui.element.AbstractSlider;
@@ -27,28 +28,24 @@ public class GuiBigSettings extends GameGui {
     public static final Text OPTION_DISABLED = Text.translatable("minebp.options.disabled").formatted(Formatting.YELLOW);
 
     private EntityScale dimensions;
+    private EntityScale initialDimensions;
 
     final ScrollContainer content = new ScrollContainer();
 
+    private Button revert;
     private ResettableSlider global, xSize, ySize, zSize, height, distance;
 
     private CameraPresetButton[] presets;
 
     public GuiBigSettings(Screen parent) {
         super(TITLE);
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player == null) {
-            dimensions = BigPony.getInstance().getConfig().scale.get();
-        } else {
-            dimensions = ((Scaling.Holder)client.player).getScaling().getDimensions();
-        }
-
         content.margin.top = 30;
         content.margin.bottom = 30;
         content.getContentPadding().top = 10;
         content.getContentPadding().right = 10;
         content.getContentPadding().bottom = 20;
         content.getContentPadding().left = 10;
+        loadDimensions();
     }
 
     public boolean hasCameraConsent() {
@@ -56,17 +53,44 @@ public class GuiBigSettings extends GameGui {
     }
 
     public boolean hasScalingConsent() {
-        return (client.player == null || Permissions.freeform(InteractionManager.getInstance().getPermissions())) && dimensions.visual();
+        return (client.player == null || Permissions.freeform(InteractionManager.getInstance().getPermissions())) && !BigPony.getInstance().getConfig().useDetectedPonyScaling.get();
     }
 
     public boolean hasHitboxConsent() {
         return client.player == null || Permissions.hitbox(InteractionManager.getInstance().getPermissions());
     }
 
-
     @Override
     protected void init() {
+        loadDimensions();
+
+        addButton(new Label(width / 2, 6)).setCentered().getStyle().setText(getTitle().getString());
+
         content.init(this::rebuildContent);
+
+        addButton(new Button(width / 2 - 110, super.height - 25, 100, 20))
+            .onClick(sender -> finish())
+            .getStyle()
+            .setText("gui.done");
+        addButton(revert = new Button(width / 2 + 10, super.height - 25, 100, 20))
+            .onClick(sender -> {
+                dimensions = initialDimensions;
+                updateDimensions();
+                clearAndInit();
+            })
+            .getStyle()
+            .setText("gui.revert");
+        tick();
+    }
+
+    private void loadDimensions() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) {
+            dimensions = BigPony.getInstance().getConfig().scale.get();
+        } else {
+            dimensions = ((Scaling.Holder)client.player).getScaling().getDimensions();
+        }
+        initialDimensions = dimensions;
     }
 
     private void rebuildContent() {
@@ -79,8 +103,6 @@ public class GuiBigSettings extends GameGui {
         boolean allowCamera = hasCameraConsent();
         boolean allowHitbox = hasHitboxConsent();
         boolean allowScaling = hasScalingConsent();
-
-        addButton(new Label(width / 2, 6)).setCentered().getStyle().setText(getTitle().getString());
 
         content.addButton(new Label(left, top)).getStyle().setText("minebp.options.body");
         content.addButton(new Label(left, top + 100)).getStyle().setText("minebp.options.camera");
@@ -175,13 +197,6 @@ public class GuiBigSettings extends GameGui {
         presets = Stream.of(CameraPresets.values())
                 .map(preset -> new CameraPresetButton(this, preset, right))
                 .toArray(CameraPresetButton[]::new);
-
-        addButton(new Button(width / 2 - 100, super.height - 25, 200, 20))
-            .onClick(sender -> finish())
-            .getStyle()
-            .setText("gui.done");
-
-        tick();
     }
 
     static Function<AbstractSlider<Float>, Text> format(String key) {
@@ -210,6 +225,7 @@ public class GuiBigSettings extends GameGui {
 
         height.setEnabled(allowCamera && allowScaling);
         distance.setEnabled(allowCamera && allowScaling);
+        revert.setEnabled(!Objects.equals(dimensions, initialDimensions));
     }
 
     @Override

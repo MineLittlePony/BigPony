@@ -1,14 +1,13 @@
 package com.minelittlepony.bigpony;
 
-import com.minelittlepony.bigpony.client.BigPonyClient;
 import com.minelittlepony.bigpony.data.BodyScale;
+import com.minelittlepony.bigpony.data.CameraScale;
 import com.minelittlepony.bigpony.data.EntityScale;
 import com.minelittlepony.bigpony.minelittlepony.PresetDetector;
+import com.minelittlepony.bigpony.network.InteractionManager;
 import com.minelittlepony.bigpony.network.MsgPlayerSize;
-import com.minelittlepony.bigpony.network.Network;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
 
@@ -35,25 +34,33 @@ public class Scaling {
         return (dimensions.visual() || !isPony) ? dimensions.body() : BodyScale.DEFAULT;
     }
 
+    public BodyScale getHitboxScale() {
+        return Permissions.hitbox(InteractionManager.getInstance().getPermissions()) ? dimensions.body() : BodyScale.DEFAULT;
+    }
+
+    public CameraScale getCameraScale() {
+        return Permissions.hitbox(InteractionManager.getInstance().getPermissions()) ? dimensions.camera() : CameraScale.DEFAULT;
+    }
+
     public EntityDimensions getReplacementSize(PlayerEntity entity, EntityPose pose, EntityDimensions existing) {
-        long permissions = InteractionManager.getInstance().getPermissions();
-        boolean changeHitbox = Permissions.hitbox(permissions);
-        boolean changeCamera = Permissions.camera(permissions);
+        BodyScale hitboxScale = getHitboxScale();
         return new EntityDimensions(
-                changeHitbox ? Math.max(0.04F, multiply(existing.width(), dimensions.body().x())) : existing.width(),
-                changeHitbox ? Math.max(0.04F, multiply(existing.height(), dimensions.body().y())) : existing.height(),
-                changeCamera ? Math.max(0.004F, multiply(existing.eyeHeight(), dimensions.camera().height())) : existing.eyeHeight(),
+                existing.width() * InteractionManager.getInstance().getClamped(hitboxScale.shadowScale()),
+                existing.height() * InteractionManager.getInstance().getClamped(hitboxScale.y()),
+                existing.eyeHeight() * InteractionManager.getInstance().getClamped(getCameraScale().height()),
                 existing.attachments(),
                 false
         );
     }
 
     public float getShadowScale() {
-        return Math.min(getRenderedBodyScale().shadowScale(), InteractionManager.getInstance().getMaxMultiplier());
+        return InteractionManager.getInstance().getClamped(getRenderedBodyScale().shadowScale());
     }
 
     public float getCameraDistanceMultiplier() {
-        return Permissions.camera(InteractionManager.getInstance().getPermissions()) ?  Math.min(dimensions.camera().distance(), InteractionManager.getInstance().getMaxMultiplier()) : 1;
+        return Permissions.camera(InteractionManager.getInstance().getPermissions())
+                ? InteractionManager.getInstance().getClamped(dimensions.camera().distance())
+                : 1;
     }
 
     public void markDirty() {
@@ -64,30 +71,17 @@ public class Scaling {
         isPony = PresetDetector.getInstance().isPony(entity);
 
         long lastSettingsUpdateTime = InteractionManager.getInstance().getLastSettingsUpdateTime();
-        if (lastSettingsUpdateTime != this.lastSettingsUpdateTime) {
-            dirty = true;
-            this.lastSettingsUpdateTime = lastSettingsUpdateTime;
-        }
 
-        if (dirty) {
+        if (dirty || lastSettingsUpdateTime != this.lastSettingsUpdateTime) {
             dirty = false;
+            this.lastSettingsUpdateTime = lastSettingsUpdateTime;
             entity.calculateDimensions();
-            if (InteractionManager.getInstance().isNetworkConnected()) {
-                if (entity instanceof ServerPlayerEntity) {
-                    Network.OTHER_PLAYER_SIZE.sendToSurroundingPlayers(toUpdatePacket(entity), entity);
-                } else if (entity.getWorld().isClient && BigPonyClient.isClientPlayer(entity)) {
-                    Network.PLAYER_SIZE.sendToServer(toUpdatePacket(entity));
-                }
-            }
+            InteractionManager.getInstance().sendSizeUpdate(entity, this);
         }
     }
 
     public MsgPlayerSize toUpdatePacket(Entity owner) {
         return new MsgPlayerSize(owner.getId(), dimensions, true);
-    }
-
-    private static float multiply(float existing, float multiplier) {
-        return existing * Math.min(multiplier, InteractionManager.getInstance().getMaxMultiplier());
     }
 
     public interface Holder {
