@@ -13,6 +13,7 @@
     "client.MixinGameRenderer",
     "client.MixinEntityRenderDispatcher",
     "client.MixinLivingEntityRenderer",
+    "client.MixinLivingEntityRenderState",
     "client.MixinPlayerEntityRenderer"
   ]
 }

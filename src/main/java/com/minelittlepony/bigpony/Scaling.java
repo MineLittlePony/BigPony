@@ -87,4 +87,8 @@ public class Scaling {
     public interface Holder {
         Scaling getScaling();
     }
+
+    public interface MutableHolder extends Holder {
+        void setScaling(Scaling scaling);
+    }
 }

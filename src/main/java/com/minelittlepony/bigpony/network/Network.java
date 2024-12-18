@@ -12,9 +12,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 
 public class Network {
-    public static final S2CPacketType<ConsentPacket> SERVER_CONSENT = SimpleNetworking.serverToClient(BigPony.id("consent"), ConsentPacket::new);
-    public static final C2SPacketType<MsgPlayerSize> PLAYER_SIZE = SimpleNetworking.clientToServer(BigPony.id("player_size"), MsgPlayerSize::new);
-    public static final S2CPacketType<MsgPlayerSize> OTHER_PLAYER_SIZE = SimpleNetworking.serverToClient(BigPony.id("other_player_size"), MsgPlayerSize::new);
+    public static final S2CPacketType<ConsentPacket> SERVER_CONSENT = SimpleNetworking.serverToClient(BigPony.id("consent"), ConsentPacket.PACKET_CODEC);
+    public static final C2SPacketType<MsgPlayerSize> PLAYER_SIZE = SimpleNetworking.clientToServer(BigPony.id("player_size"), MsgPlayerSize.PACKET_CODEC);
+    public static final S2CPacketType<MsgPlayerSize> OTHER_PLAYER_SIZE = SimpleNetworking.serverToClient(BigPony.id("other_player_size"), MsgPlayerSize.PACKET_CODEC);
 
     public static void bootstrap() {
         ServerLifecycleEvents.SERVER_STARTING.register(s -> InteractionManager.getInstance().setServer(s));

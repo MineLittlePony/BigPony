@@ -15,6 +15,7 @@ import java.util.concurrent.CompletableFuture;
 import com.minelittlepony.api.config.PonyConfig;
 import com.minelittlepony.api.events.PonyDataCallback;
 import com.minelittlepony.api.events.PonyModelPrepareCallback;
+
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.minecraft.client.MinecraftClient;
@@ -29,12 +30,12 @@ public class Main extends PresetDetector implements ClientModInitializer {
     public void onInitializeClient() {
         INSTANCE = this;
 
-        PonyModelPrepareCallback.EVENT.register((entity, model, mode) -> {
+        PonyModelPrepareCallback.EVENT.register((attributes, model, mode) -> {
             if (BigPony.getInstance().getConfig().useDetectedPonyScaling.get()
-                    && entity instanceof PlayerEntity player
-                    && BigPonyClient.isClientPlayer(player)
-                    && isPony(player)) {
-                model.getAttributes().visualHeight = entity.getHeight();
+                    && attributes.isPlayer
+                    && BigPonyClient.isClientPlayer(attributes.getEntityId())
+                    && !PonyConfig.getEffectiveRace(attributes.metadata.race()).isHuman()) {
+                attributes.visualHeight = MinecraftClient.getInstance().player.getHeight();
             }
         });
         PonyDataCallback.EVENT.register((sender, data, env) -> {
@@ -87,8 +88,7 @@ public class Main extends PresetDetector implements ClientModInitializer {
             boolean fillyCam = isFillyCam();
             setFillyCam(true);
 
-            Pony pony = Pony.getManager().getPony(skin);
-            Size size = pony.metadata().size();
+            Size size = Pony.getManager().getPony(skin).size();
 
             EntityScale scale = new EntityScale(
                     BodyScale.of(size.scaleFactor()),

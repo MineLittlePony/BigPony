@@ -1,5 +1,8 @@
 package com.minelittlepony.bigpony.client;
 
+import java.util.UUID;
+
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import com.minelittlepony.bigpony.BigPony;
@@ -26,6 +29,10 @@ public class BigPonyClient implements ClientModInitializer {
 
     public static boolean isClientPlayer(PlayerEntity player) {
         return MinecraftClient.getInstance().player == player;
+    }
+
+    public static boolean isClientPlayer(@Nullable UUID id) {
+        return MinecraftClient.getInstance().player != null && MinecraftClient.getInstance().player.getUuid().equals(id);
     }
 
     public BigPonyClient() {

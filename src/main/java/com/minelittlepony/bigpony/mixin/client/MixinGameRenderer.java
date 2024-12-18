@@ -10,9 +10,9 @@ import com.minelittlepony.bigpony.data.BodyScale;
 import com.minelittlepony.bigpony.network.InteractionManager;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.resource.SynchronousResourceReloader;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
@@ -25,14 +25,14 @@ abstract class MixinGameRenderer implements SynchronousResourceReloader, AutoClo
     private void onBobView(MatrixStack matrices, float f, CallbackInfo info) {
         MinecraftClient client = MinecraftClient.getInstance();
 
-        if (!(client.getCameraEntity() instanceof PlayerEntity player)) {
+        if (!(client.getCameraEntity() instanceof AbstractClientPlayerEntity player)) {
             return;
         }
 
         info.cancel();
 
-        float g = player.horizontalSpeed - player.prevHorizontalSpeed;
-        float h = -(player.horizontalSpeed + g * f);
+        float g = player.distanceMoved - player.lastDistanceMoved;
+        float h = -(player.distanceMoved + g * f);
         float i = MathHelper.lerp(f, player.prevStrideDistance, player.strideDistance);
 
         BodyScale scale = ((Scaling.Holder)player).getScaling().getRenderedBodyScale();
