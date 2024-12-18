@@ -12,7 +12,7 @@ public record MsgPlayerSize(int entityId, EntityScale dimensions, boolean force)
     public static final PacketCodec<PacketByteBuf, MsgPlayerSize> PACKET_CODEC = PacketCodec.tuple(
             PacketCodecs.INTEGER, MsgPlayerSize::entityId,
             EntityScale.PACKET_CODEC, MsgPlayerSize::dimensions,
-            PacketCodecs.BOOL, MsgPlayerSize::force,
+            PacketCodecs.BOOLEAN, MsgPlayerSize::force,
             MsgPlayerSize::new
     );
 

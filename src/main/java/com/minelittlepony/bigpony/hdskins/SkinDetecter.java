@@ -1,5 +1,6 @@
 package com.minelittlepony.bigpony.hdskins;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import com.minelittlepony.bigpony.util.FutureUtils;
@@ -21,7 +22,8 @@ public class SkinDetecter {
     public CompletableFuture<Identifier> loadSkin(GameProfile profile) {
         return FutureUtils.either(
                 MinecraftClient.getInstance().getSkinProvider().fetchSkinTextures(profile),
-                () -> DefaultSkinHelper.getSkinTextures(profile.getId())
-        ).thenApply(SkinTextures::texture);
+                Optional::empty
+        ).thenApply(result -> result.orElseGet(() -> DefaultSkinHelper.getSkinTextures(profile.getId())))
+         .thenApply(SkinTextures::texture);
     }
 }

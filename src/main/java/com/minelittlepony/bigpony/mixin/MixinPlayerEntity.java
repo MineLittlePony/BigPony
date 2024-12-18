@@ -24,7 +24,7 @@ abstract class MixinPlayerEntity extends LivingEntity implements Scaling.Holder 
     private final Scaling playerScale = new Scaling();
 
     @ModifyReturnValue(method = "getBaseDimensions(Lnet/minecraft/entity/EntityPose;)Lnet/minecraft/entity/EntityDimensions;", at = @At("RETURN"))
-    protected EntityDimensions modifyEntityDimensions(EntityDimensions dimensions, EntityPose pose) {
+    private EntityDimensions modifyEntityDimensions(EntityDimensions dimensions, EntityPose pose) {
         return getScaling().getReplacementSize((PlayerEntity)(Object)this, pose, dimensions);
     }
 

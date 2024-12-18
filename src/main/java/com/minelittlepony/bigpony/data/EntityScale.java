@@ -18,7 +18,7 @@ public record EntityScale(BodyScale body, CameraScale camera, boolean visual) {
     public static final PacketCodec<PacketByteBuf, EntityScale> PACKET_CODEC = PacketCodec.tuple(
             BodyScale.PACKET_CODEC, EntityScale::body,
             CameraScale.PACKET_CODEC, EntityScale::camera,
-            PacketCodecs.BOOL, EntityScale::visual,
+            PacketCodecs.BOOLEAN, EntityScale::visual,
             EntityScale::new
     );
 
