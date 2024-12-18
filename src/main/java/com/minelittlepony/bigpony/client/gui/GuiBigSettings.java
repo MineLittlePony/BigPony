@@ -29,6 +29,7 @@ public class GuiBigSettings extends GameGui {
 
     private EntityScale dimensions;
     private EntityScale initialDimensions;
+    private boolean initialDetectorState;
 
     final ScrollContainer content = new ScrollContainer();
 
@@ -62,8 +63,6 @@ public class GuiBigSettings extends GameGui {
 
     @Override
     protected void init() {
-        loadDimensions();
-
         addButton(new Label(width / 2, 6)).setCentered().getStyle().setText(getTitle().getString());
 
         content.init(this::rebuildContent);
@@ -75,11 +74,18 @@ public class GuiBigSettings extends GameGui {
         addButton(revert = new Button(width / 2 + 10, super.height - 25, 100, 20))
             .onClick(sender -> {
                 dimensions = initialDimensions;
+                BigPony.getInstance().getConfig().useDetectedPonyScaling.set(initialDetectorState);
+                if (initialDetectorState) {
+                    PresetDetector.getInstance().detectPreset(client.getGameProfile());
+                } else {
+                    PresetDetector.getInstance().revertFillyCam();
+                }
+                BigPony.getInstance().getConfig().save();
                 updateDimensions();
                 clearAndInit();
             })
             .getStyle()
-            .setText("gui.revert");
+            .setText("controls.reset");
         tick();
     }
 
@@ -91,6 +97,7 @@ public class GuiBigSettings extends GameGui {
             dimensions = ((Scaling.Holder)client.player).getScaling().getDimensions();
         }
         initialDimensions = dimensions;
+        initialDetectorState = BigPony.getInstance().getConfig().useDetectedPonyScaling.get();
     }
 
     private void rebuildContent() {
@@ -167,7 +174,8 @@ public class GuiBigSettings extends GameGui {
 
         Toggle visual;
         content.addButton(visual = new Toggle(left, top += 30, BigPony.getInstance().getConfig().useDetectedPonyScaling.get())).onChange(v -> {
-            BigPony.getInstance().getConfig().useDetectedPonyScaling.set(v);
+                BigPony.getInstance().getConfig().useDetectedPonyScaling.set(v);
+                BigPony.getInstance().getConfig().save();
                 if (v) {
                     visual.setEnabled(false);
                     PresetDetector.getInstance().detectPreset(client.getGameProfile()).thenAccept(dimensions -> {
@@ -226,7 +234,7 @@ public class GuiBigSettings extends GameGui {
 
         height.setEnabled(allowCamera && allowScaling);
         distance.setEnabled(allowCamera && allowScaling);
-        revert.setEnabled(!Objects.equals(dimensions, initialDimensions));
+        revert.setEnabled(!Objects.equals(dimensions, initialDimensions) || (initialDetectorState != BigPony.getInstance().getConfig().useDetectedPonyScaling.get()));
     }
 
     @Override
