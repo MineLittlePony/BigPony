@@ -54,6 +54,10 @@ public class GuiBigSettings extends GameGui {
     }
 
     public boolean hasScalingConsent() {
+        return (client.player == null || Permissions.freeform(InteractionManager.getInstance().getPermissions()));
+    }
+
+    public boolean isScalingButtonsEnabled() {
         return (client.player == null || Permissions.freeform(InteractionManager.getInstance().getPermissions())) && !BigPony.getInstance().getConfig().useDetectedPonyScaling.get();
     }
 
@@ -109,7 +113,7 @@ public class GuiBigSettings extends GameGui {
 
         boolean allowCamera = hasCameraConsent();
         boolean allowHitbox = hasHitboxConsent();
-        boolean allowScaling = hasScalingConsent();
+        boolean allowScaling = isScalingButtonsEnabled();
 
         content.addButton(new Label(left, top)).getStyle().setText("minebp.options.body");
         content.addButton(new Label(left, top + 100)).getStyle().setText("minebp.options.camera");
@@ -191,7 +195,7 @@ public class GuiBigSettings extends GameGui {
                     });
                 } else {
                     PresetDetector.getInstance().revertFillyCam();
-                    dimensions = new EntityScale(dimensions.body(), dimensions.camera(), true);
+                    dimensions = hasScalingConsent() ? new EntityScale(dimensions.body(), dimensions.camera(), true) : EntityScale.DEFAULT;
                     updateDimensions();
                 }
                 tick();
@@ -199,7 +203,7 @@ public class GuiBigSettings extends GameGui {
             })
             .getStyle().setText("minebp.camera.auto");
 
-        if (!allowCamera || !allowHitbox) {
+        if (!allowCamera || !allowHitbox || !hasScalingConsent()) {
             content.addButton(new Label(left, top += 20)).getStyle().setText(OPTION_DISABLED);
         }
 
@@ -221,7 +225,7 @@ public class GuiBigSettings extends GameGui {
     @Override
     public void tick() {
         boolean allowCamera = hasCameraConsent();
-        boolean allowScaling = hasScalingConsent();
+        boolean allowScaling = isScalingButtonsEnabled();
 
         for (int i = 0; i < presets.length; i++) {
             presets[i].updateEnabled(height.getValue(), distance.getValue(), xSize.getValue(), ySize.getValue(), zSize.getValue());
