@@ -23,9 +23,14 @@ abstract class MixinPlayerEntity extends LivingEntity implements Scaling.Holder 
 
     private final Scaling playerScale = new Scaling();
 
-    @ModifyReturnValue(method = "getBaseDimensions(Lnet/minecraft/entity/EntityPose;)Lnet/minecraft/entity/EntityDimensions;", at = @At("RETURN"))
+    @ModifyReturnValue(method = "getDimensions(Lnet/minecraft/entity/EntityPose;)Lnet/minecraft/entity/EntityDimensions;", at = @At("RETURN"))
     protected EntityDimensions modifyEntityDimensions(EntityDimensions dimensions, EntityPose pose) {
         return getScaling().getReplacementSize((PlayerEntity)(Object)this, pose, dimensions);
+    }
+
+    @ModifyReturnValue(method = "getActiveEyeHeight(Lnet/minecraft/entity/EntityPose;Lnet/minecraft/entity/EntityDimensions;)F", at = @At("RETURN"))
+    protected float modifyActiveEyeHeight(float initial) {
+        return getScaling().getReplacementCameraHeight((PlayerEntity)(Object)this, initial);
     }
 
     @Inject(method = "writeCustomDataToNbt(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("HEAD"))

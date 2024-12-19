@@ -45,12 +45,14 @@ public class Scaling {
     public EntityDimensions getReplacementSize(PlayerEntity entity, EntityPose pose, EntityDimensions existing) {
         BodyScale hitboxScale = getHitboxScale();
         return new EntityDimensions(
-                existing.width() * InteractionManager.getInstance().getClamped(hitboxScale.shadowScale()),
-                existing.height() * InteractionManager.getInstance().getClamped(hitboxScale.y()),
-                existing.eyeHeight() * InteractionManager.getInstance().getClamped(getCameraScale().height()),
-                existing.attachments(),
-                existing.fixed()
+                existing.width * InteractionManager.getInstance().getClamped(hitboxScale.shadowScale()),
+                existing.height * InteractionManager.getInstance().getClamped(hitboxScale.y()),
+                existing.fixed
         );
+    }
+
+    public float getReplacementCameraHeight(PlayerEntity entity, float initial) {
+        return initial * InteractionManager.getInstance().getClamped(getCameraScale().height());
     }
 
     public float getShadowScale() {
@@ -80,8 +82,8 @@ public class Scaling {
         }
     }
 
-    public MsgPlayerSize toUpdatePacket(Entity owner) {
-        return new MsgPlayerSize(owner.getId(), dimensions, true);
+    public <T extends PlayerEntity> MsgPlayerSize<T> toUpdatePacket(Entity owner) {
+        return new MsgPlayerSize<>(owner.getId(), dimensions, true);
     }
 
     public interface Holder {

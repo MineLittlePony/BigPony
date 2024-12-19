@@ -20,11 +20,12 @@ public class Main extends SkinDetecter implements ClientModInitializer {
 
     @Override
     public CompletableFuture<Identifier> loadSkin(GameProfile profile) {
-        return FutureUtils.<Optional<Identifier>>either(
-            HDSkins.getInstance().getProfileRepository().load(profile).thenApply(skins -> {
-                return skins.getSkin(SkinType.SKIN);
-            }),
-            Optional::empty
-        ).thenCompose(value -> value.map(CompletableFuture::completedFuture).orElseGet(() -> super.loadSkin(profile)));
+        return FutureUtils.<Optional<Identifier>>waitFor(callback -> {
+            HDSkins.getInstance().getProfileRepository().fetchSkins(profile, (type, id, texture) -> {
+                if (type == SkinType.SKIN) {
+                    callback.accept(Optional.of(id));
+                }
+            });
+        }, Optional::empty).thenCompose(value -> value.map(CompletableFuture::completedFuture).orElseGet(() -> super.loadSkin(profile)));
     }
 }

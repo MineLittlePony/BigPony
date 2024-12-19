@@ -3,9 +3,10 @@ package com.minelittlepony.bigpony.network;
 import com.minelittlepony.bigpony.BigPony;
 import com.sollace.fabwork.api.packets.Packet;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 
-public record ConsentPacket(long permissions, float minMultiplier, float maxMultiplier) implements Packet {
+public record ConsentPacket(long permissions, float minMultiplier, float maxMultiplier) implements Packet<PlayerEntity> {
     public ConsentPacket() {
         this(
             BigPony.getInstance().getConfig().getPermissions(),

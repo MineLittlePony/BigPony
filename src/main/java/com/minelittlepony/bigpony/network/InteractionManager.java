@@ -39,7 +39,10 @@ public class InteractionManager {
             MinecraftServer server = this.server.get();
             if (server != null) {
                 log("[S-SET] Sending settings update packet to all players");
-                Network.SERVER_CONSENT.sendToAllPlayers(new ConsentPacket(), server);
+                var p = Network.SERVER_CONSENT.toPacket(new ConsentPacket());
+                server.getPlayerManager().getPlayerList().forEach(spe -> {
+                    spe.networkHandler.sendPacket(p);
+                });
             }
         }
     }

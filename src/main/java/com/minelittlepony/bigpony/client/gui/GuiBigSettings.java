@@ -46,6 +46,7 @@ public class GuiBigSettings extends GameGui {
         content.getContentPadding().right = 10;
         content.getContentPadding().bottom = 20;
         content.getContentPadding().left = 10;
+        BigPony.getInstance().getConfig().load();
         loadDimensions();
     }
 
@@ -80,7 +81,7 @@ public class GuiBigSettings extends GameGui {
                 dimensions = initialDimensions;
                 BigPony.getInstance().getConfig().useDetectedPonyScaling.set(initialDetectorState);
                 if (initialDetectorState) {
-                    PresetDetector.getInstance().detectPreset(client.getGameProfile());
+                    PresetDetector.getInstance().detectPreset(client.getSession().getProfile());
                 } else {
                     PresetDetector.getInstance().revertFillyCam();
                 }
@@ -182,7 +183,7 @@ public class GuiBigSettings extends GameGui {
                 BigPony.getInstance().getConfig().save();
                 if (v) {
                     visual.setEnabled(false);
-                    PresetDetector.getInstance().detectPreset(client.getGameProfile()).thenAccept(dimensions -> {
+                    PresetDetector.getInstance().detectPreset(client.getSession().getProfile()).thenAccept(dimensions -> {
                         this.dimensions = dimensions;
                         xSize.setValue(dimensions.body().x());
                         ySize.setValue(dimensions.body().y());

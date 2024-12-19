@@ -4,9 +4,10 @@ import java.util.concurrent.CompletableFuture;
 
 import com.minelittlepony.bigpony.util.FutureUtils;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.DefaultSkinHelper;
-import net.minecraft.client.util.SkinTextures;
 import net.minecraft.util.Identifier;
 
 public class SkinDetecter {
@@ -19,9 +20,12 @@ public class SkinDetecter {
     SkinDetecter() {}
 
     public CompletableFuture<Identifier> loadSkin(GameProfile profile) {
-        return FutureUtils.either(
-                MinecraftClient.getInstance().getSkinProvider().fetchSkinTextures(profile),
-                () -> DefaultSkinHelper.getSkinTextures(profile.getId())
-        ).thenApply(SkinTextures::texture);
+        return FutureUtils.<Identifier>waitFor(callback -> {
+            MinecraftClient.getInstance().getSkinProvider().loadSkin(profile, (type, id, texture) -> {
+                if (type == MinecraftProfileTexture.Type.SKIN) {
+                    callback.accept(id);
+                }
+            }, false);
+        }, () -> DefaultSkinHelper.getTexture(profile.getId()));
     }
 }

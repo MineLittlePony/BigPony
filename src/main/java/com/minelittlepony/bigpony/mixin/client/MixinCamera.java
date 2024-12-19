@@ -11,8 +11,8 @@ import net.minecraft.client.render.Camera;
 
 @Mixin(Camera.class)
 abstract class MixinCamera {
-    @ModifyVariable(method = "clipToSpace(F)F", at = @At("HEAD"), argsOnly = true, index = 1)
-    private float adjustDistance(float initial) {
+    @ModifyVariable(method = "clipToSpace(D)D", at = @At("HEAD"), argsOnly = true, index = 1)
+    private double adjustDistance(double initial) {
         return (MinecraftClient.getInstance().player instanceof Scaling.Holder holder ? holder.getScaling().getCameraDistanceMultiplier() : 1) * initial;
     }
 }

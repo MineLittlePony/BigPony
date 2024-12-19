@@ -4,8 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
 
 public record BodyScale(float x, float y, float z) {
     public static final BodyScale DEFAULT = of(1);
@@ -14,12 +12,16 @@ public record BodyScale(float x, float y, float z) {
             Codec.FLOAT.fieldOf("y").forGetter(BodyScale::y),
             Codec.FLOAT.fieldOf("z").forGetter(BodyScale::z)
     ).apply(i, BodyScale::new));
-    public static final PacketCodec<PacketByteBuf, BodyScale> PACKET_CODEC = PacketCodec.tuple(
-            PacketCodecs.FLOAT, (t -> t.x),
-            PacketCodecs.FLOAT, (t -> t.y),
-            PacketCodecs.FLOAT, (t -> t.z),
-            BodyScale::new
-    );
+
+    public BodyScale(PacketByteBuf buffer) {
+        this(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
+    }
+
+    public void toBuffer(PacketByteBuf buffer) {
+        buffer.writeFloat(x);
+        buffer.writeFloat(y);
+        buffer.writeFloat(z);
+    }
 
     public float shadowScale() {
         return Math.max(x, z);

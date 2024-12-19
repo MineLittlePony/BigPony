@@ -1,7 +1,8 @@
 package com.minelittlepony.bigpony.minelittlepony;
 
-import com.minelittlepony.api.pony.Pony;
+import com.minelittlepony.api.pony.IPony;
 import com.minelittlepony.api.pony.meta.Size;
+import com.minelittlepony.api.pony.network.fabric.PonyDataCallback;
 import com.minelittlepony.bigpony.*;
 import com.minelittlepony.bigpony.client.BigPonyClient;
 import com.minelittlepony.bigpony.data.BodyScale;
@@ -13,8 +14,8 @@ import com.mojang.authlib.GameProfile;
 import java.util.concurrent.CompletableFuture;
 
 import com.minelittlepony.api.config.PonyConfig;
-import com.minelittlepony.api.events.PonyDataCallback;
-import com.minelittlepony.api.events.PonyModelPrepareCallback;
+import com.minelittlepony.api.model.fabric.PonyModelPrepareCallback;
+
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.minecraft.client.MinecraftClient;
@@ -37,7 +38,7 @@ public class Main extends PresetDetector implements ClientModInitializer {
                 model.getAttributes().visualHeight = entity.getHeight();
             }
         });
-        PonyDataCallback.EVENT.register((sender, data, env) -> {
+        PonyDataCallback.EVENT.register((sender, data, noSkin, env) -> {
             if (sender instanceof Scaling.Holder holder
                     && BigPony.getInstance().getConfig().useDetectedPonyScaling.get()
                     && env == EnvType.CLIENT && BigPonyClient.isClientPlayer(sender)) {
@@ -45,11 +46,13 @@ public class Main extends PresetDetector implements ClientModInitializer {
             }
         });
 
+        // TODO: Not implements
+        /*
         PonyConfig.getInstance().onChangedExternally(config -> {
             if (!writing) {
                 oldFillyCam = isFillyCam();
             }
-        });
+        });*/
         PonyConfig.getInstance().fillycam.onChanged(fillyCam -> {
             if (!writing) {
                 oldFillyCam = isFillyCam();
@@ -77,7 +80,7 @@ public class Main extends PresetDetector implements ClientModInitializer {
 
     @Override
     public boolean isPony(PlayerEntity player) {
-        return !Pony.getManager().getPony(player).race().isHuman();
+        return !IPony.getManager().getPony(player).race().isHuman();
     }
 
     @Override
@@ -87,12 +90,12 @@ public class Main extends PresetDetector implements ClientModInitializer {
             boolean fillyCam = isFillyCam();
             setFillyCam(true);
 
-            Pony pony = Pony.getManager().getPony(skin);
-            Size size = pony.metadata().size();
+            IPony pony = IPony.getManager().getPony(skin);
+            Size size = pony.metadata().getSize();
 
             EntityScale scale = new EntityScale(
-                    BodyScale.of(size.scaleFactor()),
-                    new CameraScale(size.eyeDistanceFactor(), size.eyeHeightFactor()),
+                    BodyScale.of(size.getScaleFactor()),
+                    new CameraScale(size.getEyeDistanceFactor(), size.getEyeHeightFactor()),
                     false
             );
 

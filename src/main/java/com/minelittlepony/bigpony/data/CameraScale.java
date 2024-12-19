@@ -4,8 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
 
 public record CameraScale(float distance, float height) {
     public static final CameraScale DEFAULT = new CameraScale(1);
@@ -13,11 +11,15 @@ public record CameraScale(float distance, float height) {
             Codec.FLOAT.fieldOf("distance").forGetter(CameraScale::distance),
             Codec.FLOAT.fieldOf("height").forGetter(CameraScale::height)
     ).apply(i, CameraScale::new));
-    public static final PacketCodec<PacketByteBuf, CameraScale> PACKET_CODEC = PacketCodec.tuple(
-            PacketCodecs.FLOAT, (t -> t.distance),
-            PacketCodecs.FLOAT, (t -> t.height),
-            CameraScale::new
-    );
+
+    public CameraScale(PacketByteBuf buffer) {
+        this(buffer.readFloat(), buffer.readFloat());
+    }
+
+    public void toBuffer(PacketByteBuf buffer) {
+        buffer.writeFloat(distance);
+        buffer.writeFloat(height);
+    }
 
     public CameraScale(float fill) {
         this(fill, fill);
