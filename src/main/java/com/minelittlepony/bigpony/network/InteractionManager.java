@@ -21,6 +21,7 @@ public class InteractionManager {
 
     private WeakReference<MinecraftServer> server = new WeakReference<>(null);
     protected final BigPonyConfig config = BigPony.getInstance().getConfig();
+    private long previousPermissions = config.getPermissions();
 
     protected InteractionManager() {
         if (INSTANCE != null) {
@@ -34,10 +35,12 @@ public class InteractionManager {
     }
 
     protected void onConfigurationChange() {
-        MinecraftServer server = this.server.get();
-        if (server != null) {
-            log("[S-SET] Sending settings update packet to all players");
-            Network.SERVER_CONSENT.sendToAllPlayers(new ConsentPacket(), server);
+        if (previousPermissions != config.getPermissions()) {
+            MinecraftServer server = this.server.get();
+            if (server != null) {
+                log("[S-SET] Sending settings update packet to all players");
+                Network.SERVER_CONSENT.sendToAllPlayers(new ConsentPacket(), server);
+            }
         }
     }
 
