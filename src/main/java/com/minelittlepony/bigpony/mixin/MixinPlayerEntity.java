@@ -11,7 +11,8 @@ import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 
 @Mixin(value = PlayerEntity.class, priority = 1001)
 abstract class MixinPlayerEntity extends LivingEntity implements Scaling.Holder {
@@ -24,14 +25,14 @@ abstract class MixinPlayerEntity extends LivingEntity implements Scaling.Holder 
         return getScaling().getReplacementSize((PlayerEntity)(Object)this, pose, dimensions);
     }
 
-    @Inject(method = "writeCustomDataToNbt(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("HEAD"))
-    private void onWriteCustomDataToTag(NbtCompound tag, CallbackInfo info) {
-        tag.put("big_pony_data", EntityScale.CODEC, getScaling().getDimensions());
+    @Inject(method = "writeCustomData(Lnet/minecraft/storage/WriteView;)V", at = @At("HEAD"))
+    private void onWriteCustomDataToTag(WriteView view, CallbackInfo info) {
+        view.put("big_pony_data", EntityScale.CODEC, getScaling().getDimensions());
     }
 
-    @Inject(method = "readCustomDataFromNbt(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("HEAD"))
-    private void onReadCustomDataFromTag(NbtCompound tag, CallbackInfo info) {
-        tag.get("big_pony_data", EntityScale.CODEC).ifPresent(getScaling()::setDimensions);
+    @Inject(method = "readCustomData(Lnet/minecraft/storage/ReadView;)V", at = @At("HEAD"))
+    private void onReadCustomDataFromTag(ReadView view, CallbackInfo info) {
+        view.read("big_pony_data", EntityScale.CODEC).ifPresent(getScaling()::setDimensions);
     }
 
     @Inject(method = "tick()V", at = @At("RETURN"))
