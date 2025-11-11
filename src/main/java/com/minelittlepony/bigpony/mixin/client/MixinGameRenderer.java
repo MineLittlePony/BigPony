@@ -31,9 +31,8 @@ abstract class MixinGameRenderer implements SynchronousResourceReloader, AutoClo
 
         info.cancel();
 
-        float g = player.distanceMoved - player.lastDistanceMoved;
-        float h = -(player.distanceMoved + g * f);
-        float i = MathHelper.lerp(f, player.lastStrideDistance, player.strideDistance);
+        float h = player.getState().getReverseLerpedDistanceMoved(f);
+        float i = player.getState().lerpMovement(f);
 
         BodyScale scale = ((Scaling.Holder)player).getScaling().getRenderedBodyScale();
         float xScale = InteractionManager.getInstance().getClamped(scale.x());

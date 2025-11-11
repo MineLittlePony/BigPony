@@ -14,11 +14,12 @@ import java.util.concurrent.CompletableFuture;
 
 import com.minelittlepony.api.config.PonyConfig;
 import com.minelittlepony.api.events.PonyDataCallback;
-import com.minelittlepony.api.events.PonyModelPrepareCallback;
+import com.minelittlepony.api.events.PonyRenderStatePrepareCallback;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class Main extends PresetDetector implements ClientModInitializer {
@@ -30,19 +31,20 @@ public class Main extends PresetDetector implements ClientModInitializer {
     public void onInitializeClient() {
         INSTANCE = this;
 
-        PonyModelPrepareCallback.EVENT.register((attributes, model, mode) -> {
+        PonyRenderStatePrepareCallback.EVENT.register((state, model, mode) -> {
             if (BigPony.getInstance().getConfig().useDetectedPonyScaling.get()
-                    && attributes.isPlayer
-                    && BigPonyClient.isClientPlayer(attributes.getEntityId())
-                    && !PonyConfig.getEffectiveRace(attributes.metadata.race()).isHuman()) {
-                attributes.visualHeight = MinecraftClient.getInstance().player.getHeight();
+                    && state.getAttributes().isPlayer
+                    && BigPonyClient.isClientPlayer(state.getAttributes().getEntityId())
+                    && !PonyConfig.getEffectiveRace(state.getAttributes().metadata.race()).isHuman()) {
+                state.getAttributes().visualHeight = MinecraftClient.getInstance().player.getHeight();
             }
         });
         PonyDataCallback.EVENT.register((sender, data, env) -> {
             if (sender instanceof Scaling.Holder holder
+                    && sender instanceof ClientPlayerEntity player
                     && BigPony.getInstance().getConfig().useDetectedPonyScaling.get()
-                    && env == EnvType.CLIENT && BigPonyClient.isClientPlayer(sender)) {
-                detectPreset(sender.getGameProfile()).thenAccept(holder.getScaling()::setDimensions);
+                    && env == EnvType.CLIENT && BigPonyClient.isClientPlayer(player)) {
+                detectPreset(player.getGameProfile()).thenAccept(holder.getScaling()::setDimensions);
             }
         });
 

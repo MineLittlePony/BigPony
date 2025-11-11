@@ -7,7 +7,8 @@ import com.minelittlepony.bigpony.util.FutureUtils;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.DefaultSkinHelper;
-import net.minecraft.client.util.SkinTextures;
+import net.minecraft.entity.player.SkinTextures;
+import net.minecraft.util.AssetInfo;
 import net.minecraft.util.Identifier;
 
 public class SkinDetecter {
@@ -23,7 +24,8 @@ public class SkinDetecter {
         return FutureUtils.either(
                 MinecraftClient.getInstance().getSkinProvider().fetchSkinTextures(profile),
                 Optional::empty
-        ).thenApply(result -> result.orElseGet(() -> DefaultSkinHelper.getSkinTextures(profile.getId())))
-         .thenApply(SkinTextures::texture);
+        ).thenApply(result -> result.orElseGet(() -> DefaultSkinHelper.getSkinTextures(profile.id())))
+         .thenApply(SkinTextures::body)
+         .thenApply(AssetInfo.TextureAsset::texturePath);
     }
 }

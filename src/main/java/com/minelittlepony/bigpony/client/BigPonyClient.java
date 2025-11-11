@@ -41,7 +41,7 @@ public class BigPonyClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        keybind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.minebp.settings", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F8, KeyBinding.MISC_CATEGORY));
+        keybind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.minebp.settings", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F8, KeyBinding.Category.MISC));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (keybind.isPressed()) {
                 client.setScreen(new GuiBigSettings(client.currentScreen));

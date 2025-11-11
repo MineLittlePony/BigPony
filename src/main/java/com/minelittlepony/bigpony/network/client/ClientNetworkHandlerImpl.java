@@ -28,7 +28,7 @@ public class ClientNetworkHandlerImpl extends InteractionManager {
             updateConsent(packet);
         });
         Network.OTHER_PLAYER_SIZE.receiver().addPersistentListener((sender, packet) -> {
-            if (sender.getWorld().getEntityById(packet.entityId()) instanceof PlayerEntity player && player instanceof Scaling.Holder holder) {
+            if (sender.getEntityWorld().getEntityById(packet.entityId()) instanceof PlayerEntity player && player instanceof Scaling.Holder holder) {
                 log("[C] Got size packet for other player " + player.getName().getString());
                 holder.getScaling().setDimensions(packet.dimensions());
             }
