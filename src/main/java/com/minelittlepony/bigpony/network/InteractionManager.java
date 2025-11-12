@@ -8,7 +8,7 @@ import com.minelittlepony.bigpony.BigPony;
 import com.minelittlepony.bigpony.BigPonyConfig;
 import com.minelittlepony.bigpony.Scaling;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.MathHelper;
 
@@ -21,7 +21,7 @@ public class InteractionManager {
 
     private WeakReference<MinecraftServer> server = new WeakReference<>(null);
     protected final BigPonyConfig config = BigPony.getInstance().getConfig();
-    private long previousPermissions = config.getPermissions();
+    private ConsentPacket serverSettings = new ConsentPacket();
 
     protected InteractionManager() {
         if (INSTANCE != null) {
@@ -35,11 +35,13 @@ public class InteractionManager {
     }
 
     protected void onConfigurationChange() {
-        if (previousPermissions != config.getPermissions()) {
+        ConsentPacket newSettings = new ConsentPacket();
+        if (!newSettings.equals(serverSettings)) {
+            serverSettings = newSettings;
             MinecraftServer server = this.server.get();
             if (server != null) {
                 log("[S-SET] Sending settings update packet to all players");
-                Network.SERVER_CONSENT.sendToAllPlayers(new ConsentPacket(), server);
+                Network.SERVER_CONSENT.sendToAllPlayers(newSettings, server);
             }
         }
     }
