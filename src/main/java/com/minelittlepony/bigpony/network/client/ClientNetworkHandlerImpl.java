@@ -14,6 +14,7 @@ import com.minelittlepony.bigpony.network.Network;
 import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -64,7 +65,6 @@ public class ClientNetworkHandlerImpl extends InteractionManager {
         return serverConsent.map(ConsentPacket::permissions).orElseGet(super::getPermissions);
     }
 
-
     @Override
     public float getMinMultiplier() {
         return serverConsent.map(ConsentPacket::minMultiplier).orElseGet(super::getMinMultiplier);
@@ -86,11 +86,11 @@ public class ClientNetworkHandlerImpl extends InteractionManager {
     }
 
     @Override
-    public void sendSizeUpdate(PlayerEntity entity, Scaling scaling) {
+    public void sendSizeUpdate(LivingEntity entity, Scaling scaling) {
         if (serverConsent.isPresent()) {
             if (entity == client.player) {
                 log("[C-UPD] Sending size update packet to server for " + entity.getName().getString());
-                Network.PLAYER_SIZE.sendToServer(scaling.toUpdatePacket(entity));
+                Network.PLAYER_SIZE.sendToServer(scaling.toUpdatePacket(entity.getId()));
             } else if (entity instanceof ServerPlayerEntity) {
                 super.sendSizeUpdate(entity, scaling);
             }

@@ -64,9 +64,9 @@ public class InteractionManager {
         return 0;
     }
 
-    public void sendSizeUpdate(PlayerEntity entity, Scaling scaling) {
+    public void sendSizeUpdate(LivingEntity entity, Scaling scaling) {
         log("[S-UPD] Sending size update packet for " + entity.getName().getString());
-        Network.OTHER_PLAYER_SIZE.sendToSurroundingPlayers(scaling.toUpdatePacket(entity), entity);
+        Network.OTHER_PLAYER_SIZE.sendToSurroundingPlayers(scaling.toUpdatePacket(entity.getId()), entity);
     }
 
     protected void log(String message) {

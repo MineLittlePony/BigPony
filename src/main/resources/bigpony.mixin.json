@@ -5,8 +5,8 @@
   "refmap": "bigpony.mixin.refmap.json",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "MixinPlayerEntity",
-    "MixinEntity"
+    "MixinEntity",
+    "MixinLivingEntity"
   ],
   "client": [
     "client.MixinCamera",

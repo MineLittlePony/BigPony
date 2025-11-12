@@ -7,8 +7,7 @@ import com.minelittlepony.bigpony.minelittlepony.PresetDetector;
 import com.minelittlepony.bigpony.network.InteractionManager;
 import com.minelittlepony.bigpony.network.MsgPlayerSize;
 import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.EntityDimensions;
 
 public class Scaling {
@@ -21,6 +20,13 @@ public class Scaling {
 
     public EntityScale getDimensions() {
         return dimensions;
+    }
+
+    public void copyFrom(Scaling other) {
+        dimensions = other.dimensions;
+        isPony = other.isPony;
+        dirty = other.dirty;
+        lastSettingsUpdateTime = other.lastSettingsUpdateTime;
     }
 
     public void setDimensions(EntityScale dimensions) {
@@ -42,7 +48,7 @@ public class Scaling {
         return Permissions.hitbox(InteractionManager.getInstance().getPermissions()) ? dimensions.camera() : CameraScale.DEFAULT;
     }
 
-    public EntityDimensions getReplacementSize(PlayerEntity entity, EntityPose pose, EntityDimensions existing) {
+    public EntityDimensions getReplacementSize(EntityPose pose, EntityDimensions existing) {
         BodyScale hitboxScale = getHitboxScale();
         return new EntityDimensions(
                 existing.width() * InteractionManager.getInstance().getClamped(hitboxScale.shadowScale()),
@@ -67,7 +73,7 @@ public class Scaling {
         dirty = true;
     }
 
-    public void tick(PlayerEntity entity) {
+    public void tick(LivingEntity entity) {
         isPony = PresetDetector.getInstance().isPony(entity);
 
         long lastSettingsUpdateTime = InteractionManager.getInstance().getLastSettingsUpdateTime();
@@ -80,15 +86,11 @@ public class Scaling {
         }
     }
 
-    public MsgPlayerSize toUpdatePacket(Entity owner) {
-        return new MsgPlayerSize(owner.getId(), dimensions, true);
+    public MsgPlayerSize toUpdatePacket(int entityId) {
+        return new MsgPlayerSize(entityId, dimensions, true);
     }
 
     public interface Holder {
         Scaling getScaling();
-    }
-
-    public interface MutableHolder extends Holder {
-        void setScaling(Scaling scaling);
     }
 }

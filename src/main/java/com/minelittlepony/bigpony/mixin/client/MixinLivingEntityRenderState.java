@@ -7,16 +7,11 @@ import com.minelittlepony.bigpony.Scaling;
 import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 
 @Mixin(LivingEntityRenderState.class)
-abstract class MixinLivingEntityRenderState implements Scaling.MutableHolder {
-    private Scaling scaling = new Scaling();
+abstract class MixinLivingEntityRenderState implements Scaling.Holder {
+    private final Scaling scaling = new Scaling();
 
     @Override
     public Scaling getScaling() {
         return scaling;
-    }
-
-    @Override
-    public void setScaling(Scaling scaling) {
-        this.scaling = scaling;
     }
 }

@@ -10,13 +10,14 @@ import com.minelittlepony.bigpony.network.Network;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.entity.EntityLike;
 
 @Mixin(Entity.class)
-abstract class MixinEntity {
+abstract class MixinEntity implements EntityLike {
     @Inject(method = "onStartedTrackingBy", at = @At("HEAD"))
     private void sendScalingOnStartedTrackingBy(ServerPlayerEntity player, CallbackInfo info) {
         if (this instanceof Scaling.Holder holder) {
-            Network.OTHER_PLAYER_SIZE.sendToPlayer(holder.getScaling().toUpdatePacket((Entity)(Object)this), player);
+            Network.OTHER_PLAYER_SIZE.sendToPlayer(holder.getScaling().toUpdatePacket(getId()), player);
         }
     }
 }

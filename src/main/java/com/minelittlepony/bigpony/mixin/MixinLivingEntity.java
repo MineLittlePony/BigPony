@@ -4,25 +4,35 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+
+import com.llamalad7.mixinextras.injector.ModifyReceiver;
 import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.bigpony.data.EntityScale;
+
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 
-@Mixin(value = PlayerEntity.class, priority = 1001)
-abstract class MixinPlayerEntity extends LivingEntity implements Scaling.Holder {
-    private MixinPlayerEntity() {super(null, null);}
+@Mixin(value = LivingEntity.class, priority = 1001)
+abstract class MixinLivingEntity extends Entity implements Scaling.Holder {
+    private MixinLivingEntity() {super(null, null);}
 
-    private final Scaling playerScale = new Scaling();
+    private final Scaling scaling = new Scaling();
 
-    @ModifyReturnValue(method = "getBaseDimensions(Lnet/minecraft/entity/EntityPose;)Lnet/minecraft/entity/EntityDimensions;", at = @At("RETURN"))
-    private EntityDimensions modifyEntityDimensions(EntityDimensions dimensions, EntityPose pose) {
-        return getScaling().getReplacementSize((PlayerEntity)(Object)this, pose, dimensions);
+    @ModifyReceiver(method = "getDimensions(Lnet/minecraft/entity/EntityPose;)Lnet/minecraft/entity/EntityDimensions;",
+            at = @At(
+                value = "INVOKE",
+                target = "net/minecraft/entity/EntityDimensions.scaled(F)Lnet/minecraft/entity/EntityDimensions;"))
+    private EntityDimensions modifyEntityDimensions(EntityDimensions dimensions, float scale, EntityPose pose) {
+        return getScaling().getReplacementSize(pose, dimensions);
+    }
+
+    @Override
+    public Scaling getScaling() {
+        return scaling;
     }
 
     @Inject(method = "writeCustomData(Lnet/minecraft/storage/WriteView;)V", at = @At("HEAD"))
@@ -37,11 +47,8 @@ abstract class MixinPlayerEntity extends LivingEntity implements Scaling.Holder 
 
     @Inject(method = "tick()V", at = @At("RETURN"))
     private void afterTick(CallbackInfo info) {
-        getScaling().tick((PlayerEntity)(Object)this);
-    }
-
-    @Override
-    public Scaling getScaling() {
-        return playerScale;
+        if (this instanceof Scaling.Holder holder) {
+            holder.getScaling().tick((LivingEntity)(Object)this);
+        }
     }
 }

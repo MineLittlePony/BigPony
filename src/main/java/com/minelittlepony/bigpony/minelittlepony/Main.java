@@ -20,7 +20,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.LivingEntity;
 
 public class Main extends PresetDetector implements ClientModInitializer {
 
@@ -79,8 +79,8 @@ public class Main extends PresetDetector implements ClientModInitializer {
     }
 
     @Override
-    public boolean isPony(PlayerEntity player) {
-        return !Pony.getManager().getPony(player).race().isHuman();
+    public boolean isPony(LivingEntity entity) {
+        return Pony.getManager().getPony(entity).filter(pony -> !pony.race().isHuman()).isPresent();
     }
 
     @Override

@@ -31,7 +31,7 @@ abstract class MixinLivingEntityRenderer<T extends LivingEntity, S extends Livin
     @Inject(method = "updateRenderState", at = @At("HEAD"))
     private void onUpdateRenderState(T entity, S state, float tickDelta, CallbackInfo info) {
         if (entity instanceof Scaling.Holder holder) {
-            ((Scaling.MutableHolder)state).setScaling(holder.getScaling());
+            ((Scaling.Holder)state).getScaling().copyFrom(holder.getScaling());
         }
     }
 }
