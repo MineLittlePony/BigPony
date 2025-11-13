@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.minelittlepony.bigpony.Scaling;
+import com.minelittlepony.bigpony.client.BigPonyRenderState;
 import com.minelittlepony.bigpony.data.BodyScale;
 import com.minelittlepony.bigpony.network.InteractionManager;
 
@@ -22,33 +22,35 @@ abstract class MixinGameRenderer implements SynchronousResourceReloader, AutoClo
     @Inject(method = "bobView(Lnet/minecraft/client/util/math/MatrixStack;F)V",
             at = @At("HEAD"),
             cancellable = true)
-    private void onBobView(MatrixStack matrices, float f, CallbackInfo info) {
+    private void onBobView(MatrixStack matrices, float tickDelta, CallbackInfo info) {
         MinecraftClient client = MinecraftClient.getInstance();
 
         if (!(client.getCameraEntity() instanceof AbstractClientPlayerEntity player)) {
             return;
         }
 
-        info.cancel();
+        if (client.getEntityRenderDispatcher().getRenderer(player).getAndUpdateRenderState(player, tickDelta) instanceof BigPonyRenderState.Holder holder) {
+            info.cancel();
 
-        float h = player.getState().getReverseLerpedDistanceMoved(f);
-        float i = player.getState().lerpMovement(f);
+            float h = player.getState().getReverseLerpedDistanceMoved(tickDelta);
+            float i = player.getState().lerpMovement(tickDelta);
 
-        BodyScale scale = ((Scaling.Holder)player).getScaling().getRenderedBodyScale();
-        float xScale = InteractionManager.getInstance().getClamped(scale.x());
-        float yScale = InteractionManager.getInstance().getClamped(scale.y());
-        float zScale = InteractionManager.getInstance().getClamped(scale.z());
+            BodyScale scale = holder.getBigPonyState().bodyScale;
+            float xScale = InteractionManager.getInstance().getClamped(scale.x());
+            float yScale = InteractionManager.getInstance().getClamped(scale.y());
+            float zScale = InteractionManager.getInstance().getClamped(scale.z());
 
-        matrices.translate(
-                (MathHelper.sin(h * MathHelper.PI) * i * 0.5F) * xScale,
-                -Math.abs(MathHelper.cos(h * MathHelper.PI) * i) * yScale,
-                0
-        );
-        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(
-                MathHelper.sin(h * MathHelper.PI) * i * 3 * zScale
-        ));
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(
-                Math.abs(MathHelper.cos(h * MathHelper.PI - 0.2F) * i) * 5 * xScale
-        ));
+            matrices.translate(
+                    (MathHelper.sin(h * MathHelper.PI) * i * 0.5F) * xScale,
+                    -Math.abs(MathHelper.cos(h * MathHelper.PI) * i) * yScale,
+                    0
+            );
+            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(
+                    MathHelper.sin(h * MathHelper.PI) * i * 3 * zScale
+            ));
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(
+                    Math.abs(MathHelper.cos(h * MathHelper.PI - 0.2F) * i) * 5 * xScale
+            ));
+        }
     }
 }

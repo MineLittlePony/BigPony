@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.minelittlepony.bigpony.Scaling;
+import com.minelittlepony.bigpony.client.BigPonyRenderState;
 
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.state.EntityRenderState;
@@ -18,6 +18,6 @@ abstract class MixinEntityRenderDispatcher<T extends Entity, S extends EntityRen
             at = @At(value = "INVOKE", target = "java/lang/Math.min(FF)F"),
             index = 0)
     private float modifyShadowRadius(float radius, @Local(ordinal = 0) S state) {
-        return radius * (state instanceof Scaling.Holder holder ? holder.getScaling().getShadowScale() : 1);
+        return radius * (state instanceof BigPonyRenderState.Holder holder ? holder.getBigPonyState().shadowScale : 1);
     }
 }

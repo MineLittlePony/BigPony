@@ -8,6 +8,7 @@ import com.minelittlepony.bigpony.data.BodyScale;
 import com.minelittlepony.bigpony.data.CameraScale;
 import com.minelittlepony.bigpony.data.EntityScale;
 import com.minelittlepony.bigpony.hdskins.SkinDetecter;
+import com.minelittlepony.client.render.entity.state.PonifiedRenderState;
 import com.mojang.authlib.GameProfile;
 
 import java.util.concurrent.CompletableFuture;
@@ -20,8 +21,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 
 public class Main extends PresetDetector implements ClientModInitializer {
 
@@ -48,6 +47,8 @@ public class Main extends PresetDetector implements ClientModInitializer {
                 detectPreset(player.getGameProfile()).thenAccept(holder.getScaling()::setDimensions);
             }
         });
+
+        BigPonyClient.setIsPonyPredicate(state -> state instanceof PonifiedRenderState);
 
         PonyConfig.getInstance().onChangedExternally(config -> {
             if (!writing) {
@@ -77,11 +78,6 @@ public class Main extends PresetDetector implements ClientModInitializer {
     @Override
     public boolean isFillyCam() {
         return PonyConfig.getInstance().fillycam.get();
-    }
-
-    @Override
-    public boolean isPony(LivingEntity entity) {
-        return entity instanceof PlayerEntity player && !Pony.getManager().getPony(player).race().isHuman();
     }
 
     @Override

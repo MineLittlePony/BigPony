@@ -1,6 +1,7 @@
 package com.minelittlepony.bigpony.client;
 
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -15,6 +16,7 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerEntity;
 
@@ -23,8 +25,18 @@ public class BigPonyClient implements ClientModInitializer {
 
     private KeyBinding keybind;
 
+    private static Predicate<EntityRenderState> isPonyPredicate = s -> false;
+
     public static BigPonyClient getInstance() {
         return instance;
+    }
+
+    public static boolean isPony(EntityRenderState state) {
+        return isPonyPredicate.test(state);
+    }
+
+    public static void setIsPonyPredicate(Predicate<EntityRenderState> predicate) {
+        isPonyPredicate = predicate;
     }
 
     public static boolean isClientPlayer(PlayerEntity player) {

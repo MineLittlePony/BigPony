@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.minelittlepony.bigpony.Scaling;
+import com.minelittlepony.bigpony.client.BigPonyRenderState;
 import com.minelittlepony.bigpony.data.BodyScale;
 import com.minelittlepony.bigpony.network.InteractionManager;
 
@@ -18,8 +19,8 @@ import net.minecraft.entity.LivingEntity;
 abstract class MixinLivingEntityRenderer<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>> {
     @Inject(method = "setupTransforms", at = @At("HEAD"))
     private void modifyScaleOnSetupTransforms(S state, MatrixStack matrices, float animationProgress, float baseScale, CallbackInfo info) {
-        if (state instanceof Scaling.Holder holder) {
-            BodyScale scale = holder.getScaling().getRenderedBodyScale();
+        if (state instanceof BigPonyRenderState.Holder holder) {
+            BodyScale scale = holder.getBigPonyState().bodyScale;
             matrices.scale(
                     InteractionManager.getInstance().getClamped(scale.x()),
                     InteractionManager.getInstance().getClamped(scale.y()),
@@ -30,8 +31,8 @@ abstract class MixinLivingEntityRenderer<T extends LivingEntity, S extends Livin
 
     @Inject(method = "updateRenderState", at = @At("HEAD"))
     private void onUpdateRenderState(T entity, S state, float tickDelta, CallbackInfo info) {
-        if (entity instanceof Scaling.Holder holder) {
-            ((Scaling.Holder)state).getScaling().copyFrom(holder.getScaling());
+        if (entity instanceof Scaling.Holder holder && state instanceof BigPonyRenderState.Holder s) {
+            s.getBigPonyState().update(entity, holder.getScaling());
         }
     }
 }
