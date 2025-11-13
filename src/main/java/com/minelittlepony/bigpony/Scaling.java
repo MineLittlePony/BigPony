@@ -25,16 +25,12 @@ public class Scaling {
         }
     }
 
-    private BodyScale getHitboxScale() {
-        return Permissions.hitbox(InteractionManager.getInstance().getPermissions()) ? dimensions.body() : BodyScale.DEFAULT;
-    }
-
     private CameraScale getCameraScale() {
         return Permissions.hitbox(InteractionManager.getInstance().getPermissions()) ? dimensions.camera() : CameraScale.DEFAULT;
     }
 
     public EntityDimensions getReplacementSize(EntityPose pose, EntityDimensions existing) {
-        BodyScale hitboxScale = getHitboxScale();
+        BodyScale hitboxScale = Permissions.hitbox(InteractionManager.getInstance().getPermissions()) ? dimensions.body() : BodyScale.DEFAULT;
         return new EntityDimensions(
                 existing.width() * InteractionManager.getInstance().getClamped(hitboxScale.shadowScale()),
                 existing.height() * InteractionManager.getInstance().getClamped(hitboxScale.y()),

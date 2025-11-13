@@ -5,6 +5,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import com.minelittlepony.bigpony.data.BodyScale;
+import com.minelittlepony.bigpony.data.CameraScale;
 import com.minelittlepony.bigpony.data.EntityScale;
 import com.minelittlepony.bigpony.network.ConsentPacket;
 import com.minelittlepony.bigpony.network.InteractionManager;
@@ -60,11 +62,11 @@ public class BigPonyCommand {
                 ));
             set.then(
                     CommandManager.literal(arg.name)
-                    .then(CommandManager.argument("value", FloatArgumentType.floatArg(0))
-                            .executes(context -> arg.executeSet(context, context.getSource().getPlayerOrThrow(), FloatArgumentType.getFloat(context, "value")))
+                    .then(CommandManager.argument("value", arg.type.argumentType().get())
+                            .executes(context -> arg.executeSet(context, context.getSource().getPlayerOrThrow(), context.getArgument("value", Object.class)))
                             .then(
                                     CommandManager.argument("target", EntityArgumentType.entity())
-                                        .executes(context -> arg.executeSet(context, EntityArgumentType.getEntity(context, "target"), FloatArgumentType.getFloat(context, "value")))
+                                        .executes(context -> arg.executeSet(context, EntityArgumentType.getEntity(context, "target"), context.getArgument("value", Object.class)))
                             )
                     )
             );
@@ -95,20 +97,31 @@ public class BigPonyCommand {
         return 0;
     }
 
+    record ScalingArgType<T>(Function<EntityScale, T> valueGetter, BiFunction<EntityScale, T, EntityScale> valueUpdater, Supplier<ArgumentType<T>> argumentType) {}
+
     public enum ScaleArg {
-        BODY_X(scale -> scale.body().x(), (scale, value) -> scale.withBody(scale.body().withX(value))),
-        BODY_Y(scale -> scale.body().y(), (scale, value) -> scale.withBody(scale.body().withY(value))),
-        BODY_Z(scale -> scale.body().z(), (scale, value) -> scale.withBody(scale.body().withZ(value))),
+        SCALE(scale -> scale.body().shadowScale(), (scale, value) -> scale.withModel(BodyScale.of(value)).withCamera(CameraScale.of(value))),
+        MODEL(scale -> scale.body().shadowScale(), (scale, value) -> scale.withModel(BodyScale.of(value))),
+        MODEL_X(scale -> scale.body().x(), (scale, value) -> scale.withModel(scale.model().withX(value))),
+        MODEL_Y(scale -> scale.body().y(), (scale, value) -> scale.withModel(scale.model().withY(value))),
+        MODEL_Z(scale -> scale.body().z(), (scale, value) -> scale.withModel(scale.model().withZ(value))),
+        HITBOX(scale -> scale.body().shadowScale(), (scale, value) -> scale.withHitbox(BodyScale.of(value))),
+        HITBOX_X(scale -> scale.body().x(), (scale, value) -> scale.withHitbox(scale.body().withX(value))),
+        HITBOX_Y(scale -> scale.body().y(), (scale, value) -> scale.withHitbox(scale.body().withY(value))),
+        HITBOX_Z(scale -> scale.body().z(), (scale, value) -> scale.withHitbox(scale.body().withZ(value))),
+        CAMERA(scale -> scale.camera().height(), (scale, value) -> scale.withCamera(CameraScale.of(value))),
         CAMERA_HEIGHT(scale -> scale.camera().height(), (scale, value) -> scale.withCamera(scale.camera().withHeight(value))),
         CAMERA_DISTANCE(scale -> scale.camera().distance(), (scale, value) -> scale.withCamera(scale.camera().withDistance(value)));
 
         private final String name = name().toLowerCase(Locale.ROOT);
-        private final Function<EntityScale, Float> valueGetter;
-        private final BiFunction<EntityScale, Float, EntityScale> valueUpdater;
+        private final ScalingArgType<?> type;
 
         ScaleArg(Function<EntityScale, Float> valueGetter, BiFunction<EntityScale, Float, EntityScale> valueUpdater) {
-            this.valueGetter = valueGetter;
-            this.valueUpdater = valueUpdater;
+            this(new ScalingArgType<>(valueGetter, valueUpdater, () -> FloatArgumentType.floatArg(0)));
+        }
+
+        ScaleArg(ScalingArgType<?> type) {
+            this.type = type;
         }
 
         public int executeGet(CommandContext<ServerCommandSource> context, Entity target) {
@@ -116,7 +129,7 @@ public class BigPonyCommand {
                 context.getSource().sendError(Text.translatable("bigpony.command.scale.not_supported"));
                 return 0;
             }
-            float scale = valueGetter.apply(holder.getScaling().getDimensions());
+            Object scale = type.valueGetter.apply(holder.getScaling().getDimensions());
             Text argumentName = Text.translatable("bigpony.argument.scale." + name).formatted(Formatting.GREEN);
             if (target == context.getSource().getEntity()) {
                 context.getSource().sendFeedback(() -> Text.translatable("bigpony.command.scale.get.self", argumentName, Text.literal(String.valueOf(scale)).formatted(Formatting.GOLD)), false);
@@ -127,23 +140,25 @@ public class BigPonyCommand {
             return 0;
         }
 
-        public int executeSet(CommandContext<ServerCommandSource> context, Entity target, float value) {
-            if (value != 1 && !BigPony.getInstance().getConfig().allowFreeformResizing.get()) {
-                context.getSource().sendError(Text.translatable("bigpony.command.scale.restricted").formatted(Formatting.RED));
-                return 0;
-            }
-            if (value < InteractionManager.getInstance().getMinMultiplier() || value > InteractionManager.getInstance().getMaxMultiplier()) {
-                context.getSource().sendError(Text.translatable("bigpony.command.scale.not_permitted",
-                        InteractionManager.getInstance().getMinMultiplier(),
-                        InteractionManager.getInstance().getMaxMultiplier()).formatted(Formatting.RED)
-                );
-                return 0;
+        public int executeSet(CommandContext<ServerCommandSource> context, Entity target, Object value) {
+            if (value instanceof Float f) {
+                if (f != 1 && !BigPony.getInstance().getConfig().allowFreeformResizing.get()) {
+                    context.getSource().sendError(Text.translatable("bigpony.command.scale.restricted").formatted(Formatting.RED));
+                    return 0;
+                }
+                if (f < InteractionManager.getInstance().getMinMultiplier() || f > InteractionManager.getInstance().getMaxMultiplier()) {
+                    context.getSource().sendError(Text.translatable("bigpony.command.scale.not_permitted",
+                            InteractionManager.getInstance().getMinMultiplier(),
+                            InteractionManager.getInstance().getMaxMultiplier()).formatted(Formatting.RED)
+                    );
+                    return 0;
+                }
             }
             if (!(target instanceof Scaling.Holder holder)) {
                 context.getSource().sendError(Text.translatable("bigpony.command.scale.not_supported"));
                 return 0;
             }
-            holder.getScaling().setDimensions(valueUpdater.apply(holder.getScaling().getDimensions(), value));
+            holder.getScaling().setDimensions(type.valueUpdater.apply(holder.getScaling().getDimensions(), cast(value)));
             Text argumentName = Text.translatable("bigpony.argument.scale." + name).formatted(Formatting.GREEN);
             if (target != context.getSource().getEntity()) {
                 if (target instanceof ServerPlayerEntity player && context.getSource().getWorld().getGameRules().getBoolean(GameRules.SEND_COMMAND_FEEDBACK)) {
@@ -155,6 +170,11 @@ public class BigPonyCommand {
             }
             return 0;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T> T cast(Object o) {
+        return (T)o;
     }
 
     public enum Setting {

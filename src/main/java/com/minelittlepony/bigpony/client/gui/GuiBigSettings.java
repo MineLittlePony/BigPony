@@ -54,7 +54,7 @@ public class GuiBigSettings extends GameGui {
     }
 
     public boolean hasScalingConsent() {
-        return (client.player == null || Permissions.freeform(InteractionManager.getInstance().getPermissions()));
+        return client.player == null || Permissions.freeform(InteractionManager.getInstance().getPermissions());
     }
 
     public boolean isScalingButtonsEnabled() {
@@ -134,7 +134,7 @@ public class GuiBigSettings extends GameGui {
             .getStyle().setText("minebp.scale.global");
         content.addButton(xSize = new ResettableSlider(content, left, top += 20, .1F, max, dimensions.body().x()))
             .onChange(v -> {
-                dimensions = dimensions.withBody(dimensions.body().withX(v));
+                dimensions = dimensions.withModel(dimensions.model().withX(v));
                 updateDimensions();
                 return v;
             })
@@ -142,7 +142,7 @@ public class GuiBigSettings extends GameGui {
             .setEnabled(allowScaling);
         content.addButton(ySize = new ResettableSlider(content, left, top += 20, .1F, max, dimensions.body().y()))
             .onChange(v -> {
-                dimensions = dimensions.withBody(dimensions.body().withY(v));
+                dimensions = dimensions.withModel(dimensions.model().withY(v));
                 updateDimensions();
                 return v;
             })
@@ -150,7 +150,7 @@ public class GuiBigSettings extends GameGui {
             .setEnabled(allowScaling);
         content.addButton(zSize = new ResettableSlider(content, left, top += 20, .1F, max, dimensions.body().z()))
             .onChange(v -> {
-                dimensions = dimensions.withBody(dimensions.body().withZ(v));
+                dimensions = dimensions.withModel(dimensions.model().withZ(v));
                 updateDimensions();
                 return v;
             })
@@ -183,20 +183,18 @@ public class GuiBigSettings extends GameGui {
                 if (v) {
                     visual.setEnabled(false);
                     PresetDetector.getInstance().detectPreset(client.getGameProfile()).thenAccept(dimensions -> {
-                        this.dimensions = dimensions;
                         xSize.setValue(dimensions.body().x());
                         ySize.setValue(dimensions.body().y());
                         zSize.setValue(dimensions.body().z());
                         height.setValue(dimensions.camera().height());
                         distance.setValue(dimensions.camera().distance());
+                        this.dimensions = dimensions;
                         updateDimensions();
                         tick();
                         visual.setEnabled(true);
                     });
                 } else {
-                    PresetDetector.getInstance().revertFillyCam();
-                    dimensions = hasScalingConsent() ? new EntityScale(dimensions.body(), dimensions.camera(), true) : EntityScale.DEFAULT;
-                    updateDimensions();
+                    toggleMLPScalingOff();
                 }
                 tick();
                 return v;
@@ -210,6 +208,12 @@ public class GuiBigSettings extends GameGui {
         presets = Stream.of(CameraPresets.values())
                 .map(preset -> new CameraPresetButton(this, preset, right))
                 .toArray(CameraPresetButton[]::new);
+    }
+
+    public void toggleMLPScalingOff() {
+        PresetDetector.getInstance().revertFillyCam();
+        dimensions = hasScalingConsent() ? dimensions.withModel(dimensions.body()) : EntityScale.DEFAULT;
+        updateDimensions();
     }
 
     static Function<AbstractSlider<Float>, Text> format(String key) {

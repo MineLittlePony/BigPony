@@ -17,7 +17,7 @@ public class BigPonyRenderState {
     }
 
     public void update(LivingEntity entity, Scaling scaling) {
-        bodyScale = (scaling.getDimensions().visual() || !isPony) ? scaling.getDimensions().body() : BodyScale.DEFAULT;
+        bodyScale = isPony ? scaling.getDimensions().model() : scaling.getDimensions().body();
         bodyScale = new BodyScale(
                 InteractionManager.getInstance().getClamped(bodyScale.x()),
                 InteractionManager.getInstance().getClamped(bodyScale.y()),

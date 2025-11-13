@@ -4,13 +4,17 @@ import com.minelittlepony.api.pony.Pony;
 import com.minelittlepony.api.pony.meta.Size;
 import com.minelittlepony.bigpony.*;
 import com.minelittlepony.bigpony.client.BigPonyClient;
+import com.minelittlepony.bigpony.client.gui.GuiBigSettings;
 import com.minelittlepony.bigpony.data.BodyScale;
 import com.minelittlepony.bigpony.data.CameraScale;
 import com.minelittlepony.bigpony.data.EntityScale;
 import com.minelittlepony.bigpony.hdskins.SkinDetecter;
+import com.minelittlepony.bigpony.network.InteractionManager;
 import com.minelittlepony.client.render.entity.state.PonifiedRenderState;
+import com.minelittlepony.common.client.gui.GameGui;
 import com.mojang.authlib.GameProfile;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import com.minelittlepony.api.config.PonyConfig;
@@ -21,11 +25,16 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 public class Main extends PresetDetector implements ClientModInitializer {
 
-    private boolean oldFillyCam;
-    private boolean writing;
+    private Boolean oldFillycam;
+    private boolean setFillycam;
+
+    private boolean switching;
 
     @Override
     public void onInitializeClient() {
@@ -48,31 +57,69 @@ public class Main extends PresetDetector implements ClientModInitializer {
             }
         });
 
-        BigPonyClient.setIsPonyPredicate(state -> state instanceof PonifiedRenderState);
+        PonyConfig.getInstance().onChangedExternally(config -> enforceFillyCamState());
+        PonyConfig.getInstance().fillycam.onChanged(fillyCam -> enforceFillyCamState());
 
-        PonyConfig.getInstance().onChangedExternally(config -> {
-            if (!writing) {
-                oldFillyCam = isFillyCam();
+        BigPonyClient.setIsPonyPredicate(state -> state instanceof PonifiedRenderState);
+    }
+
+    private synchronized void enforceFillyCamState() {
+        if (switching) {
+            return;
+        }
+        switching = true;
+
+        if (isFillyCam() && BigPony.getInstance().getConfig().useDetectedPonyScaling.get()) {
+            PonyConfig.getInstance().fillycam.set(false);
+            GameGui.playSound(SoundEvents.ENTITY_VILLAGER_NO);
+
+            var client = MinecraftClient.getInstance();
+
+            if (client.player != null) {
+                client.player.sendMessage(Text.literal("[Big Pony] FillyCam was enabled! Auto-Detect function has been disabled").formatted(Formatting.DARK_RED), false);
             }
-        });
-        PonyConfig.getInstance().fillycam.onChanged(fillyCam -> {
-            if (!writing) {
-                oldFillyCam = isFillyCam();
+
+            BigPony.getInstance().getConfig().useDetectedPonyScaling.set(false);
+
+            if (client.currentScreen instanceof GuiBigSettings settingsScreen) {
+                settingsScreen.toggleMLPScalingOff();
+            } else {
+                PresetDetector.getInstance().revertFillyCam();
+                EntityScale dimensions = BigPony.getInstance().getConfig().scale.get();
+                boolean scalingConsent = client.player == null || Permissions.freeform(InteractionManager.getInstance().getPermissions());
+                dimensions = scalingConsent ? dimensions.withModel(dimensions.body()) : EntityScale.DEFAULT;
+                BigPony.getInstance().getConfig().scale.set(dimensions);
+                if (client.player instanceof Scaling.Holder holder) {
+                    holder.getScaling().setDimensions(dimensions);
+                }
             }
-        });
-        oldFillyCam = isFillyCam();
+            BigPony.getInstance().getConfig().save();
+        }
+
+        switching = false;
     }
 
     public void setFillyCam(boolean enable) {
-        oldFillyCam = isFillyCam();
-        writing = true;
+        boolean fillyCam = isFillyCam();
+        if (enable == fillyCam) {
+            return;
+        }
+        if (oldFillycam == null || fillyCam != setFillycam) {
+            oldFillycam = fillyCam;
+        }
+        setFillycam = enable;
         PonyConfig.getInstance().fillycam.set(enable);
-        writing = false;
     }
 
     @Override
     public void revertFillyCam() {
-        PonyConfig.getInstance().fillycam.set(oldFillyCam);
+        if (oldFillycam != null) {
+            boolean fillyCam = isFillyCam();
+            if (fillyCam == setFillycam && fillyCam != oldFillycam) {
+                PonyConfig.getInstance().fillycam.set(oldFillycam);
+            }
+            oldFillycam = null;
+        }
     }
 
     @Override
@@ -85,22 +132,26 @@ public class Main extends PresetDetector implements ClientModInitializer {
         return SkinDetecter.getInstance().loadSkin(profile).thenApplyAsync(skin -> {
             // Turn on filly cam so we can get the camera parameters
             boolean fillyCam = isFillyCam();
-            setFillyCam(true);
+            synchronized (this) {
+                switching = true;
+                setFillyCam(true);
 
-            Size size = Pony.getManager().getPony(skin).size();
+                Size size = Pony.getManager().getPony(skin).size();
 
-            EntityScale scale = new EntityScale(
-                    BodyScale.of(size.scaleFactor()),
-                    new CameraScale(size.eyeDistanceFactor(), size.eyeHeightFactor()),
-                    false
-            );
+                EntityScale scale = new EntityScale(
+                        BodyScale.DEFAULT,
+                        Optional.of(BodyScale.of(size.scaleFactor())),
+                        new CameraScale(size.eyeDistanceFactor(), size.eyeHeightFactor())
+                );
 
-            // We turn off filly cam because it's not needed and might cause issues with buckets if left enabled
-            setFillyCam(false);
-            if (!fillyCam) {
-                PonyConfig.getInstance().save();
+                // We turn off filly cam because it's not needed and might cause issues with buckets if left enabled
+                setFillyCam(false);
+                if (!fillyCam) {
+                    PonyConfig.getInstance().save();
+                }
+                switching = false;
+                return scale;
             }
-            return scale;
         }, MinecraftClient.getInstance());
     }
 }
