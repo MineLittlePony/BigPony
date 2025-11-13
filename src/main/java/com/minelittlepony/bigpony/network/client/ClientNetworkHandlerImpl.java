@@ -15,8 +15,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
 
 public class ClientNetworkHandlerImpl extends InteractionManager {
     private long lastSettingsUpdate = 0;
@@ -29,8 +27,8 @@ public class ClientNetworkHandlerImpl extends InteractionManager {
             updateConsent(packet);
         });
         Network.OTHER_PLAYER_SIZE.receiver().addPersistentListener((sender, packet) -> {
-            if (sender.getEntityWorld().getEntityById(packet.entityId()) instanceof PlayerEntity player && player instanceof Scaling.Holder holder) {
-                log("[C] Got size packet for other player " + player.getName().getString());
+            if (sender.getEntityWorld().getEntityById(packet.entityId()) instanceof LivingEntity target && target instanceof Scaling.Holder holder) {
+                log("[C] Got size packet for other entity " + target.getName().getString());
                 holder.getScaling().setDimensions(packet.dimensions());
             }
         });
@@ -91,7 +89,7 @@ public class ClientNetworkHandlerImpl extends InteractionManager {
             if (entity == client.player) {
                 log("[C-UPD] Sending size update packet to server for " + entity.getName().getString());
                 Network.PLAYER_SIZE.sendToServer(scaling.toUpdatePacket(entity.getId()));
-            } else if (entity instanceof ServerPlayerEntity) {
+            } else {
                 super.sendSizeUpdate(entity, scaling);
             }
         }
