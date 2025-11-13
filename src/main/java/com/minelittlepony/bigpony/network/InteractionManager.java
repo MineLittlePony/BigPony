@@ -37,12 +37,16 @@ public class InteractionManager {
     protected void onConfigurationChange() {
         ConsentPacket newSettings = new ConsentPacket();
         if (!newSettings.equals(serverSettings)) {
-            serverSettings = newSettings;
-            MinecraftServer server = this.server.get();
-            if (server != null) {
-                log("[S-SET] Sending settings update packet to all players");
-                Network.SERVER_CONSENT.sendToAllPlayers(newSettings, server);
-            }
+            sendConfigurationChange(newSettings);
+        }
+    }
+
+    public void sendConfigurationChange(ConsentPacket newSettings) {
+        serverSettings = newSettings;
+        MinecraftServer server = this.server.get();
+        if (server != null) {
+            log("[S-SET] Sending settings update packet to all players");
+            Network.SERVER_CONSENT.sendToAllPlayers(newSettings, server);
         }
     }
 

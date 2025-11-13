@@ -1,11 +1,13 @@
 package com.minelittlepony.bigpony.network;
 
 import com.minelittlepony.bigpony.BigPony;
+import com.minelittlepony.bigpony.BigPonyCommand;
 import com.minelittlepony.bigpony.Scaling;
 import com.sollace.fabwork.api.packets.C2SPacketType;
 import com.sollace.fabwork.api.packets.S2CPacketType;
 import com.sollace.fabwork.api.packets.SimpleNetworking;
 
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -30,6 +32,9 @@ public class Network {
             Scaling newScaling = ((Scaling.Holder)newPlayer).getScaling();
             newScaling.setDimensions(((Scaling.Holder)oldPlayer).getScaling().getDimensions());
             newScaling.markDirty();
+        });
+        CommandRegistrationCallback.EVENT.register((dispatcher, registries, environment) -> {
+            dispatcher.register(BigPonyCommand.create());
         });
 
         PLAYER_SIZE.receiver().addPersistentListener((player, packet) -> {
