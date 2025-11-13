@@ -7,7 +7,7 @@ import com.minelittlepony.common.util.settings.Config;
 import com.minelittlepony.common.util.settings.Setting;
 
 public class BigPonyConfig extends Config {
-    public final Setting<EntityScale> scale = value("common", "scale", EntityScale.DEFAULT);
+    public final Setting<EntityScale> scale = value("common", "scale", () -> EntityScale.DEFAULT, EntityScale.CODEC);
 
     public final Setting<Boolean> useDetectedPonyScaling = value("client", "useDetectedPonyScaling", false);
 
