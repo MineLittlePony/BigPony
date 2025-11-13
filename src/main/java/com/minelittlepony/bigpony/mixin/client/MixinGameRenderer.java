@@ -7,8 +7,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.minelittlepony.bigpony.client.BigPonyRenderState;
 import com.minelittlepony.bigpony.data.BodyScale;
-import com.minelittlepony.bigpony.network.InteractionManager;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.GameRenderer;
@@ -36,20 +34,17 @@ abstract class MixinGameRenderer implements SynchronousResourceReloader, AutoClo
             float i = player.getState().lerpMovement(tickDelta);
 
             BodyScale scale = holder.getBigPonyState().bodyScale;
-            float xScale = InteractionManager.getInstance().getClamped(scale.x());
-            float yScale = InteractionManager.getInstance().getClamped(scale.y());
-            float zScale = InteractionManager.getInstance().getClamped(scale.z());
 
             matrices.translate(
-                    (MathHelper.sin(h * MathHelper.PI) * i * 0.5F) * xScale,
-                    -Math.abs(MathHelper.cos(h * MathHelper.PI) * i) * yScale,
+                    (MathHelper.sin(h * MathHelper.PI) * i * 0.5F) * scale.x(),
+                    -Math.abs(MathHelper.cos(h * MathHelper.PI) * i) * scale.y(),
                     0
             );
             matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(
-                    MathHelper.sin(h * MathHelper.PI) * i * 3 * zScale
+                    MathHelper.sin(h * MathHelper.PI) * i * 3 * scale.z()
             ));
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(
-                    Math.abs(MathHelper.cos(h * MathHelper.PI - 0.2F) * i) * 5 * xScale
+                    Math.abs(MathHelper.cos(h * MathHelper.PI - 0.2F) * i) * 5 * scale.x()
             ));
         }
     }

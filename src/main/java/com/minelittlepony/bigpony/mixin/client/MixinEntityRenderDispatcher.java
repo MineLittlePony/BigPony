@@ -18,6 +18,6 @@ abstract class MixinEntityRenderDispatcher<T extends Entity, S extends EntityRen
             at = @At(value = "INVOKE", target = "java/lang/Math.min(FF)F"),
             index = 0)
     private float modifyShadowRadius(float radius, @Local(ordinal = 0) S state) {
-        return radius * (state instanceof BigPonyRenderState.Holder holder ? holder.getBigPonyState().shadowScale : 1);
+        return radius * (state instanceof BigPonyRenderState.Holder holder ? holder.getBigPonyState().bodyScale.shadowScale() : 1);
     }
 }

@@ -7,25 +7,24 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.bigpony.client.BigPonyRenderState;
 import com.minelittlepony.bigpony.data.BodyScale;
-import com.minelittlepony.bigpony.network.InteractionManager;
-
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.state.LivingEntityRenderState;
+import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 
 @Mixin(LivingEntityRenderer.class)
 abstract class MixinLivingEntityRenderer<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>> {
-    @Inject(method = "setupTransforms", at = @At("HEAD"))
-    private void modifyScaleOnSetupTransforms(S state, MatrixStack matrices, float animationProgress, float baseScale, CallbackInfo info) {
+    @Inject(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/state/CameraRenderState;)V",
+            at = @At(
+                value = "INVOKE",
+                target = "net/minecraft/client/render/entity/LivingEntityRenderer.setupTransforms(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;FF)V"))
+    private void modifyScaleOnSetupTransforms(S state, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState camera, CallbackInfo info) {
         if (state instanceof BigPonyRenderState.Holder holder) {
             BodyScale scale = holder.getBigPonyState().bodyScale;
-            matrices.scale(
-                    InteractionManager.getInstance().getClamped(scale.x()),
-                    InteractionManager.getInstance().getClamped(scale.y()),
-                    InteractionManager.getInstance().getClamped(scale.z())
-            );
+            matrices.scale(scale.x(), scale.y(), scale.z());
         }
     }
 

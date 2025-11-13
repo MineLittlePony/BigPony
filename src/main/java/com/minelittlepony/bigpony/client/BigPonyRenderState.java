@@ -9,7 +9,6 @@ import net.minecraft.entity.LivingEntity;
 
 public class BigPonyRenderState {
     public BodyScale bodyScale = BodyScale.DEFAULT;
-    public float shadowScale = 1;
 
     private final boolean isPony;
 
@@ -19,7 +18,11 @@ public class BigPonyRenderState {
 
     public void update(LivingEntity entity, Scaling scaling) {
         bodyScale = (scaling.getDimensions().visual() || !isPony) ? scaling.getDimensions().body() : BodyScale.DEFAULT;
-        shadowScale = InteractionManager.getInstance().getClamped(bodyScale.shadowScale());
+        bodyScale = new BodyScale(
+                InteractionManager.getInstance().getClamped(bodyScale.x()),
+                InteractionManager.getInstance().getClamped(bodyScale.y()),
+                InteractionManager.getInstance().getClamped(bodyScale.z())
+        );
     }
 
     public interface Holder {

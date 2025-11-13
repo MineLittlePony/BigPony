@@ -132,10 +132,10 @@ public class BigPonyCommand {
                 context.getSource().sendError(Text.translatable("bigpony.command.scale.restricted").formatted(Formatting.RED));
                 return 0;
             }
-            if (value < BigPony.getInstance().getConfig().minScalingMultiplier.get() || value > BigPony.getInstance().getConfig().maxScalingMultiplier.get()) {
+            if (value < InteractionManager.getInstance().getMinMultiplier() || value > InteractionManager.getInstance().getMaxMultiplier()) {
                 context.getSource().sendError(Text.translatable("bigpony.command.scale.not_permitted",
-                        BigPony.getInstance().getConfig().minScalingMultiplier.get(),
-                        BigPony.getInstance().getConfig().maxScalingMultiplier.get()).formatted(Formatting.RED)
+                        InteractionManager.getInstance().getMinMultiplier(),
+                        InteractionManager.getInstance().getMaxMultiplier()).formatted(Formatting.RED)
                 );
                 return 0;
             }

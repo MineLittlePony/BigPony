@@ -5,8 +5,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.minelittlepony.bigpony.client.BigPonyRenderState;
 import com.minelittlepony.bigpony.data.BodyScale;
-import com.minelittlepony.bigpony.network.InteractionManager;
-
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.util.math.Vec3d;
@@ -16,10 +14,6 @@ abstract class MixinPlayerEntityRenderer {
     @ModifyReturnValue(method = "getPositionOffset", at = @At("RETURN"))
     private Vec3d fixSneakingHeight(Vec3d offset, PlayerEntityRenderState state) {
         BodyScale scale = ((BigPonyRenderState.Holder)state).getBigPonyState().bodyScale;
-        return offset.multiply(
-                InteractionManager.getInstance().getClamped(scale.x()),
-                InteractionManager.getInstance().getClamped(scale.y()),
-                InteractionManager.getInstance().getClamped(scale.z())
-        );
+        return offset.multiply(scale.x(), scale.y(), scale.z());
     }
 }
