@@ -64,7 +64,7 @@ public class BigPonyClient implements ClientModInitializer {
         BigPony.getInstance().getConfig().onChangedExternally(config -> {
             MinecraftClient.getInstance().execute(() -> {
                 if (MinecraftClient.getInstance().currentScreen instanceof GuiBigSettings screen) {
-                    screen.init(MinecraftClient.getInstance(), screen.width, ((Screen)screen).height);
+                    screen.init(screen.width, ((Screen)screen).height);
                 }
             });
         });

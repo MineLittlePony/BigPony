@@ -22,13 +22,13 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.world.GameRules;
+import net.minecraft.world.rule.GameRules;
 
 public class BigPonyCommand {
     public static LiteralArgumentBuilder<ServerCommandSource> create() {
         return CommandManager.literal("bigpony")
-                .then(config().requires(CommandManager.requirePermissionLevel(3)))
-                .then(scale().requires(CommandManager.requirePermissionLevel(2)));
+                .then(config().requires(CommandManager.requirePermissionLevel(CommandManager.ADMINS_CHECK)))
+                .then(scale().requires(CommandManager.requirePermissionLevel(CommandManager.GAMEMASTERS_CHECK)));
     }
 
     static LiteralArgumentBuilder<ServerCommandSource> config() {
@@ -161,7 +161,7 @@ public class BigPonyCommand {
             holder.getScaling().setDimensions(type.valueUpdater.apply(holder.getScaling().getDimensions(), cast(value)));
             Text argumentName = Text.translatable("bigpony.argument.scale." + name).formatted(Formatting.GREEN);
             if (target != context.getSource().getEntity()) {
-                if (target instanceof ServerPlayerEntity player && context.getSource().getWorld().getGameRules().getBoolean(GameRules.SEND_COMMAND_FEEDBACK)) {
+                if (target instanceof ServerPlayerEntity player && context.getSource().getWorld().getGameRules().getValue(GameRules.SEND_COMMAND_FEEDBACK)) {
                     player.sendMessage(Text.translatable("bigpony.scaling.changed"));
                 }
                 context.getSource().sendFeedback(() -> Text.translatable("bigpony.command.scale.set", target.getDisplayName(), argumentName, Text.literal(String.valueOf(value)).formatted(Formatting.GOLD)), false);

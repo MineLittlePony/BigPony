@@ -2,7 +2,6 @@
   "required": true,
   "minVersion": "0.6",
   "package": "com.minelittlepony.bigpony.mixin",
-  "refmap": "bigpony.mixin.refmap.json",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "MixinEntity",
