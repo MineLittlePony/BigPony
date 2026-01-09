@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 
 import com.minelittlepony.bigpony.BigPony;
+import com.minelittlepony.bigpony.Permissions;
 import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.bigpony.data.EntityScale;
 import com.minelittlepony.bigpony.network.ConsentPacket;
@@ -60,7 +61,7 @@ public class ClientNetworkHandlerImpl extends InteractionManager {
 
     @Override
     public long getPermissions() {
-        return serverConsent.map(ConsentPacket::permissions).orElseGet(super::getPermissions);
+        return serverConsent.map(ConsentPacket::permissions).orElseGet(() -> Permissions.with(super.getPermissions(), Permissions.FLAG_HITBOX, false));
     }
 
     @Override
