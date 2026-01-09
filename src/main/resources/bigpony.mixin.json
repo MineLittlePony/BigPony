@@ -13,6 +13,7 @@
     "client.MixinEntityRenderDispatcher",
     "client.MixinLivingEntityRenderer",
     "client.MixinLivingEntityRenderState",
-    "client.MixinPlayerEntityRenderer"
+    "client.MixinPlayerEntityRenderer",
+    "client.MixinPlayerInteractItemC2SPacket"
   ]
 }

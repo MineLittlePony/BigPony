@@ -1,0 +1,110 @@
+package com.minelittlepony.bigpony.client;
+
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.*;
+import net.minecraft.world.RaycastContext;
+
+import org.jetbrains.annotations.Nullable;
+
+import com.minelittlepony.bigpony.BigPony;
+import com.minelittlepony.bigpony.Permissions;
+import com.minelittlepony.bigpony.Scaling;
+import com.minelittlepony.bigpony.minelittlepony.PresetDetector;
+import com.minelittlepony.bigpony.network.InteractionManager;
+
+public class HorseCam {
+    private static final double TO_DEGREES = 180D / Math.PI;
+
+    /**
+     * Transforms the client pony's pitch to the corresponding angle for a human character.
+     */
+    public static float transformCameraAngle(float pitch) {
+        try {
+            if (PresetDetector.getInstance().isFillyCam()) {
+                return pitch;
+            }
+
+            MinecraftClient client = MinecraftClient.getInstance();
+            PlayerEntity player = client.player;
+
+            if (player == null || client.isInSingleplayer() || client.isIntegratedServerRunning() || Permissions.hitbox(InteractionManager.getInstance().getPermissions())) {
+                return pitch;
+            }
+
+            // noop
+            // Only run when the player has an item in their hands. Can't check for buckets specifically since mods exist.
+            if (player.getMainHandStack().isEmpty() && player.getOffHandStack().isEmpty()) {
+                return pitch;
+            }
+
+            if (player instanceof Scaling.Holder holder) {
+                final float alteredHeight = player.getEyeHeight(player.getPose());
+                final float vanillaHeight = alteredHeight / holder.getScaling().getCameraScale().height();
+
+                // only change the angle if required
+                if (!MathHelper.approximatelyEquals(vanillaHeight, alteredHeight) && client.targetedEntity == null) {
+                    // noop
+                    // Ignore misses, helps with bows, arrows, and projectiles
+                    if (client.crosshairTarget != null && client.crosshairTarget.getType() == HitResult.Type.BLOCK) {
+                        return rescaleCameraPitch(player, alteredHeight, vanillaHeight, pitch);
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            BigPony.LOGGER.info("Error occured when unconverting camera pitch: {}", t);
+        }
+        return pitch;
+    }
+
+    /**
+     * Calculates a corresponding camera pitch for the current player at
+     * the specified character height.
+     *
+     * @param toHeight      Target height.
+     * @param originalPitch Original, unchanged pitch.
+     *
+     * @return The new pitch value, otherwise the original value passed in.
+     */
+    public static float rescaleCameraPitch(Entity entity, double fromHeight, double toHeight, float originalPitch) {
+        Vec3d start = entity.getEntityPos().add(0, fromHeight, 0);
+        Vec3d end = getRaycastPos(entity, start, originalPitch);
+
+        if (end == null) {
+            return originalPitch;
+        }
+
+        double x = horizontalDistance(start, end);
+        double y = entity.getY() - end.y + toHeight;
+
+        if (x == 0) {
+            return originalPitch;
+        }
+
+        double newPitch = Math.atan(y / x) * TO_DEGREES;
+        // Try not to break stuff
+        if (Double.isInfinite(newPitch) || Double.isNaN(newPitch)) {
+            return originalPitch;
+        }
+
+        return (float)newPitch;
+    }
+
+    public static @Nullable Vec3d getRaycastPos(Entity entity, Vec3d start, float pitch) {
+        BlockHitResult hit = entity.getEntityWorld().raycast(new RaycastContext(
+                start,
+                start.add(entity.getRotationVector(pitch, entity.getYaw()).multiply(16)),
+                RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, entity)
+        );
+        return hit == null ? null : hit.getPos();
+    }
+
+    private static double horizontalDistance(Vec3d from, Vec3d to) {
+        double diffX = to.x - from.x;
+        double diffZ = to.z - from.z;
+        return Math.sqrt(diffX * diffX + diffZ * diffZ);
+    }
+}
