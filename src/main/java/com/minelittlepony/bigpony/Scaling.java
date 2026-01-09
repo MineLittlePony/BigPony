@@ -25,8 +25,8 @@ public class Scaling {
         }
     }
 
-    private CameraScale getCameraScale() {
-        return Permissions.hitbox(InteractionManager.getInstance().getPermissions()) ? dimensions.camera() : CameraScale.DEFAULT;
+    public CameraScale getCameraScale() {
+        return Permissions.camera(InteractionManager.getInstance().getPermissions()) ? dimensions.camera() : CameraScale.DEFAULT;
     }
 
     public EntityDimensions getReplacementSize(EntityPose pose, EntityDimensions existing) {
