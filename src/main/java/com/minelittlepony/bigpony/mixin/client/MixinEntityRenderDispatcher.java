@@ -7,14 +7,14 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.minelittlepony.bigpony.client.BigPonyRenderState;
 
-import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.state.EntityRenderState;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.world.entity.Entity;
 
 @Mixin(value = EntityRenderer.class)
 abstract class MixinEntityRenderDispatcher<T extends Entity, S extends EntityRenderState> {
     @ModifyArg(
-            method = "updateShadow(Lnet/minecraft/client/render/entity/state/EntityRenderState;Lnet/minecraft/client/MinecraftClient;Lnet/minecraft/world/World;)V",
+            method = "extractShadow(Lnet/minecraft/client/renderer/entity/state/EntityRenderState;Lnet/minecraft/client/Minecraft;Lnet/minecraft/world/level/Level;)V",
             at = @At(value = "INVOKE", target = "java/lang/Math.min(FF)F"),
             index = 0)
     private float modifyShadowRadius(float radius, @Local(ordinal = 0) S state) {

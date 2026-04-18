@@ -5,9 +5,10 @@ import com.minelittlepony.bigpony.data.CameraScale;
 import com.minelittlepony.bigpony.data.EntityScale;
 import com.minelittlepony.bigpony.network.InteractionManager;
 import com.minelittlepony.bigpony.network.MsgPlayerSize;
-import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.EntityDimensions;
+
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
 
 public class Scaling {
     private EntityScale dimensions = EntityScale.DEFAULT;
@@ -29,7 +30,7 @@ public class Scaling {
         return Permissions.camera(InteractionManager.getInstance().getPermissions()) ? dimensions.camera() : CameraScale.DEFAULT;
     }
 
-    public EntityDimensions getReplacementSize(EntityPose pose, EntityDimensions existing) {
+    public EntityDimensions getReplacementSize(Pose pose, EntityDimensions existing) {
         BodyScale hitboxScale = Permissions.hitbox(InteractionManager.getInstance().getPermissions()) ? dimensions.body() : BodyScale.DEFAULT;
         return new EntityDimensions(
                 existing.width() * InteractionManager.getInstance().getClamped(hitboxScale.shadowScale()),
@@ -56,7 +57,7 @@ public class Scaling {
         if (dirty || lastSettingsUpdateTime != this.lastSettingsUpdateTime) {
             dirty = false;
             this.lastSettingsUpdateTime = lastSettingsUpdateTime;
-            entity.calculateDimensions();
+            entity.refreshDimensions();
             InteractionManager.getInstance().sendSizeUpdate(entity, this);
         }
     }

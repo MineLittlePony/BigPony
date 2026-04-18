@@ -9,8 +9,8 @@ import com.minelittlepony.hdskins.profile.SkinType;
 import com.mojang.authlib.GameProfile;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.minecraft.util.AssetInfo.TextureAsset;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.ClientAsset;
+import net.minecraft.resources.Identifier;
 
 public class Main extends SkinDetecter implements ClientModInitializer {
 
@@ -21,11 +21,11 @@ public class Main extends SkinDetecter implements ClientModInitializer {
 
     @Override
     public CompletableFuture<Identifier> loadSkin(GameProfile profile) {
-        return FutureUtils.<Optional<TextureAsset>>either(
+        return FutureUtils.<Optional<ClientAsset.Texture>>either(
             HDSkins.getInstance().getProfileRepository().load(profile).thenApply(skins -> {
                 return skins.getSkin(SkinType.SKIN);
             }),
             Optional::empty
-        ).thenCompose(value -> value.map(TextureAsset::texturePath).map(CompletableFuture::completedFuture).orElseGet(() -> super.loadSkin(profile)));
+        ).thenCompose(value -> value.map(ClientAsset.Texture::texturePath).map(CompletableFuture::completedFuture).orElseGet(() -> super.loadSkin(profile)));
     }
 }

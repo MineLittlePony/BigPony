@@ -7,45 +7,38 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.minelittlepony.bigpony.client.BigPonyRenderState;
 import com.minelittlepony.bigpony.data.BodyScale;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.resource.SynchronousResourceReloader;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.util.Mth;
 
 @Mixin(GameRenderer.class)
-abstract class MixinGameRenderer implements SynchronousResourceReloader, AutoCloseable {
-    @Inject(method = "bobView(Lnet/minecraft/client/util/math/MatrixStack;F)V",
+abstract class MixinGameRenderer {
+    @Inject(method = "bobView(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;)V",
             at = @At("HEAD"),
             cancellable = true)
-    private void onBobView(MatrixStack matrices, float tickDelta, CallbackInfo info) {
-        MinecraftClient client = MinecraftClient.getInstance();
-
-        if (!(client.getCameraEntity() instanceof AbstractClientPlayerEntity player)) {
+    private void onBobView(final CameraRenderState cameraState, final PoseStack poseStack, CallbackInfo info) {
+        if (!cameraState.entityRenderState.isPlayer) {
             return;
         }
 
-        if (client.getEntityRenderDispatcher().getRenderer(player).getAndUpdateRenderState(player, tickDelta) instanceof BigPonyRenderState.Holder holder) {
+        if (cameraState instanceof BigPonyRenderState.Holder holder) {
             info.cancel();
 
-            float h = player.getState().getReverseLerpedDistanceMoved(tickDelta);
-            float i = player.getState().lerpMovement(tickDelta);
+            float backwardsInterpolatedWalkDistance = cameraState.entityRenderState.backwardsInterpolatedWalkDistance;
+            float bob = cameraState.entityRenderState.bob;
 
             BodyScale scale = holder.getBigPonyState().bodyScale;
 
-            matrices.translate(
-                    (MathHelper.sin(h * MathHelper.PI) * i * 0.5F) * scale.x(),
-                    -Math.abs(MathHelper.cos(h * MathHelper.PI) * i) * scale.y(),
+            poseStack.translate(
+                    (Mth.sin(backwardsInterpolatedWalkDistance * Mth.PI) * bob * 0.5F) * scale.x(),
+                    -Math.abs(Mth.cos(backwardsInterpolatedWalkDistance * Mth.PI) * bob) * scale.y(),
                     0
             );
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(
-                    MathHelper.sin(h * MathHelper.PI) * i * 3 * scale.z()
-            ));
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(
-                    Math.abs(MathHelper.cos(h * MathHelper.PI - 0.2F) * i) * 5 * scale.x()
-            ));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.sin(backwardsInterpolatedWalkDistance * Mth.PI) * bob * 3 * scale.z()));
+            poseStack.mulPose(Axis.XP.rotationDegrees(Mth.abs(Mth.cos(backwardsInterpolatedWalkDistance * Mth.PI - 0.2F) * bob) * 5 * scale.x()));
         }
     }
 }

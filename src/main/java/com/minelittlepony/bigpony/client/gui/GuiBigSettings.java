@@ -17,15 +17,14 @@ import com.minelittlepony.common.client.gui.element.Button;
 import com.minelittlepony.common.client.gui.element.Label;
 import com.minelittlepony.common.client.gui.element.Toggle;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
 public class GuiBigSettings extends GameGui {
-    public static final Text TITLE = Text.translatable("minebp.options.title");
-    public static final Text OPTION_DISABLED = Text.translatable("minebp.options.disabled").formatted(Formatting.YELLOW);
+    public static final Component TITLE = Component.translatable("minebp.options.title");
+    public static final Component OPTION_DISABLED = Component.translatable("minebp.options.disabled").withStyle(ChatFormatting.YELLOW);
 
     private EntityScale dimensions;
     private EntityScale initialDimensions;
@@ -39,7 +38,7 @@ public class GuiBigSettings extends GameGui {
     private CameraPresetButton[] presets;
 
     public GuiBigSettings(Screen parent) {
-        super(TITLE);
+        super(TITLE, parent);
         content.margin.top = 30;
         content.margin.bottom = 30;
         content.getContentPadding().top = 10;
@@ -50,19 +49,19 @@ public class GuiBigSettings extends GameGui {
     }
 
     public boolean hasCameraConsent() {
-        return client.player == null || Permissions.camera(InteractionManager.getInstance().getPermissions());
+        return minecraft.player == null || Permissions.camera(InteractionManager.getInstance().getPermissions());
     }
 
     public boolean hasScalingConsent() {
-        return client.player == null || Permissions.freeform(InteractionManager.getInstance().getPermissions());
+        return minecraft.player == null || Permissions.freeform(InteractionManager.getInstance().getPermissions());
     }
 
     public boolean isScalingButtonsEnabled() {
-        return (client.player == null || Permissions.freeform(InteractionManager.getInstance().getPermissions())) && !BigPony.getInstance().getConfig().useDetectedPonyScaling.get();
+        return (minecraft.player == null || Permissions.freeform(InteractionManager.getInstance().getPermissions())) && !BigPony.getInstance().getConfig().useDetectedPonyScaling.get();
     }
 
     public boolean hasHitboxConsent() {
-        return client.player == null || Permissions.hitbox(InteractionManager.getInstance().getPermissions());
+        return minecraft.player == null || Permissions.hitbox(InteractionManager.getInstance().getPermissions());
     }
 
     @Override
@@ -72,21 +71,21 @@ public class GuiBigSettings extends GameGui {
         content.init(this::rebuildContent);
 
         addButton(new Button(width / 2 - 110, super.height - 25, 100, 20))
-            .onClick(sender -> finish())
+            .onClick(_ -> finish())
             .getStyle()
             .setText("gui.done");
         addButton(revert = new Button(width / 2 + 10, super.height - 25, 100, 20))
-            .onClick(sender -> {
+            .onClick(_ -> {
                 dimensions = initialDimensions;
                 BigPony.getInstance().getConfig().useDetectedPonyScaling.set(initialDetectorState);
                 if (initialDetectorState) {
-                    PresetDetector.getInstance().detectPreset(client.getGameProfile());
+                    PresetDetector.getInstance().detectPreset(minecraft.getGameProfile());
                 } else {
                     PresetDetector.getInstance().revertFillyCam();
                 }
                 BigPony.getInstance().getConfig().save();
                 updateDimensions();
-                clearAndInit();
+                rebuildWidgets();
             })
             .getStyle()
             .setText("controls.reset");
@@ -94,11 +93,10 @@ public class GuiBigSettings extends GameGui {
     }
 
     private void loadDimensions() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player == null) {
+        if (minecraft.player == null) {
             dimensions = BigPony.getInstance().getConfig().scale.get();
         } else {
-            dimensions = ((Scaling.Holder)client.player).getScaling().getDimensions();
+            dimensions = ((Scaling.Holder)minecraft.player).getScaling().getDimensions();
         }
         initialDimensions = dimensions;
         initialDetectorState = BigPony.getInstance().getConfig().useDetectedPonyScaling.get();
@@ -182,7 +180,7 @@ public class GuiBigSettings extends GameGui {
                 BigPony.getInstance().getConfig().save();
                 if (v) {
                     visual.setEnabled(false);
-                    PresetDetector.getInstance().detectPreset(client.getGameProfile()).thenAccept(dimensions -> {
+                    PresetDetector.getInstance().detectPreset(minecraft.getGameProfile()).thenAccept(dimensions -> {
                         xSize.setValue(dimensions.body().x());
                         ySize.setValue(dimensions.body().y());
                         zSize.setValue(dimensions.body().z());
@@ -216,14 +214,14 @@ public class GuiBigSettings extends GameGui {
         updateDimensions();
     }
 
-    static Function<AbstractSlider<Float>, Text> format(String key) {
-        return slider -> Text.translatable(key, String.format("%.2f", slider.getValue()));
+    static Function<AbstractSlider<Float>, Component> format(String key) {
+        return slider -> Component.translatable(key, String.format("%.2f", slider.getValue()));
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
-        super.render(context, mouseX, mouseY, partialTicks);
-        content.render(context, mouseX, mouseY, partialTicks);
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float partialTicks) {
+        super.extractRenderState(context, mouseX, mouseY, partialTicks);
+        content.extractRenderState(context, mouseX, mouseY, partialTicks);
     }
 
     @Override
@@ -246,19 +244,19 @@ public class GuiBigSettings extends GameGui {
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 
     private void updateDimensions() {
-        if (client.player instanceof Scaling.Holder holder) {
+        if (minecraft.player instanceof Scaling.Holder holder) {
             holder.getScaling().setDimensions(dimensions);
         }
     }
 
     @Override
-    public void close() {
-        super.close();
+    public void removed() {
+        super.removed();
         BigPony.getInstance().getConfig().scale.set(dimensions);
         BigPony.getInstance().getConfig().save();
         updateDimensions();

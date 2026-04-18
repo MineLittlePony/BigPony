@@ -10,7 +10,6 @@ import com.minelittlepony.bigpony.data.CameraScale;
 import com.minelittlepony.bigpony.data.EntityScale;
 import com.minelittlepony.bigpony.hdskins.SkinDetecter;
 import com.minelittlepony.bigpony.network.InteractionManager;
-import com.minelittlepony.client.render.entity.state.PonifiedRenderState;
 import com.minelittlepony.common.client.gui.GameGui;
 import com.mojang.authlib.GameProfile;
 
@@ -20,14 +19,15 @@ import java.util.concurrent.CompletableFuture;
 import com.minelittlepony.api.config.PonyConfig;
 import com.minelittlepony.api.events.PonyDataCallback;
 import com.minelittlepony.api.events.PonyRenderStatePrepareCallback;
+import com.minelittlepony.api.model.PonyModel;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 
 public class Main extends PresetDetector implements ClientModInitializer {
 
@@ -40,27 +40,30 @@ public class Main extends PresetDetector implements ClientModInitializer {
     public void onInitializeClient() {
         INSTANCE = this;
 
-        PonyRenderStatePrepareCallback.EVENT.register((state, model, mode) -> {
+        PonyRenderStatePrepareCallback.EVENT.register((state, _, _) -> {
             if (BigPony.getInstance().getConfig().useDetectedPonyScaling.get()
                     && state.getAttributes().isPlayer
                     && BigPonyClient.isClientPlayer(state.getAttributes().getEntityId())
                     && !PonyConfig.getEffectiveRace(state.getAttributes().metadata.race()).isHuman()) {
-                state.getAttributes().visualHeight = MinecraftClient.getInstance().player.getHeight();
+                state.getAttributes().visualHeight = Minecraft.getInstance().player.getBbHeight();
             }
         });
-        PonyDataCallback.EVENT.register((sender, data, env) -> {
+        PonyDataCallback.EVENT.register((sender, _, env) -> {
             if (sender instanceof Scaling.Holder holder
-                    && sender instanceof ClientPlayerEntity player
+                    && sender instanceof AbstractClientPlayer player
                     && BigPony.getInstance().getConfig().useDetectedPonyScaling.get()
                     && env == EnvType.CLIENT && BigPonyClient.isClientPlayer(player)) {
                 detectPreset(player.getGameProfile()).thenAccept(holder.getScaling()::setDimensions);
             }
         });
 
-        PonyConfig.getInstance().onChangedExternally(config -> enforceFillyCamState());
-        PonyConfig.getInstance().fillycam.onChanged(fillyCam -> enforceFillyCamState());
+        PonyConfig.getInstance().onChangedExternally(_ -> enforceFillyCamState());
+        PonyConfig.getInstance().fillycam.onChanged(_ -> enforceFillyCamState());
 
-        BigPonyClient.setIsPonyPredicate(state -> state instanceof PonifiedRenderState);
+        BigPonyClient.setIsPonyPredicate(
+                state -> state instanceof PonyModel.AttributedHolder,
+                entity -> Pony.getManager().getPony(entity).filter(pony -> !pony.race().isHuman()).isPresent()
+        );
     }
 
     private synchronized void enforceFillyCamState() {
@@ -71,17 +74,17 @@ public class Main extends PresetDetector implements ClientModInitializer {
 
         if (isFillyCam() && BigPony.getInstance().getConfig().useDetectedPonyScaling.get()) {
             PonyConfig.getInstance().fillycam.set(false);
-            GameGui.playSound(SoundEvents.ENTITY_VILLAGER_NO);
+            GameGui.playSound(SoundEvents.VILLAGER_NO);
 
-            var client = MinecraftClient.getInstance();
+            var client = Minecraft.getInstance();
 
             if (client.player != null) {
-                client.player.sendMessage(Text.literal("[Big Pony] FillyCam was enabled! Auto-Detect function has been disabled").formatted(Formatting.DARK_RED), false);
+                client.player.sendSystemMessage(Component.literal("[Big Pony] FillyCam was enabled! Auto-Detect function has been disabled").withStyle(ChatFormatting.DARK_RED));
             }
 
             BigPony.getInstance().getConfig().useDetectedPonyScaling.set(false);
 
-            if (client.currentScreen instanceof GuiBigSettings settingsScreen) {
+            if (client.screen instanceof GuiBigSettings settingsScreen) {
                 settingsScreen.toggleMLPScalingOff();
             } else {
                 PresetDetector.getInstance().revertFillyCam();
@@ -152,6 +155,6 @@ public class Main extends PresetDetector implements ClientModInitializer {
                 switching = false;
                 return scale;
             }
-        }, MinecraftClient.getInstance());
+        }, Minecraft.getInstance());
     }
 }

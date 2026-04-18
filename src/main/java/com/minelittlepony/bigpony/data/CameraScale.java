@@ -3,9 +3,9 @@ package com.minelittlepony.bigpony.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 public record CameraScale(float distance, float height) {
     public static final CameraScale DEFAULT = of(1);
@@ -13,9 +13,9 @@ public record CameraScale(float distance, float height) {
             Codec.FLOAT.fieldOf("distance").forGetter(CameraScale::distance),
             Codec.FLOAT.fieldOf("height").forGetter(CameraScale::height)
     ).apply(i, CameraScale::new));
-    public static final PacketCodec<PacketByteBuf, CameraScale> PACKET_CODEC = PacketCodec.tuple(
-            PacketCodecs.FLOAT, (t -> t.distance),
-            PacketCodecs.FLOAT, (t -> t.height),
+    public static final StreamCodec<FriendlyByteBuf, CameraScale> PACKET_CODEC = StreamCodec.composite(
+            ByteBufCodecs.FLOAT, (t -> t.distance),
+            ByteBufCodecs.FLOAT, (t -> t.height),
             CameraScale::new
     );
 

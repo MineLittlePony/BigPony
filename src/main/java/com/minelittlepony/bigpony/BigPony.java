@@ -7,7 +7,7 @@ import com.minelittlepony.bigpony.network.Network;
 import com.minelittlepony.common.util.GamePaths;
 
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 public class BigPony implements ModInitializer {
 
@@ -20,7 +20,7 @@ public class BigPony implements ModInitializer {
     }
 
     public static Identifier id(String name) {
-        return Identifier.of("minebp", name);
+        return Identifier.fromNamespaceAndPath("minebp", name);
     }
 
     private final BigPonyConfig config = new BigPonyConfig(GamePaths.getConfigDirectory().resolve("bigpony.json"));

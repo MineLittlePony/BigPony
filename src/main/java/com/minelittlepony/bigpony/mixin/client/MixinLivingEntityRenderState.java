@@ -4,11 +4,11 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import com.minelittlepony.bigpony.client.BigPonyRenderState;
 
-import net.minecraft.client.render.entity.state.EntityRenderState;
-import net.minecraft.client.render.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 
-@Mixin(LivingEntityRenderState.class)
-abstract class MixinLivingEntityRenderState extends EntityRenderState implements BigPonyRenderState.Holder {
+@Mixin(value = { LivingEntityRenderState.class, CameraRenderState.class })
+abstract class MixinLivingEntityRenderState implements BigPonyRenderState.Holder {
     private final BigPonyRenderState scaling = new BigPonyRenderState(this);
 
     @Override

@@ -12,7 +12,7 @@ public class ResettableSlider extends Slider {
         super(left, top, min, max, Math.min(value, max));
         width = 150;
         gui.addButton(reset = new Button(left + width + 5, top, 20, 20)
-                .onClick(o -> setValue(1F))
+                .onClick(_ -> setValue(1F))
                 .setEnabled(!FloatUtils.equals(getValue(), 1)))
                 .getStyle().setText("x");
     }

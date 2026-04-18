@@ -9,12 +9,12 @@ import com.llamalad7.mixinextras.injector.ModifyReceiver;
 import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.bigpony.data.EntityScale;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityDimensions;
-import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 @Mixin(value = LivingEntity.class, priority = 1001)
 abstract class MixinLivingEntity extends Entity implements Scaling.Holder {
@@ -22,11 +22,11 @@ abstract class MixinLivingEntity extends Entity implements Scaling.Holder {
 
     private final Scaling scaling = new Scaling();
 
-    @ModifyReceiver(method = "getDimensions(Lnet/minecraft/entity/EntityPose;)Lnet/minecraft/entity/EntityDimensions;",
+    @ModifyReceiver(method = "getDimensions(Lnet/minecraft/world/entity/Pose;)Lnet/minecraft/world/entity/EntityDimensions;",
             at = @At(
                 value = "INVOKE",
-                target = "net/minecraft/entity/EntityDimensions.scaled(F)Lnet/minecraft/entity/EntityDimensions;"))
-    private EntityDimensions modifyEntityDimensions(EntityDimensions dimensions, float scale, EntityPose pose) {
+                target = "net/minecraft/world/entity/EntityDimensions.scale(F)Lnet/minecraft/world/entity/EntityDimensions;"))
+    private EntityDimensions modifyEntityDimensions(EntityDimensions dimensions, float scale, Pose pose) {
         return getScaling().getReplacementSize(pose, dimensions);
     }
 
@@ -35,13 +35,13 @@ abstract class MixinLivingEntity extends Entity implements Scaling.Holder {
         return scaling;
     }
 
-    @Inject(method = "writeCustomData(Lnet/minecraft/storage/WriteView;)V", at = @At("HEAD"))
-    private void onWriteCustomDataToTag(WriteView view, CallbackInfo info) {
-        view.put("big_pony_data", EntityScale.CODEC, getScaling().getDimensions());
+    @Inject(method = "addAdditionalSaveData(Lnet/minecraft/world/level/storage/ValueOutput;)V", at = @At("HEAD"))
+    private void onWriteCustomDataToTag(ValueOutput view, CallbackInfo info) {
+        view.store("big_pony_data", EntityScale.CODEC, getScaling().getDimensions());
     }
 
-    @Inject(method = "readCustomData(Lnet/minecraft/storage/ReadView;)V", at = @At("HEAD"))
-    private void onReadCustomDataFromTag(ReadView view, CallbackInfo info) {
+    @Inject(method = "readAdditionalSaveData(Lnet/minecraft/world/level/storage/ValueInput;)V", at = @At("HEAD"))
+    private void onReadCustomDataFromTag(ValueInput view, CallbackInfo info) {
         view.read("big_pony_data", EntityScale.CODEC).ifPresent(getScaling()::setDimensions);
     }
 

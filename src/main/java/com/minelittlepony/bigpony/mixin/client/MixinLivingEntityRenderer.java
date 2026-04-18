@@ -7,28 +7,29 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.bigpony.client.BigPonyRenderState;
 import com.minelittlepony.bigpony.data.BodyScale;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.state.LivingEntityRenderState;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.LivingEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.world.entity.LivingEntity;
 
 @Mixin(LivingEntityRenderer.class)
 abstract class MixinLivingEntityRenderer<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>> {
-    @Inject(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/state/CameraRenderState;)V",
+    @Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V",
             at = @At(
                 value = "INVOKE",
-                target = "net/minecraft/client/render/entity/LivingEntityRenderer.setupTransforms(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;FF)V"))
-    private void modifyScaleOnSetupTransforms(S state, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState camera, CallbackInfo info) {
+                target = "net/minecraft/client/renderer/entity/LivingEntityRenderer.setupRotations(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;FF)V"))
+    private void modifyScaleOnSetupTransforms(S state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState camera, CallbackInfo info) {
         if (state instanceof BigPonyRenderState.Holder holder) {
             BodyScale scale = holder.getBigPonyState().bodyScale;
             matrices.scale(scale.x(), scale.y(), scale.z());
         }
     }
 
-    @Inject(method = "updateRenderState", at = @At("HEAD"))
+    @Inject(method = "extractRenderState", at = @At("HEAD"))
     private void onUpdateRenderState(T entity, S state, float tickDelta, CallbackInfo info) {
         if (entity instanceof Scaling.Holder holder && state instanceof BigPonyRenderState.Holder s) {
             s.getBigPonyState().update(entity, holder.getScaling());

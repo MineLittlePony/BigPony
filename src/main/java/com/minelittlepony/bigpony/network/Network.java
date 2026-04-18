@@ -8,7 +8,7 @@ import com.sollace.fabwork.api.packets.S2CPacketType;
 import com.sollace.fabwork.api.packets.SimpleNetworking;
 
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -20,20 +20,20 @@ public class Network {
 
     public static void bootstrap() {
         ServerLifecycleEvents.SERVER_STARTING.register(s -> InteractionManager.getInstance().setServer(s));
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, _) -> {
             InteractionManager.getInstance().log("[S-JOIN] Sending settings update packet to " + handler.getPlayer().getName().getString());
             sender.sendPacket(Network.SERVER_CONSENT.toPacket(new ConsentPacket()));
         });
-        ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, origin, destination) -> {
+        ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((player, _, _) -> {
             InteractionManager.getInstance().log("[S-CNGWLD] Re-Sending settings update packet to " + player.getName().getString());
             Network.SERVER_CONSENT.sendToPlayer(new ConsentPacket(), player);
         });
-        ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
+        ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, _) -> {
             Scaling newScaling = ((Scaling.Holder)newPlayer).getScaling();
             newScaling.setDimensions(((Scaling.Holder)oldPlayer).getScaling().getDimensions());
             newScaling.markDirty();
         });
-        CommandRegistrationCallback.EVENT.register((dispatcher, registries, environment) -> {
+        CommandRegistrationCallback.EVENT.register((dispatcher, _, _) -> {
             dispatcher.register(BigPonyCommand.create());
         });
 
@@ -42,7 +42,7 @@ public class Network {
             ((Scaling.Holder)player).getScaling().setDimensions(packet.dimensions());
         });
 
-        BigPony.getInstance().getConfig().onChangedExternally(config -> {
+        BigPony.getInstance().getConfig().onChangedExternally(_ -> {
             InteractionManager.getInstance().onConfigurationChange();
         });
     }

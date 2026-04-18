@@ -5,9 +5,9 @@ import java.util.Optional;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 public record EntityScale(BodyScale model, Optional<BodyScale> hitbox, CameraScale camera) {
     public static final EntityScale DEFAULT = new EntityScale(BodyScale.DEFAULT, Optional.empty(), CameraScale.DEFAULT);
@@ -17,9 +17,9 @@ public record EntityScale(BodyScale model, Optional<BodyScale> hitbox, CameraSca
             BodyScale.CODEC.optionalFieldOf("hitbox").forGetter(EntityScale::hitbox),
             CameraScale.CODEC.fieldOf("camera").forGetter(EntityScale::camera)
     ).apply(i, EntityScale::new));
-    public static final PacketCodec<PacketByteBuf, EntityScale> PACKET_CODEC = PacketCodec.tuple(
+    public static final StreamCodec<FriendlyByteBuf, EntityScale> PACKET_CODEC = StreamCodec.composite(
             BodyScale.PACKET_CODEC, EntityScale::model,
-            PacketCodecs.optional(BodyScale.PACKET_CODEC), EntityScale::hitbox,
+            ByteBufCodecs.optional(BodyScale.PACKET_CODEC), EntityScale::hitbox,
             CameraScale.PACKET_CODEC, EntityScale::camera,
             EntityScale::new
     );

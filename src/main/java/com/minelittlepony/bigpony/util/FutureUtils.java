@@ -13,7 +13,7 @@ public interface FutureUtils {
 
     static <T> CompletableFuture<T> waitFor(Consumer<Consumer<T>> action, Supplier<T> fallback) {
         CompletableFuture<T> waiter = CompletableFuture.supplyAsync(fallback, DELAYED_EXECUTOR);
-        CompletableFuture.runAsync(() -> action.accept(waiter::complete), Util.getMainWorkerExecutor());
+        CompletableFuture.runAsync(() -> action.accept(waiter::complete), Util.backgroundExecutor());
         return waiter;
     }
 

@@ -14,27 +14,27 @@ import com.minelittlepony.bigpony.network.Network;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.LivingEntity;
 
 public class ClientNetworkHandlerImpl extends InteractionManager {
     private long lastSettingsUpdate = 0;
     private Optional<ConsentPacket> serverConsent = Optional.empty();
-    private final MinecraftClient client = MinecraftClient.getInstance();
+    private final Minecraft client = Minecraft.getInstance();
 
     public ClientNetworkHandlerImpl() {
-        Network.SERVER_CONSENT.receiver().addPersistentListener((sender, packet) -> {
+        Network.SERVER_CONSENT.receiver().addPersistentListener((_, packet) -> {
             log("[C] Got server settings update packet " + packet);
             updateConsent(packet);
         });
         Network.OTHER_PLAYER_SIZE.receiver().addPersistentListener((sender, packet) -> {
-            if (sender.getEntityWorld().getEntityById(packet.entityId()) instanceof LivingEntity target && target instanceof Scaling.Holder holder) {
+            if (sender.level().getEntity(packet.entityId()) instanceof LivingEntity target && target instanceof Scaling.Holder holder) {
                 log("[C] Got size packet for other entity " + target.getName().getString());
                 holder.getScaling().setDimensions(packet.dimensions());
             }
         });
-        ClientLoginConnectionEvents.INIT.register((handler, client) -> updateConsent(null));
-        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+        ClientLoginConnectionEvents.INIT.register((_, _) -> updateConsent(null));
+        ClientPlayConnectionEvents.JOIN.register((_, _, client) -> {
             if (client.player instanceof Scaling.Holder holder) {
                 log("[C-JOIN] Giving player initial scale");
                 Scaling scaling = holder.getScaling();

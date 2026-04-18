@@ -5,15 +5,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.minelittlepony.bigpony.client.BigPonyRenderState;
 import com.minelittlepony.bigpony.data.BodyScale;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.world.phys.Vec3;
 
-@Mixin(PlayerEntityRenderer.class)
+@Mixin(AvatarRenderer.class)
 abstract class MixinPlayerEntityRenderer {
-    @ModifyReturnValue(method = "getPositionOffset", at = @At("RETURN"))
-    private Vec3d fixSneakingHeight(Vec3d offset, PlayerEntityRenderState state) {
-        BodyScale scale = ((BigPonyRenderState.Holder)state).getBigPonyState().bodyScale;
-        return offset.multiply(scale.x(), scale.y(), scale.z());
+    @ModifyReturnValue(method = "getRenderOffset", at = @At("RETURN"))
+    private Vec3 fixSneakingHeight(Vec3 offset, AvatarRenderState state) {
+        if (state instanceof BigPonyRenderState.Holder holder) {
+            BodyScale scale = holder.getBigPonyState().bodyScale;
+            return offset.multiply(scale.x(), scale.y(), scale.z());
+        }
+        return offset;
     }
 }

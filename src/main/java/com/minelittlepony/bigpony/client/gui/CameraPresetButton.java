@@ -35,7 +35,7 @@ public class CameraPresetButton {
     private class PresetButton extends Button {
         public PresetButton(int x, int y, int width, boolean camera, boolean body, String label) {
             super(x, y, width, 20);
-            onClick(self -> gui.applyPreset(preset, camera, body));
+            onClick(_ -> gui.applyPreset(preset, camera, body));
             getStyle().setText(label);
         }
     }

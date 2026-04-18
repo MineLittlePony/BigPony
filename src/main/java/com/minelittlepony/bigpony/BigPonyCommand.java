@@ -15,84 +15,85 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.world.rule.GameRules;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.gamerules.GameRules;
 
 public class BigPonyCommand {
-    public static LiteralArgumentBuilder<ServerCommandSource> create() {
-        return CommandManager.literal("bigpony")
-                .then(config().requires(CommandManager.requirePermissionLevel(CommandManager.ADMINS_CHECK)))
-                .then(scale().requires(CommandManager.requirePermissionLevel(CommandManager.GAMEMASTERS_CHECK)));
+    public static LiteralArgumentBuilder<CommandSourceStack> create() {
+        return Commands.literal("bigpony")
+                .then(config().requires(Commands.hasPermission(Commands.LEVEL_ADMINS)))
+                .then(scale().requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)));
     }
 
-    static LiteralArgumentBuilder<ServerCommandSource> config() {
-        var get = CommandManager.literal("get");
-        var set = CommandManager.literal("set");
+    static LiteralArgumentBuilder<CommandSourceStack> config() {
+        var get = Commands.literal("get");
+        var set = Commands.literal("set");
         for (Setting i : Setting.values()) {
-            get.then(CommandManager.literal(i.name).executes(i::executeGet));
-            set.then(CommandManager.literal(i.name).then(CommandManager.argument("value", i.argumentType.get()).executes(i::executeSet)));
+            get.then(Commands.literal(i.name).executes(i::executeGet));
+            set.then(Commands.literal(i.name).then(Commands.argument("value", i.argumentType.get()).executes(i::executeSet)));
         }
 
-        return CommandManager.literal("config").then(get).then(set);
+        return Commands.literal("config").then(get).then(set);
     }
 
-    static LiteralArgumentBuilder<ServerCommandSource> scale() {
+    static LiteralArgumentBuilder<CommandSourceStack> scale() {
 
-        var get = CommandManager.literal("get");
-        var set = CommandManager.literal("set");
-        var reset = CommandManager.literal("reset")
-                .executes(context -> executeReset(context, context.getSource().getPlayerOrThrow()))
+        var get = Commands.literal("get");
+        var set = Commands.literal("set");
+        var reset = Commands.literal("reset")
+                .executes(context -> executeReset(context, context.getSource().getPlayerOrException()))
                 .then(
-                        CommandManager.argument("target", EntityArgumentType.entity())
-                        .executes(context -> executeReset(context, EntityArgumentType.getEntity(context, "target")))
+                        Commands.argument("target", EntityArgument.entity())
+                        .executes(context -> executeReset(context, EntityArgument.getEntity(context, "target")))
                 );
 
         for (var arg : ScaleArg.values()) {
-            get.then(CommandManager.literal(arg.name)
-                .executes(context -> arg.executeGet(context, context.getSource().getPlayerOrThrow()))
+            get.then(Commands.literal(arg.name)
+                .executes(context -> arg.executeGet(context, context.getSource().getPlayerOrException()))
                 .then(
-                        CommandManager.argument("target", EntityArgumentType.entity())
-                            .executes(context -> arg.executeGet(context, EntityArgumentType.getEntity(context, "target")))
+                        Commands.argument("target", EntityArgument.entity())
+                            .executes(context -> arg.executeGet(context, EntityArgument.getEntity(context, "target")))
                 ));
             set.then(
-                    CommandManager.literal(arg.name)
-                    .then(CommandManager.argument("value", arg.type.argumentType().get())
-                            .executes(context -> arg.executeSet(context, context.getSource().getPlayerOrThrow(), context.getArgument("value", Object.class)))
+                    Commands.literal(arg.name)
+                    .then(Commands.argument("value", arg.type.argumentType().get())
+                            .executes(context -> arg.executeSet(context, context.getSource().getPlayerOrException(), context.getArgument("value", Object.class)))
                             .then(
-                                    CommandManager.argument("target", EntityArgumentType.entity())
-                                        .executes(context -> arg.executeSet(context, EntityArgumentType.getEntity(context, "target"), context.getArgument("value", Object.class)))
+                                    Commands.argument("target", EntityArgument.entity())
+                                        .executes(context -> arg.executeSet(context, EntityArgument.getEntity(context, "target"), context.getArgument("value", Object.class)))
                             )
                     )
             );
             reset.then(
-                    CommandManager.literal(arg.name)
-                        .executes(context -> arg.executeSet(context, context.getSource().getPlayerOrThrow(), 1))
+                    Commands.literal(arg.name)
+                        .executes(context -> arg.executeSet(context, context.getSource().getPlayerOrException(), 1))
                         .then(
-                                CommandManager.argument("target", EntityArgumentType.entity())
-                                    .executes(context -> arg.executeSet(context, EntityArgumentType.getEntity(context, "target"), 1))
+                                Commands.argument("target", EntityArgument.entity())
+                                    .executes(context -> arg.executeSet(context, EntityArgument.getEntity(context, "target"), 1))
                         )
             );
         }
 
-        return CommandManager.literal("scale").then(get).then(set).then(reset);
+        return Commands.literal("scale").then(get).then(set).then(reset);
     }
 
-    private static int executeReset(CommandContext<ServerCommandSource> context, Entity target) {
+    private static int executeReset(CommandContext<CommandSourceStack> context, Entity target) {
         if (!(target instanceof Scaling.Holder holder)) {
-            context.getSource().sendError(Text.translatable("bigpony.command.scale.not_supported"));
+            context.getSource().sendFailure(Component.translatable("bigpony.command.scale.not_supported"));
             return 0;
         }
         holder.getScaling().setDimensions(EntityScale.DEFAULT);
         if (target == context.getSource().getEntity()) {
-            context.getSource().sendFeedback(() -> Text.translatable("bigpony.command.scale.reset.self"), false);
+            context.getSource().sendSuccess(() -> Component.translatable("bigpony.command.scale.reset.self"), false);
         } else {
-            context.getSource().sendFeedback(() -> Text.translatable("bigpony.command.scale.reset", target.getDisplayName()), false);
+            context.getSource().sendSuccess(() -> Component.translatable("bigpony.command.scale.reset", target.getDisplayName()), false);
         }
         return 0;
     }
@@ -124,49 +125,49 @@ public class BigPonyCommand {
             this.type = type;
         }
 
-        public int executeGet(CommandContext<ServerCommandSource> context, Entity target) {
+        public int executeGet(CommandContext<CommandSourceStack> context, Entity target) {
             if (!(target instanceof Scaling.Holder holder)) {
-                context.getSource().sendError(Text.translatable("bigpony.command.scale.not_supported"));
+                context.getSource().sendFailure(Component.translatable("bigpony.command.scale.not_supported"));
                 return 0;
             }
             Object scale = type.valueGetter.apply(holder.getScaling().getDimensions());
-            Text argumentName = Text.translatable("bigpony.argument.scale." + name).formatted(Formatting.GREEN);
+            Component argumentName = Component.translatable("bigpony.argument.scale." + name).withStyle(ChatFormatting.GREEN);
             if (target == context.getSource().getEntity()) {
-                context.getSource().sendFeedback(() -> Text.translatable("bigpony.command.scale.get.self", argumentName, Text.literal(String.valueOf(scale)).formatted(Formatting.GOLD)), false);
+                context.getSource().sendSuccess(() -> Component.translatable("bigpony.command.scale.get.self", argumentName, Component.literal(String.valueOf(scale)).withStyle(ChatFormatting.GOLD)), false);
             } else {
-                context.getSource().sendFeedback(() -> Text.translatable("bigpony.command.scale.get", target.getDisplayName(), argumentName, Text.literal(String.valueOf(scale)).formatted(Formatting.GOLD)), false);
+                context.getSource().sendSuccess(() -> Component.translatable("bigpony.command.scale.get", target.getDisplayName(), argumentName, Component.literal(String.valueOf(scale)).withStyle(ChatFormatting.GOLD)), false);
             }
 
             return 0;
         }
 
-        public int executeSet(CommandContext<ServerCommandSource> context, Entity target, Object value) {
+        public int executeSet(CommandContext<CommandSourceStack> context, Entity target, Object value) {
             if (value instanceof Float f) {
                 if (f != 1 && !BigPony.getInstance().getConfig().allowFreeformResizing.get()) {
-                    context.getSource().sendError(Text.translatable("bigpony.command.scale.restricted").formatted(Formatting.RED));
+                    context.getSource().sendFailure(Component.translatable("bigpony.command.scale.restricted").withStyle(ChatFormatting.RED));
                     return 0;
                 }
                 if (f < InteractionManager.getInstance().getMinMultiplier() || f > InteractionManager.getInstance().getMaxMultiplier()) {
-                    context.getSource().sendError(Text.translatable("bigpony.command.scale.not_permitted",
+                    context.getSource().sendFailure(Component.translatable("bigpony.command.scale.not_permitted",
                             InteractionManager.getInstance().getMinMultiplier(),
-                            InteractionManager.getInstance().getMaxMultiplier()).formatted(Formatting.RED)
+                            InteractionManager.getInstance().getMaxMultiplier()).withStyle(ChatFormatting.RED)
                     );
                     return 0;
                 }
             }
             if (!(target instanceof Scaling.Holder holder)) {
-                context.getSource().sendError(Text.translatable("bigpony.command.scale.not_supported"));
+                context.getSource().sendFailure(Component.translatable("bigpony.command.scale.not_supported"));
                 return 0;
             }
             holder.getScaling().setDimensions(type.valueUpdater.apply(holder.getScaling().getDimensions(), cast(value)));
-            Text argumentName = Text.translatable("bigpony.argument.scale." + name).formatted(Formatting.GREEN);
+            Component argumentName = Component.translatable("bigpony.argument.scale." + name).withStyle(ChatFormatting.GREEN);
             if (target != context.getSource().getEntity()) {
-                if (target instanceof ServerPlayerEntity player && context.getSource().getWorld().getGameRules().getValue(GameRules.SEND_COMMAND_FEEDBACK)) {
-                    player.sendMessage(Text.translatable("bigpony.scaling.changed"));
+                if (target instanceof ServerPlayer player && context.getSource().getLevel().getGameRules().get(GameRules.SEND_COMMAND_FEEDBACK)) {
+                    player.sendSystemMessage(Component.translatable("bigpony.scaling.changed"));
                 }
-                context.getSource().sendFeedback(() -> Text.translatable("bigpony.command.scale.set", target.getDisplayName(), argumentName, Text.literal(String.valueOf(value)).formatted(Formatting.GOLD)), false);
+                context.getSource().sendSuccess(() -> Component.translatable("bigpony.command.scale.set", target.getDisplayName(), argumentName, Component.literal(String.valueOf(value)).withStyle(ChatFormatting.GOLD)), false);
             } else {
-                context.getSource().sendFeedback(() -> Text.translatable("bigpony.command.scale.set.self", argumentName, Text.literal(String.valueOf(value)).formatted(Formatting.GOLD)), false);
+                context.getSource().sendSuccess(() -> Component.translatable("bigpony.command.scale.set.self", argumentName, Component.literal(String.valueOf(value)).withStyle(ChatFormatting.GOLD)), false);
             }
             return 0;
         }
@@ -194,16 +195,16 @@ public class BigPonyCommand {
             this.argumentType = argumentType;
         }
 
-        public int executeGet(CommandContext<ServerCommandSource> context) {
-            context.getSource().sendFeedback(() -> {
+        public int executeGet(CommandContext<CommandSourceStack> context) {
+            context.getSource().sendSuccess(() -> {
                 return BigPony.getInstance().getConfig().getCategory("server").getOrEmpty(settingName.toLowerCase(Locale.ROOT)).map(value -> {
-                    return Text.translatable("bigpony.command.config.get", Text.literal(name).formatted(Formatting.GREEN), Text.literal(String.valueOf(value.get())).formatted(Formatting.GOLD));
-                }).orElseGet(() -> Text.translatable("bigpony.command.config.get.unknown"));
+                    return Component.translatable("bigpony.command.config.get", Component.literal(name).withStyle(ChatFormatting.GREEN), Component.literal(String.valueOf(value.get())).withStyle(ChatFormatting.GOLD));
+                }).orElseGet(() -> Component.translatable("bigpony.command.config.get.unknown"));
             }, false);
             return 0;
         }
 
-        public int executeSet(CommandContext<ServerCommandSource> context) {
+        public int executeSet(CommandContext<CommandSourceStack> context) {
             var config = BigPony.getInstance().getConfig();
             config.getCategory("server").getOrEmpty(settingName.toLowerCase(Locale.ROOT)).ifPresentOrElse(value -> {
                 Object newValue = context.getArgument("value", value.get().getClass());
@@ -211,9 +212,9 @@ public class BigPonyCommand {
                 config.save();
                 InteractionManager.getInstance().sendConfigurationChange(new ConsentPacket());
 
-                context.getSource().sendFeedback(() -> Text.translatable("bigpony.command.config.set.success", Text.literal(name).formatted(Formatting.GREEN), Text.literal(String.valueOf(newValue)).formatted(Formatting.GOLD)), false);
+                context.getSource().sendSuccess(() -> Component.translatable("bigpony.command.config.set.success", Component.literal(name).withStyle(ChatFormatting.GREEN), Component.literal(String.valueOf(newValue)).withStyle(ChatFormatting.GOLD)), false);
             }, () -> {
-                context.getSource().sendFeedback(() -> Text.translatable("bigpony.command.config.set.error", Text.literal(name).formatted(Formatting.GREEN)).formatted(Formatting.RED), false);
+                context.getSource().sendSuccess(() -> Component.translatable("bigpony.command.config.set.error", Component.literal(name).withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.RED), false);
             });
             return 0;
         }

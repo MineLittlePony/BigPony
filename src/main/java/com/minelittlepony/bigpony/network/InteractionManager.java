@@ -8,9 +8,9 @@ import com.minelittlepony.bigpony.BigPony;
 import com.minelittlepony.bigpony.BigPonyConfig;
 import com.minelittlepony.bigpony.Scaling;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 
 public class InteractionManager {
     private static InteractionManager INSTANCE = new InteractionManager();
@@ -63,7 +63,7 @@ public class InteractionManager {
     }
 
     public float getClamped(float value) {
-        return MathHelper.clamp(value, getMinMultiplier(), getMaxMultiplier());
+        return Mth.clamp(value, getMinMultiplier(), getMaxMultiplier());
     }
 
     public long getLastSettingsUpdateTime() {

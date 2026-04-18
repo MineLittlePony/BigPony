@@ -3,9 +3,9 @@ package com.minelittlepony.bigpony.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 public record BodyScale(float x, float y, float z) {
     public static final BodyScale DEFAULT = of(1);
@@ -14,10 +14,10 @@ public record BodyScale(float x, float y, float z) {
             Codec.FLOAT.fieldOf("y").forGetter(BodyScale::y),
             Codec.FLOAT.fieldOf("z").forGetter(BodyScale::z)
     ).apply(i, BodyScale::new));
-    public static final PacketCodec<PacketByteBuf, BodyScale> PACKET_CODEC = PacketCodec.tuple(
-            PacketCodecs.FLOAT, (t -> t.x),
-            PacketCodecs.FLOAT, (t -> t.y),
-            PacketCodecs.FLOAT, (t -> t.z),
+    public static final StreamCodec<FriendlyByteBuf, BodyScale> PACKET_CODEC = StreamCodec.composite(
+            ByteBufCodecs.FLOAT, (t -> t.x),
+            ByteBufCodecs.FLOAT, (t -> t.y),
+            ByteBufCodecs.FLOAT, (t -> t.z),
             BodyScale::new
     );
 
