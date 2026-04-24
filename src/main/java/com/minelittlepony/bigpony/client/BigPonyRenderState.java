@@ -24,6 +24,8 @@ public class BigPonyRenderState {
     public void update(Entity entity) {
         if (entity instanceof LivingEntity living && entity instanceof Scaling.Holder holder) {
             update(living, holder.getScaling(), BigPonyClient.isPony(living));
+        } else {
+            bodyScale = BodyScale.DEFAULT;
         }
     }
 

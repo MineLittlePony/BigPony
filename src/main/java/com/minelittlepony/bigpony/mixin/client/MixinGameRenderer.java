@@ -19,7 +19,7 @@ abstract class MixinGameRenderer {
     @Inject(method = "bobView(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;)V",
             at = @At("HEAD"),
             cancellable = true)
-    private void onBobView(final CameraRenderState cameraState, final PoseStack poseStack, CallbackInfo info) {
+    private void onBobView(CameraRenderState cameraState, PoseStack poseStack, CallbackInfo info) {
         if (!cameraState.entityRenderState.isPlayer) {
             return;
         }
