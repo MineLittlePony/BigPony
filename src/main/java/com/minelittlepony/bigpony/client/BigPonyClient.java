@@ -64,14 +64,14 @@ public class BigPonyClient implements ClientModInitializer {
         KeyMappingHelper.registerKeyMapping(keybind);
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (keybind.isDown()) {
-                client.setScreen(new GuiBigSettings(client.screen));
+                client.gui.setScreen(new GuiBigSettings(client.gui.screen()));
             }
         });
         new ClientNetworkHandlerImpl();
 
         BigPony.getInstance().getConfig().onChangedExternally(_ -> {
             Minecraft.getInstance().execute(() -> {
-                if (Minecraft.getInstance().screen instanceof GuiBigSettings screen) {
+                if (Minecraft.getInstance().gui.screen() instanceof GuiBigSettings screen) {
                     screen.init(screen.width, ((Screen)screen).height);
                 }
             });

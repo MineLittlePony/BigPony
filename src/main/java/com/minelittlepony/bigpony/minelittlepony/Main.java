@@ -84,7 +84,7 @@ public class Main extends PresetDetector implements ClientModInitializer {
 
             BigPony.getInstance().getConfig().useDetectedPonyScaling.set(false);
 
-            if (client.screen instanceof GuiBigSettings settingsScreen) {
+            if (client.gui.screen() instanceof GuiBigSettings settingsScreen) {
                 settingsScreen.toggleMLPScalingOff();
             } else {
                 PresetDetector.getInstance().revertFillyCam();
