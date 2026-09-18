@@ -13,6 +13,7 @@ import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.bigpony.client.BigPonyRenderState;
 
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -46,7 +47,7 @@ abstract class MixinCamera {
     }
 
     @Inject(method = "extractRenderState", at = @At("HEAD"))
-    private void onExtractRenderState(CameraRenderState state, float tickDelta, CallbackInfo info) {
+    private void onExtractRenderState(CameraRenderState state, DeltaTracker deltaTracker, CallbackInfo info) {
         if (state instanceof BigPonyRenderState.Holder holder) {
             holder.getBigPonyState().update(entity);
         }

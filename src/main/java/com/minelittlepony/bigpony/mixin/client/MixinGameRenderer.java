@@ -37,8 +37,8 @@ abstract class MixinGameRenderer {
                     -Math.abs(Mth.cos(backwardsInterpolatedWalkDistance * Mth.PI) * bob) * scale.y(),
                     0
             );
-            poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.sin(backwardsInterpolatedWalkDistance * Mth.PI) * bob * 3 * scale.z()));
-            poseStack.mulPose(Axis.XP.rotationDegrees(Mth.abs(Mth.cos(backwardsInterpolatedWalkDistance * Mth.PI - 0.2F) * bob) * 5 * scale.x()));
+            poseStack.rotateDegrees(Axis.ZP, Mth.sin(backwardsInterpolatedWalkDistance * Mth.PI) * bob * 3 * scale.z());
+            poseStack.rotateDegrees(Axis.XP, Mth.abs(Mth.cos(backwardsInterpolatedWalkDistance * Mth.PI - 0.2F) * bob) * 5 * scale.x());
         }
     }
 }

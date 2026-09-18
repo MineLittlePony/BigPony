@@ -4,8 +4,6 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
-
 import com.google.common.base.Predicates;
 import com.minelittlepony.bigpony.BigPony;
 import com.minelittlepony.bigpony.client.gui.GuiBigSettings;
@@ -25,7 +23,7 @@ import net.minecraft.world.entity.LivingEntity;
 public class BigPonyClient implements ClientModInitializer {
     private static BigPonyClient instance;
 
-    private final KeyMapping keybind = new KeyMapping("key.minebp.settings", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F8, KeyMapping.Category.MISC);
+    private final KeyMapping keybind = new KeyMapping("key.minebp.settings", InputConstants.Type.KEYBOARD, InputConstants.KEY_F8, KeyMapping.Category.MISC);
 
     private static Predicate<EntityRenderState> isPonyPredicate = Predicates.alwaysFalse();
     private static Predicate<LivingEntity> isEntityPonyPredicate = Predicates.alwaysFalse();
