@@ -47,6 +47,10 @@ public class Scaling {
                 : 1;
     }
 
+    public float getZNearPlaneDistance(float zNear) {
+        return Math.min(zNear, zNear * getCameraDistanceMultiplier() * 0.0001F);
+    }
+
     public void markDirty() {
         dirty = true;
     }

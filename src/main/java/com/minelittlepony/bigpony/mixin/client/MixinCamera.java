@@ -4,10 +4,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
 import com.minelittlepony.bigpony.Scaling;
 import com.minelittlepony.bigpony.client.BigPonyRenderState;
 
@@ -28,10 +29,15 @@ abstract class MixinCamera {
 
     @ModifyArg(method = "alignWithEntity(F)V", at = @At(value = "INVOKE", target = "java/lang/Math.max(FF)F"), index = 1)
     private float adjustMountCameraDistance(float value) {
-        if (entity.isPassenger() && entity.getVehicle() instanceof LivingEntity l) {
-            return value * bigpony_getDistanceScale(l);
+        if (entity.isPassenger() && entity.getVehicle() instanceof LivingEntity mount) {
+            return value * bigpony_getDistanceScale(mount);
         }
         return value * bigpony_getDistanceScale(entity);
+    }
+
+    @ModifyConstant(method = "getMaxZoom(F)F", constant = @Constant(floatValue = 0.1F))
+    private float adjustClippingJitterScale(float jitter) {
+        return jitter * 0.01F;
     }
 
     @Unique
@@ -52,7 +58,7 @@ abstract class MixinCamera {
     ), index = 0)
     private float adjustZNearPlane(float zNear) {
         if (entity instanceof Scaling.Holder holder) {
-            zNear = Math.min(zNear, zNear * holder.getScaling().getCameraDistanceMultiplier());
+            return holder.getScaling().getZNearPlaneDistance(zNear);
         }
         return zNear;
     }
