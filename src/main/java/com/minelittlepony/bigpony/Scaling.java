@@ -48,7 +48,8 @@ public class Scaling {
     }
 
     public float getZNearPlaneDistance(float zNear) {
-        return Math.min(zNear, zNear * getCameraDistanceMultiplier() * 0.0001F);
+        float cameraHeight = InteractionManager.getInstance().getClamped(getCameraScale().height());
+        return cameraHeight < 1 ? zNear * 0.01F : zNear;
     }
 
     public void markDirty() {
