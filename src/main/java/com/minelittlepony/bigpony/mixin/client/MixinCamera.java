@@ -37,7 +37,10 @@ abstract class MixinCamera {
 
     @ModifyConstant(method = "getMaxZoom(F)F", constant = @Constant(floatValue = 0.1F))
     private float adjustClippingJitterScale(float jitter) {
-        return jitter * 0.01F;
+        if (entity instanceof Scaling.Holder holder) {
+            return holder.getScaling().getZNearPlaneDistance(jitter);
+        }
+        return jitter;
     }
 
     @Unique
